@@ -15,7 +15,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class DiyService {
@@ -61,5 +64,71 @@ public class DiyService {
             .build();
 
     return diyRepository.save(diyEntity);
+  }
+
+  public ResponseDTO getPackageDetail(Long packageNum){
+
+    DiyEntity diyEntity = diyRepository.findById(packageNum) .orElse(null);
+    AirlineEntity airlineEntity = diyEntity.getAirline();
+    RouteEntity routeEntity = diyEntity.getRoute();
+    // DetailCourseEntity 리스트 조회
+    List<DetailCourseEntity> detailCourseEntities = detailCourseRepository.findByRoute(routeEntity);
+    // AirlineDTO 설정
+    AirlineDTO airlineDTO = AirlineDTO.builder()
+            .airlineNum(airlineEntity.getAirlineNum())
+            .airlineName(airlineEntity.getAirlineName())
+            .startingPoint(airlineEntity.getStartingPoint())
+            .destination(airlineEntity.getDestination())
+            .startFlightNum(airlineEntity.getStartFlightNum())
+            .boardingDate(airlineEntity.getBoardingDate())
+            .comeFlightNum(airlineEntity.getComeFlightNum())
+            .comingDate(airlineEntity.getComingDate())
+            .build();
+
+    // RouteDTO 설정
+    RouteDTO routeDTO = RouteDTO.builder()
+            .routeNum((routeEntity.getRouteNum()))
+            .startDate(routeEntity.getStartDate())
+            .lastDate(routeEntity.getLastDate())
+            .build();
+
+    // DetailCourseDTO 설정
+    List<DetailCourseDTO> detailCourseDTOList = detailCourseEntities.stream()
+            .map(detailCourse -> DetailCourseDTO.builder()
+                    .detailCourseNum(detailCourse.getDetailCourseNum())
+                    .dayNum(detailCourse.getDayNum())
+                    .route(detailCourse.getRoute())
+                    .courses(Arrays.asList(
+                            detailCourse.getCourse1(),
+                            detailCourse.getCourse2(),
+                            detailCourse.getCourse3(),
+                            detailCourse.getCourse4(),
+                            detailCourse.getCourse5(),
+                            detailCourse.getCourse6(),
+                            detailCourse.getCourse7(),
+                            detailCourse.getCourse8(),
+                            detailCourse.getCourse9(),
+                            detailCourse.getCourse10()
+                    ).stream().filter(Objects::nonNull).collect(Collectors.toList()))
+                    .fileUrl(detailCourse.getFileUrl())
+                    .build())
+            .collect(Collectors.toList());
+
+    // PackageFormDTO설정
+    PackageFormDTO packageFormDTO = PackageFormDTO.getDiyEntity(diyEntity);
+
+    //임시 userNum
+    int userNum = diyEntity.getUserNum();
+
+    // ResponseDTO 설정
+    ResponseDTO responseDTO = ResponseDTO.builder()
+            .airline(airlineDTO)
+            .route(routeDTO)
+            .packageForm(packageFormDTO)
+            .detailCourses(detailCourseDTOList)
+            .userNum(userNum)
+            .build();
+
+    return responseDTO;
   }
 }
