@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Builder
@@ -21,7 +22,7 @@ public class DetailCourseEntity {
   private Long detailCourseNum;
 
   @Column(name = "day_num" )
-  private Date dayNum;
+  private LocalDate dayNum;
 
   @Column(name = "course_1" ,nullable = false, length = 255)
   private String course1;

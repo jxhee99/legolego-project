@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -17,7 +18,7 @@ import java.util.List;
 public class DetailCourseDTO {
   private Long detailCourseNum;
   private RouteEntity route;
-  private Date dayNum;
+  private LocalDate dayNum;
   private List<String> courses; // 코스를 담을 리스트
   private String fileUrl;
 
