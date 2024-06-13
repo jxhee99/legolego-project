@@ -17,6 +17,11 @@ public class DiyController {
   }
   @GetMapping("/packages/{package_num}")
   public ResponseDTO getPackageDetail(@PathVariable Long package_num){
-    return diyService.getPackageDetail(package_num);
+    return diyService.getDiyDetail(package_num);
+  }
+
+  @PutMapping("/packages/{package_num}")
+  public DiyEntity updatedPackage(@PathVariable Long package_num,@RequestBody RequestDTO requestDTO){
+    return diyService.updateDiy(package_num, requestDTO);
   }
 }

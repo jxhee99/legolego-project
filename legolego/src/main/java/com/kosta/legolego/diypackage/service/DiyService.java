@@ -10,6 +10,7 @@ import com.kosta.legolego.diypackage.repository.DiyRepository;
 import com.kosta.legolego.diypackage.repository.AirlineRepository;
 import com.kosta.legolego.diypackage.repository.RouteRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -66,9 +67,9 @@ public class DiyService {
     return diyRepository.save(diyEntity);
   }
 
-  public ResponseDTO getPackageDetail(Long packageNum){
+  public ResponseDTO getDiyDetail(Long packageNum) {
 
-    DiyEntity diyEntity = diyRepository.findById(packageNum) .orElse(null);
+    DiyEntity diyEntity = diyRepository.findById(packageNum).orElse(null);
     AirlineEntity airlineEntity = diyEntity.getAirline();
     RouteEntity routeEntity = diyEntity.getRoute();
     // DetailCourseEntity 리스트 조회
@@ -130,5 +131,47 @@ public class DiyService {
             .build();
 
     return responseDTO;
+  }
+
+  @Transactional
+  public DiyEntity updateDiy(Long packageNum, RequestDTO requestDTO) {
+    // 1. 엔티티 조회
+    DiyEntity diyEntity = diyRepository.findById(packageNum).orElse(null);
+    if (diyEntity == null) {
+      // 해당 번호의 DIY 패키지가 존재하지 않는 경우 예외 처리
+      return null;
+    }
+    // 2. 관련 엔티티 조회
+    AirlineEntity airlineEntity = airlineRepository.findById(diyEntity.getAirline().getAirlineNum())
+            .orElseThrow(() -> new RuntimeException("항공사가 존재하지 않습니다."));
+
+    RouteEntity routeEntity = routeRepository.findById(diyEntity.getRoute().getRouteNum())
+            .orElseThrow(() -> new RuntimeException("경로가 존재하지 않습니다."));
+
+    List<DetailCourseDTO> detailCourseDTOs = requestDTO.getDetailCourses();
+    PackageFormDTO packageFormDTO = requestDTO.getPackageForm();
+    //3. dto의 값을 엔티티에 복사
+    BeanUtils.copyProperties(requestDTO.getAirline(),airlineEntity);
+    BeanUtils.copyProperties(requestDTO.getRoute(),routeEntity);
+    //4. 각 테이블에 저장
+    airlineEntity = airlineRepository.save(airlineEntity);
+    routeEntity = routeRepository.save(routeEntity);
+
+    //5. 기존의 DetailCourseEntity를 삭제하고 새로 저장
+    detailCourseRepository.deleteByRoute(routeEntity); //기존 경로와 연결된 detailcourseEntity
+    for (DetailCourseDTO detailCourseDTO : detailCourseDTOs) {
+      // RouteEntity를 DetailCourseDTO에 설정
+      detailCourseDTO.setRoute(routeEntity);
+      DetailCourseEntity detailCourseEntity = detailCourseDTO.toEntity();
+      detailCourseRepository.save(detailCourseEntity); // 저장
+    }
+
+    // 6.diyEntity의 필드 업데이트
+    BeanUtils.copyProperties(packageFormDTO,diyEntity);
+    diyEntity.setModDate(LocalDate.now());
+    diyEntity.setAirline(airlineEntity);
+    diyEntity.setRoute(routeEntity);
+
+    return diyRepository.save(diyEntity);
   }
 }
