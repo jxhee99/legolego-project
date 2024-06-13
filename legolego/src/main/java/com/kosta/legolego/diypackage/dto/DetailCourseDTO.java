@@ -17,14 +17,15 @@ import java.util.List;
 @Builder
 public class DetailCourseDTO {
   private Long detailCourseNum;
-  private RouteEntity route;
+  //private RouteEntity route;
+  private Long routeNum;
   private LocalDate dayNum;
   private List<String> courses; // 코스를 담을 리스트
   private String fileUrl;
 
-  public DetailCourseEntity toEntity() {
+  public DetailCourseEntity toEntity(RouteEntity routeEntity) {
     return DetailCourseEntity.builder()
-            .route(this.route)
+            .route(routeEntity)
             .dayNum(this.dayNum)
             .course1(this.courses.get(0))
             .course2(this.courses.get(1))

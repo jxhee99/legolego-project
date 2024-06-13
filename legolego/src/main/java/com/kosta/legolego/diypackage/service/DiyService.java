@@ -48,9 +48,9 @@ public class DiyService {
     //for문으로 detailCourseDTO 갯수 만큼 유동적으로 처리
     for (DetailCourseDTO detailCourseDTO : detailCourseDTOs) {
       // RouteEntity를 DetailCourseDTO에 설정
-      detailCourseDTO.setRoute(routeEntity);
-      DetailCourseEntity detailCourseEntity = detailCourseDTO.toEntity();
-      detailCourseEntity = detailCourseRepository.save(detailCourseEntity);
+      detailCourseDTO.setRouteNum(routeEntity.getRouteNum());
+      DetailCourseEntity detailCourseEntity = detailCourseDTO.toEntity(routeEntity);
+      detailCourseRepository.save(detailCourseEntity);
     }
 
     //diyEntity 생성
@@ -98,7 +98,7 @@ public class DiyService {
             .map(detailCourse -> DetailCourseDTO.builder()
                     .detailCourseNum(detailCourse.getDetailCourseNum())
                     .dayNum(detailCourse.getDayNum())
-                    .route(detailCourse.getRoute())
+                    .routeNum(detailCourse.getRoute().getRouteNum())
                     .courses(Arrays.asList(
                             detailCourse.getCourse1(),
                             detailCourse.getCourse2(),
@@ -161,8 +161,8 @@ public class DiyService {
     detailCourseRepository.deleteByRoute(routeEntity); //기존 경로와 연결된 detailcourseEntity
     for (DetailCourseDTO detailCourseDTO : detailCourseDTOs) {
       // RouteEntity를 DetailCourseDTO에 설정
-      detailCourseDTO.setRoute(routeEntity);
-      DetailCourseEntity detailCourseEntity = detailCourseDTO.toEntity();
+      detailCourseDTO.setRouteNum(routeEntity.getRouteNum());
+      DetailCourseEntity detailCourseEntity = detailCourseDTO.toEntity(routeEntity);
       detailCourseRepository.save(detailCourseEntity); // 저장
     }
 
