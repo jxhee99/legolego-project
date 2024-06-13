@@ -43,7 +43,7 @@ public class DiyEntity {
 
   //추후 조인
   @Column(name = "user_num", nullable = false)
-  private int userNum;
+  private Long userNum;
 
   @OneToOne
   @JoinColumn(name = "airline_num", nullable = false)

@@ -11,5 +11,5 @@ public class RequestDTO {
   private RouteDTO route;
   private List<DetailCourseDTO> detailCourses;
   private PackageFormDTO packageForm;
-  private int userNum;
+  private Long userNum;
 }

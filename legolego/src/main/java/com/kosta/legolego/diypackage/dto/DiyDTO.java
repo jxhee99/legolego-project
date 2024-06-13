@@ -25,7 +25,7 @@ public class DiyDTO {
   private AirlineEntity airline;
   private RouteEntity route;
   //임시 타입, 해당 테이블 entity 생기면 수정
-  private int userNum;
+  private Long userNum;
 
 
   public DiyEntity toEntity() {

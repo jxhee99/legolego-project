@@ -5,10 +5,7 @@ import com.kosta.legolego.diypackage.entity.DetailCourseEntity;
 import com.kosta.legolego.diypackage.entity.DiyEntity;
 import com.kosta.legolego.diypackage.entity.AirlineEntity;
 import com.kosta.legolego.diypackage.entity.RouteEntity;
-import com.kosta.legolego.diypackage.repository.DetailCourseRepository;
-import com.kosta.legolego.diypackage.repository.DiyRepository;
-import com.kosta.legolego.diypackage.repository.AirlineRepository;
-import com.kosta.legolego.diypackage.repository.RouteRepository;
+import com.kosta.legolego.diypackage.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +22,9 @@ import java.util.stream.Collectors;
 public class DiyService {
   @Autowired
   private DiyRepository diyRepository;
+
+  @Autowired
+  private DiyLikeRepository diyLikeRepository;
   @Autowired
   private AirlineRepository airlineRepository;
   @Autowired
@@ -67,13 +67,20 @@ public class DiyService {
     return diyRepository.save(diyEntity);
   }
 
-  public ResponseDTO getDiyDetail(Long packageNum) {
+  public ResponseDTO getDiyDetail(Long packageNum, Long currentUserNum) {
+    //조회수 증가
+    diyRepository.incrementViewNum(packageNum);
 
     DiyEntity diyEntity = diyRepository.findById(packageNum).orElse(null);
+
+    //로그인한 유저가 응원하기 참여했는지 확인
+    boolean isLiked = diyLikeRepository.existsByUserNumAndDiy(currentUserNum, diyEntity);
+
+    //항공,루트, 상세 코스 조회
     AirlineEntity airlineEntity = diyEntity.getAirline();
     RouteEntity routeEntity = diyEntity.getRoute();
-    // DetailCourseEntity 리스트 조회
     List<DetailCourseEntity> detailCourseEntities = detailCourseRepository.findByRoute(routeEntity);
+
     // AirlineDTO 설정
     AirlineDTO airlineDTO = AirlineDTO.builder()
             .airlineNum(airlineEntity.getAirlineNum())
@@ -119,7 +126,7 @@ public class DiyService {
     PackageFormDTO packageFormDTO = PackageFormDTO.getDiyEntity(diyEntity);
 
     //임시 userNum
-    int userNum = diyEntity.getUserNum();
+    Long userNum = diyEntity.getUserNum();
 
     // ResponseDTO 설정
     ResponseDTO responseDTO = ResponseDTO.builder()
@@ -128,8 +135,10 @@ public class DiyService {
             .packageForm(packageFormDTO)
             .detailCourses(detailCourseDTOList)
             .userNum(userNum)
+            .likedNum(diyEntity.getPackageLikedNum())
+            .viewNum(diyEntity.getPackageViewNum())
+            .isLiked(isLiked)
             .build();
-
     return responseDTO;
   }
 

@@ -15,5 +15,5 @@ public interface DetailCourseRepository extends JpaRepository<DetailCourseEntity
   @Transactional
   @Query("DELETE FROM DetailCourseEntity d WHERE d.route = :route")
   @Modifying
-  void deleteByRoute(@Param("route")RouteEntity routeEntity);
+  void deleteByRoute(@Param("route")RouteEntity route);
 }

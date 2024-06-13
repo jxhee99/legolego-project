@@ -11,5 +11,8 @@ public class ResponseDTO {
   private RouteDTO route;
   private List<DetailCourseDTO> detailCourses;
   private PackageFormDTO packageForm;
-  private int userNum;
+  private Long userNum;
+  private int likedNum;
+  private int viewNum;
+  private boolean isLiked;
 }
