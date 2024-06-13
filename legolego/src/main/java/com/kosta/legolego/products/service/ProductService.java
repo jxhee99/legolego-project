@@ -64,19 +64,4 @@ public List<ProductDto> getAllProductsForAdmin(){
       productRepository.deleteById(productNum);
     }
 
-//    //    찜 하기
-//    public void lovedProduct(Long productNum){
-//        Product product = productRepository.findById(productNum)
-//                .orElseThrow(()-> new RuntimeException("상품을 찾을 수 없습니다"));
-//        product.setProductLovedNum(product.getProductLovedNum() +1);
-//        productRepository.save(product);
-//    }
-//
-//    //    찜 취소
-//    public void  unlovedProduct(Long productNum){
-//        Product product = productRepository.findById(productNum)
-//                .orElseThrow(()->new RuntimeException("상품을 찾을 수 없습니다"));
-//        product.setProductLovedNum(product.getProductLovedNum() -1);
-//        productRepository.save(product);
-//    }
 }

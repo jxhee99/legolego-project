@@ -42,8 +42,8 @@ public class Product {
     @Column(name = "product_view_num")
     private Integer productViewNum = 0;
 
-    @Column(name = "product_loved_num")
-    private Integer productLovedNum = 0;
+    @Column(name = "wishlist_count")
+    private int wishlistCount = 0;
 
     @ManyToOne
     @JoinColumn(name = "admin_num", nullable = false)

@@ -19,7 +19,7 @@ public class ProductDto { // 상세 조회 시 필요한 모든 데이터
     private Date recruitmentDeadline;
     private Boolean recruitmentConfirmed;
     private Integer productViewNum;
-    private Integer productLovedNum;
+    private Integer wishlistCount;
     private Long adminNum;
     private Long packageNum;
     private String userNickname; // 작성자 닉네임
@@ -33,10 +33,10 @@ public class ProductDto { // 상세 조회 시 필요한 모든 데이터
                 product.getRecruitmentDeadline(),
                 product.getRecruitmentConfirmed(),
                 product.getProductViewNum(),
-                product.getProductLovedNum(),
+                product.getWishlistCount(),
                 product.getAdmin().getAdminNum(),
                 product.getDiyPackage().getPackageNum(),
-                product.getUser().getUserNickname()
+                product.getUser().getUserNickname() // User
         );
     }
 }
