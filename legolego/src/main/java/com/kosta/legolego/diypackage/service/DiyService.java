@@ -174,4 +174,23 @@ public class DiyService {
 
     return diyRepository.save(diyEntity);
   }
+  @Transactional
+  public void deleteDiy(Long packageNum){
+    // 1. 엔티티 조회
+    DiyEntity diyEntity = diyRepository.findById(packageNum).orElse(null);
+
+    //2.diy패키지 테이블에서 삭제
+    diyRepository.delete(diyEntity);
+
+    //3. 관련 엔티티 조회
+    AirlineEntity airlineEntity = airlineRepository.findById(diyEntity.getAirline().getAirlineNum())
+            .orElseThrow(() -> new RuntimeException("항공사가 존재하지 않습니다."));
+
+    RouteEntity routeEntity = routeRepository.findById(diyEntity.getRoute().getRouteNum())
+            .orElseThrow(() -> new RuntimeException("경로가 존재하지 않습니다."));
+    //연관된 테이블에서 삭제
+    airlineRepository.delete(airlineEntity);
+    routeRepository.delete(routeEntity);
+    detailCourseRepository.deleteByRoute(routeEntity);
+  }
 }

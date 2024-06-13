@@ -24,4 +24,8 @@ public class DiyController {
   public DiyEntity updatedPackage(@PathVariable Long package_num,@RequestBody RequestDTO requestDTO){
     return diyService.updateDiy(package_num, requestDTO);
   }
+  @DeleteMapping("/packages/{package_num}")
+  public void deltePackage(@PathVariable Long package_num){
+    diyService.deleteDiy(package_num);
+  }
 }
