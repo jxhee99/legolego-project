@@ -66,7 +66,12 @@ public class DiyService {
 
     return diyRepository.save(diyEntity);
   }
+  //전체조회
+  public List<DiyEntity> getDiyPackages(){
+    return diyRepository.findAll();
+  }
 
+  //상세조회
   public ResponseDTO getDiyDetail(Long packageNum, Long currentUserNum) {
     //조회수 증가
     diyRepository.incrementViewNum(packageNum);

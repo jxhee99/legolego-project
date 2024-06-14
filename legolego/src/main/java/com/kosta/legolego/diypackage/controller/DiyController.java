@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/packages")
 public class DiyController {
@@ -22,7 +24,14 @@ public class DiyController {
     DiyEntity diyEntity = diyService.createDiy(requestDTO);
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
+  //전체 조회
+  @GetMapping
+  public ResponseEntity<List<DiyEntity>> getDiyPackages() {
+    List<DiyEntity> diyPackages = diyService.getDiyPackages();
+    return ResponseEntity.ok(diyPackages);
+  }
 
+  //상세조회
   @GetMapping("/{package_num}")
   public ResponseEntity<ResponseDTO> getDiyDetail(@PathVariable Long package_num) {
     //로그인한 사용자 임시 하드코딩
