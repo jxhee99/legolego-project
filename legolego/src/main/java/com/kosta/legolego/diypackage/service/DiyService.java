@@ -48,7 +48,7 @@ public class DiyService {
     //for문으로 detailCourseDTO 갯수 만큼 유동적으로 처리
     for (DetailCourseDTO detailCourseDTO : detailCourseDTOs) {
       // RouteEntity를 DetailCourseDTO에 설정
-      detailCourseDTO.setRouteNum(routeEntity.getRouteNum());
+      //detailCourseDTO.setRouteNum(routeEntity.getRouteNum());
       DetailCourseEntity detailCourseEntity = detailCourseDTO.toEntity(routeEntity);
       detailCourseRepository.save(detailCourseEntity);
     }
@@ -108,9 +108,9 @@ public class DiyService {
     // DetailCourseDTO 설정
     List<DetailCourseDTO> detailCourseDTOList = detailCourseEntities.stream()
             .map(detailCourse -> DetailCourseDTO.builder()
-                    .detailCourseNum(detailCourse.getDetailCourseNum())
+                    //.detailCourseNum(detailCourse.getDetailCourseNum())
                     .dayNum(detailCourse.getDayNum())
-                    .routeNum(detailCourse.getRoute().getRouteNum())
+                    //.routeNum(detailCourse.getRoute().getRouteNum())
                     .courses(Arrays.asList(
                             detailCourse.getCourse1(),
                             detailCourse.getCourse2(),
@@ -175,7 +175,7 @@ public class DiyService {
     detailCourseRepository.deleteByRoute(routeEntity); //기존 경로와 연결된 detailcourseEntity
     for (DetailCourseDTO detailCourseDTO : detailCourseDTOs) {
       // RouteEntity를 DetailCourseDTO에 설정
-      detailCourseDTO.setRouteNum(routeEntity.getRouteNum());
+      //detailCourseDTO.setRouteNum(routeEntity.getRouteNum());
       DetailCourseEntity detailCourseEntity = detailCourseDTO.toEntity(routeEntity);
       detailCourseRepository.save(detailCourseEntity); // 저장
     }
@@ -188,6 +188,85 @@ public class DiyService {
 
     return diyRepository.save(diyEntity);
   }
+@Transactional
+public DiyEntity updateDiyPatch(Long packageNum, RequestDTO requestDTO) {
+  // 1. 엔티티 조회
+  DiyEntity diyEntity = diyRepository.findById(packageNum)
+          .orElseThrow(() -> new RuntimeException("해당 번호의 DIY 패키지가 존재하지 않습니다."));
+
+  // 2. 관련 엔티티 조회
+  AirlineEntity airlineEntity = diyEntity.getAirline();
+  RouteEntity routeEntity = diyEntity.getRoute();
+
+  // 3. dto에 변경들어온 필드만 엔티티에 복사
+  //airline
+  if (requestDTO.getAirline() != null) {
+    if (requestDTO.getAirline().getAirlineName() != null) {
+      airlineEntity.setAirlineName(requestDTO.getAirline().getAirlineName());
+    }
+    if (requestDTO.getAirline().getStartFlightNum() != null) {
+      airlineEntity.setStartFlightNum(requestDTO.getAirline().getStartFlightNum());
+    }
+    if (requestDTO.getAirline().getStartingPoint() != null) {
+      airlineEntity.setStartingPoint(requestDTO.getAirline().getStartingPoint());
+    }
+    if (requestDTO.getAirline().getDestination() != null) {
+      airlineEntity.setDestination(requestDTO.getAirline().getDestination());
+    }
+    if (requestDTO.getAirline().getBoardingDate() != null) {
+      airlineEntity.setBoardingDate(requestDTO.getAirline().getBoardingDate());
+    }
+    if (requestDTO.getAirline().getComeFlightNum() != null) {
+      airlineEntity.setComeFlightNum(requestDTO.getAirline().getComeFlightNum());
+    }
+    if (requestDTO.getAirline().getComingDate() != null) {
+      airlineEntity.setComingDate(requestDTO.getAirline().getComingDate());
+    }
+    airlineEntity = airlineRepository.save(airlineEntity);
+  }
+  //route
+  if (requestDTO.getRoute() != null) {
+    if (requestDTO.getRoute().getStartDate() != null) {
+      routeEntity.setStartDate(requestDTO.getRoute().getStartDate());
+    }
+    if (requestDTO.getRoute().getLastDate() != null) {
+      routeEntity.setLastDate(requestDTO.getRoute().getLastDate());
+    }
+    routeEntity = routeRepository.save(routeEntity);
+  }
+
+  // 4. DetailCourse 업데이트
+  List<DetailCourseDTO> detailCourseDTOs = requestDTO.getDetailCourses();
+  if (detailCourseDTOs != null && !detailCourseDTOs.isEmpty()) {
+    // 기존의 DetailCourse 삭제 후 새로 저장
+    detailCourseRepository.deleteByRoute(routeEntity);
+    for (DetailCourseDTO detailCourseDTO : detailCourseDTOs) {
+      //detailCourseDTO.setRouteNum(routeEntity.getRouteNum());
+      DetailCourseEntity detailCourseEntity = detailCourseDTO.toEntity(routeEntity);
+      detailCourseRepository.save(detailCourseEntity);
+    }
+  }
+
+  // 5. diyEntity의 필드 업데이트 (packageFormDTO로 업데이트)
+  PackageFormDTO packageFormDTO = requestDTO.getPackageForm();
+  if (packageFormDTO != null) {
+    if (packageFormDTO.getPackageName() != null) {
+      diyEntity.setPackageName(packageFormDTO.getPackageName());
+    }
+    if (packageFormDTO.getProfileImg() != null) {
+      diyEntity.setProfileImg(packageFormDTO.getProfileImg());
+    }
+    if (packageFormDTO.getShortDescription() != null) {
+      diyEntity.setShortDescription(packageFormDTO.getShortDescription());
+    }
+  }
+  diyEntity.setModDate(LocalDate.now());
+  diyEntity.setAirline(airlineEntity);
+  diyEntity.setRoute(routeEntity);
+
+  return diyRepository.save(diyEntity);
+}
+
   @Transactional
   public void deleteDiy(Long packageNum){
     // 1. 엔티티 조회

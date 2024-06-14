@@ -39,14 +39,20 @@ public class DiyController {
     ResponseDTO responseDTO = diyService.getDiyDetail(package_num, currentUserNum);
     return new ResponseEntity<>(responseDTO, HttpStatus.OK);
   }
-
+  //put방식
   @PutMapping("/{package_num}")
   //추후 수정 권한 검사 추가
   public ResponseEntity<Void> updateDiy(@PathVariable Long package_num, @RequestBody RequestDTO requestDTO) {
     DiyEntity diyEntity = diyService.updateDiy(package_num, requestDTO);
     return new ResponseEntity<>(HttpStatus.OK);
   }
-
+  //patch방식
+  @PatchMapping("/{package_num}")
+  //추후 수정 권한 검사 추가
+  public ResponseEntity<Void> updateDiyPatch(@PathVariable Long package_num, @RequestBody RequestDTO requestDTO) {
+    DiyEntity diyEntity = diyService.updateDiyPatch(package_num, requestDTO);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
   @DeleteMapping("/{package_num}")
   //추후 삭제 권한 검사 추가
   public ResponseEntity<Void> deleteDiy(@PathVariable Long package_num) {

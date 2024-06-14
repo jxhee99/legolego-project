@@ -16,9 +16,9 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class DetailCourseDTO {
-  private Long detailCourseNum;
+  //private Long detailCourseNum;
   //private RouteEntity route;
-  private Long routeNum;
+  //private Long routeNum;
   private LocalDate dayNum;
   private List<String> courses; // 코스를 담을 리스트
   private String fileUrl;
