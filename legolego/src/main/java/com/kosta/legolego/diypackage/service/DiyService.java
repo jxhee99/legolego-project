@@ -12,10 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -108,7 +106,7 @@ public class DiyService {
     // DetailCourseDTO 설정
     List<DetailCourseDTO> detailCourseDTOList = detailCourseEntities.stream()
             .map(detailCourse -> DetailCourseDTO.builder()
-                    //.detailCourseNum(detailCourse.getDetailCourseNum())
+                    .detailCourseNum(detailCourse.getDetailCourseNum())
                     .dayNum(detailCourse.getDayNum())
                     //.routeNum(detailCourse.getRoute().getRouteNum())
                     .courses(Arrays.asList(
@@ -235,15 +233,46 @@ public DiyEntity updateDiyPatch(Long packageNum, RequestDTO requestDTO) {
     routeEntity = routeRepository.save(routeEntity);
   }
 
+  // 4. DetailCourse 업데이트(삭제 후 새로 저장 방식: 밑의 방법이 예상치 못한 버그가 많으면 적용
+//  List<DetailCourseDTO> detailCourseDTOs = requestDTO.getDetailCourses();
+//  if (detailCourseDTOs != null && !detailCourseDTOs.isEmpty()) {
+//    // 기존의 DetailCourse 삭제 후 새로 저장
+//    detailCourseRepository.deleteByRoute(routeEntity);
+//    for (DetailCourseDTO detailCourseDTO : detailCourseDTOs) {
+//      //detailCourseDTO.setRouteNum(routeEntity.getRouteNum());
+//      DetailCourseEntity detailCourseEntity = detailCourseDTO.toEntity(routeEntity);
+//      detailCourseRepository.save(detailCourseEntity);
+//    }
+//  }
+
   // 4. DetailCourse 업데이트
   List<DetailCourseDTO> detailCourseDTOs = requestDTO.getDetailCourses();
-  if (detailCourseDTOs != null && !detailCourseDTOs.isEmpty()) {
-    // 기존의 DetailCourse 삭제 후 새로 저장
-    detailCourseRepository.deleteByRoute(routeEntity);
+  if (detailCourseDTOs != null) {
+    // 기존의 DetailCourse 조회
+    List<DetailCourseEntity> existingCourses = detailCourseRepository.findByRoute(routeEntity);
+
+    // 맵을 사용하여 기존 엔티티를 조회
+    Map<Long, DetailCourseEntity> existingCourseMap = existingCourses.stream()
+            .collect(Collectors.toMap(DetailCourseEntity::getDetailCourseNum, Function.identity()));
+
+    // 요청 DTO를 처리하여 업데이트 및 추가 수행
     for (DetailCourseDTO detailCourseDTO : detailCourseDTOs) {
-      //detailCourseDTO.setRouteNum(routeEntity.getRouteNum());
-      DetailCourseEntity detailCourseEntity = detailCourseDTO.toEntity(routeEntity);
-      detailCourseRepository.save(detailCourseEntity);
+      if (detailCourseDTO.getDetailCourseNum() != null && existingCourseMap.containsKey(detailCourseDTO.getDetailCourseNum())) {
+        // 기존 엔티티 업데이트
+        DetailCourseEntity existingCourse = existingCourseMap.get(detailCourseDTO.getDetailCourseNum());
+        updateDetailCourseEntity(existingCourse, detailCourseDTO);
+        detailCourseRepository.save(existingCourse);
+        existingCourseMap.remove(detailCourseDTO.getDetailCourseNum());
+      } else {
+        // 새로운 엔티티 추가
+        DetailCourseEntity newCourse = detailCourseDTO.toEntity(routeEntity);
+        detailCourseRepository.save(newCourse);
+      }
+    }
+
+    // 남은 기존 엔티티 삭제
+    for (DetailCourseEntity remainingCourse : existingCourseMap.values()) {
+      detailCourseRepository.delete(remainingCourse);
     }
   }
 
@@ -285,5 +314,27 @@ public DiyEntity updateDiyPatch(Long packageNum, RequestDTO requestDTO) {
     airlineRepository.delete(airlineEntity);
     routeRepository.delete(routeEntity);
     detailCourseRepository.deleteByRoute(routeEntity);
+  }
+
+  private void updateDetailCourseEntity(DetailCourseEntity entity, DetailCourseDTO dto) {
+    if (dto.getDayNum() != null) {
+      entity.setDayNum(dto.getDayNum());
+    }
+    if (dto.getCourses() != null && !dto.getCourses().isEmpty()) {
+      int size = dto.getCourses().size();
+      entity.setCourse1(size > 0 ? dto.getCourses().get(0) : null);
+      entity.setCourse2(size > 1 ? dto.getCourses().get(1) : null);
+      entity.setCourse3(size > 2 ? dto.getCourses().get(2) : null);
+      entity.setCourse4(size > 3 ? dto.getCourses().get(3) : null);
+      entity.setCourse5(size > 4 ? dto.getCourses().get(4) : null);
+      entity.setCourse6(size > 5 ? dto.getCourses().get(5) : null);
+      entity.setCourse7(size > 6 ? dto.getCourses().get(6) : null);
+      entity.setCourse8(size > 7 ? dto.getCourses().get(7) : null);
+      entity.setCourse9(size > 8 ? dto.getCourses().get(8) : null);
+      entity.setCourse10(size > 9 ? dto.getCourses().get(9) : null);
+    }
+    if (dto.getFileUrl() != null) {
+      entity.setFileUrl(dto.getFileUrl());
+    }
   }
 }
