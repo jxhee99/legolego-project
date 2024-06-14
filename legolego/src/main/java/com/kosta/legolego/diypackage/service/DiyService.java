@@ -1,10 +1,7 @@
 package com.kosta.legolego.diypackage.service;
 
 import com.kosta.legolego.diypackage.dto.*;
-import com.kosta.legolego.diypackage.entity.DetailCourseEntity;
-import com.kosta.legolego.diypackage.entity.DiyEntity;
-import com.kosta.legolego.diypackage.entity.AirlineEntity;
-import com.kosta.legolego.diypackage.entity.RouteEntity;
+import com.kosta.legolego.diypackage.entity.*;
 import com.kosta.legolego.diypackage.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
@@ -300,6 +297,11 @@ public DiyEntity updateDiyPatch(Long packageNum, RequestDTO requestDTO) {
   public void deleteDiy(Long packageNum){
     // 1. 엔티티 조회
     DiyEntity diyEntity = diyRepository.findById(packageNum).orElse(null);
+
+    // DiyEntity에 연결된 DiyLikeEntity 삭제
+    List<DiyLikeEntity> diyLikes = diyLikeRepository.findByDiy(diyEntity);
+    diyLikeRepository.deleteAll(diyLikes);
+
 
     //2.diy패키지 테이블에서 삭제
     diyRepository.delete(diyEntity);
