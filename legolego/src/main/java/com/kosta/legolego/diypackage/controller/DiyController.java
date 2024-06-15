@@ -20,9 +20,13 @@ public class DiyController {
   DiyLikeService diyLikeService;
 
   @PostMapping
-  public ResponseEntity<Void> createDiy(@RequestBody RequestDTO requestDTO) {
-    DiyEntity diyEntity = diyService.createDiy(requestDTO);
-    return new ResponseEntity<>(HttpStatus.CREATED);
+  public ResponseEntity<?> createDiy(@RequestBody RequestDTO requestDTO) {
+    try{
+      diyService.createDiy(requestDTO);
+      return new ResponseEntity<>(HttpStatus.CREATED);
+    }catch (RuntimeException e){
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
   //전체 조회
   @GetMapping
@@ -42,22 +46,35 @@ public class DiyController {
   //put방식
   @PutMapping("/{package_num}")
   //추후 수정 권한 검사 추가
-  public ResponseEntity<Void> updateDiy(@PathVariable Long package_num, @RequestBody RequestDTO requestDTO) {
-    DiyEntity diyEntity = diyService.updateDiy(package_num, requestDTO);
-    return new ResponseEntity<>(HttpStatus.OK);
+  public ResponseEntity<?> updateDiy(@PathVariable Long package_num, @RequestBody RequestDTO requestDTO) {
+    try{
+      DiyEntity diyEntity = diyService.updateDiy(package_num, requestDTO);
+      return new ResponseEntity<>(HttpStatus.OK);
+    }catch (RuntimeException e){
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
   //patch방식
   @PatchMapping("/{package_num}")
   //추후 수정 권한 검사 추가
-  public ResponseEntity<Void> updateDiyPatch(@PathVariable Long package_num, @RequestBody RequestDTO requestDTO) {
-    DiyEntity diyEntity = diyService.updateDiyPatch(package_num, requestDTO);
-    return new ResponseEntity<>(HttpStatus.OK);
+  public ResponseEntity<?> updateDiyPatch(@PathVariable Long package_num, @RequestBody RequestDTO requestDTO) {
+    try{
+      DiyEntity diyEntity = diyService.updateDiyPatch(package_num, requestDTO);
+      return new ResponseEntity<>(HttpStatus.OK);
+    }catch (RuntimeException e){
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
   }
   @DeleteMapping("/{package_num}")
   //추후 삭제 권한 검사 추가
-  public ResponseEntity<Void> deleteDiy(@PathVariable Long package_num) {
-    diyService.deleteDiy(package_num);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  public ResponseEntity<?> deleteDiy(@PathVariable Long package_num) {
+    try{
+      diyService.deleteDiy(package_num);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }catch (RuntimeException e){
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 
   //가수요 참여

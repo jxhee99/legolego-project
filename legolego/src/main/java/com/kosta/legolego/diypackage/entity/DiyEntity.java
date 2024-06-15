@@ -32,9 +32,11 @@ public class DiyEntity {
   @Column(name = "mod_date")
   private LocalDate modDate;
 
+  @Builder.Default
   @Column(name = "package_liked_num", nullable = false)
   private int packageLikedNum = 0;
 
+  @Builder.Default
   @Column(name = "package_view_num", nullable = false)
   private int packageViewNum = 0;
 
