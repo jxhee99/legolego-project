@@ -152,39 +152,22 @@ public class DiyService {
   //patch update 관련 메서드
   private void updatePartialAirline(AirlineEntity airlineEntity, DiyAirlineDTO diyAirlineDTO) {
     if (diyAirlineDTO != null) {
-      if (diyAirlineDTO.getAirlineName() != null) {
-        airlineEntity.setAirlineName(diyAirlineDTO.getAirlineName());
-      }
-      if (diyAirlineDTO.getStartFlightNum() != null) {
-        airlineEntity.setStartFlightNum(diyAirlineDTO.getStartFlightNum());
-      }
-      if (diyAirlineDTO.getStartingPoint() != null) {
-        airlineEntity.setStartingPoint(diyAirlineDTO.getStartingPoint());
-      }
-      if (diyAirlineDTO.getDestination() != null) {
-        airlineEntity.setDestination(diyAirlineDTO.getDestination());
-      }
-      if (diyAirlineDTO.getBoardingDate() != null) {
-        airlineEntity.setBoardingDate(diyAirlineDTO.getBoardingDate());
-      }
-      if (diyAirlineDTO.getComeFlightNum() != null) {
-        airlineEntity.setComeFlightNum(diyAirlineDTO.getComeFlightNum());
-      }
-      if (diyAirlineDTO.getComingDate() != null) {
-        airlineEntity.setComingDate(diyAirlineDTO.getComingDate());
-      }
+      Optional.ofNullable(diyAirlineDTO.getAirlineName()).ifPresent(airlineEntity::setAirlineName);
+      Optional.ofNullable(diyAirlineDTO.getStartFlightNum()).ifPresent(airlineEntity::setStartFlightNum);
+      Optional.ofNullable(diyAirlineDTO.getStartingPoint()).ifPresent(airlineEntity::setStartingPoint);
+      Optional.ofNullable(diyAirlineDTO.getDestination()).ifPresent(airlineEntity::setDestination);
+      Optional.ofNullable(diyAirlineDTO.getBoardingDate()).ifPresent(airlineEntity::setBoardingDate);
+      Optional.ofNullable(diyAirlineDTO.getComeFlightNum()).ifPresent(airlineEntity::setComeFlightNum);
+      Optional.ofNullable(diyAirlineDTO.getComingDate()).ifPresent(airlineEntity::setComingDate);
+
       airlineRepository.save(airlineEntity);
     }
   }
 
   private void updatePartialRoute(RouteEntity routeEntity, DiyRouteDTO diyRouteDTO) {
     if (diyRouteDTO != null) {
-      if (diyRouteDTO.getStartDate() != null) {
-        routeEntity.setStartDate(diyRouteDTO.getStartDate());
-      }
-      if (diyRouteDTO.getLastDate() != null) {
-        routeEntity.setLastDate(diyRouteDTO.getLastDate());
-      }
+      Optional.ofNullable(diyRouteDTO.getStartDate()).ifPresent(routeEntity::setStartDate);
+      Optional.ofNullable(diyRouteDTO.getLastDate()).ifPresent(routeEntity::setLastDate);
       routeRepository.save(routeEntity);
     }
   }
@@ -215,39 +198,24 @@ public class DiyService {
     }
   }
   private void updateDetailCourseEntity(DetailCourseEntity entity, DiyDetailCourseDTO dto) {
-    if (dto.getDayNum() != null) {
-      entity.setDayNum(dto.getDayNum());
+    Optional.ofNullable(dto.getDayNum()).ifPresent(entity::setDayNum);
+
+    List<String> courses = dto.getCourses();
+    //필드 갯수 만큼 코스 설정
+    if (courses != null && !courses.isEmpty()) {
+      entity.clearCourses(); // 모든 코스 필드를 초기화
+      for (int i = 0; i < Math.min(courses.size(), 10); i++) {
+        entity.setCourse(i + 1, courses.get(i));
+      }
     }
-    if (dto.getCourses() != null && !dto.getCourses().isEmpty()) {
-      int size = dto.getCourses().size();
-      entity.setCourse1(size > 0 ? dto.getCourses().get(0) : null);
-      entity.setCourse2(size > 1 ? dto.getCourses().get(1) : null);
-      entity.setCourse3(size > 2 ? dto.getCourses().get(2) : null);
-      entity.setCourse4(size > 3 ? dto.getCourses().get(3) : null);
-      entity.setCourse5(size > 4 ? dto.getCourses().get(4) : null);
-      entity.setCourse6(size > 5 ? dto.getCourses().get(5) : null);
-      entity.setCourse7(size > 6 ? dto.getCourses().get(6) : null);
-      entity.setCourse8(size > 7 ? dto.getCourses().get(7) : null);
-      entity.setCourse9(size > 8 ? dto.getCourses().get(8) : null);
-      entity.setCourse10(size > 9 ? dto.getCourses().get(9) : null);
-    }
-    if (dto.getFileUrl() != null) {
-      entity.setFileUrl(dto.getFileUrl());
-    }
+    Optional.ofNullable(dto.getFileUrl()).ifPresent(entity::setFileUrl);
   }
   private void updatePartialDiyEntity(DiyEntity diyEntity, DiyDTO diyDTO) {
     if (diyDTO != null) {
-      if (diyDTO.getPackageName() != null) {
-        diyEntity.setPackageName(diyDTO.getPackageName());
-      }
-      if (diyDTO.getProfileImg() != null) {
-        diyEntity.setProfileImg(diyDTO.getProfileImg());
-      }
-      if (diyDTO.getShortDescription() != null) {
-        diyEntity.setShortDescription(diyDTO.getShortDescription());
-      }
+      Optional.ofNullable(diyDTO.getPackageName()).ifPresent(diyEntity::setPackageName);
+      Optional.ofNullable(diyDTO.getProfileImg()).ifPresent(diyEntity::setProfileImg);
+      Optional.ofNullable(diyDTO.getShortDescription()).ifPresent(diyEntity::setShortDescription);
       diyRepository.save(diyEntity);
     }
   }
-
 }

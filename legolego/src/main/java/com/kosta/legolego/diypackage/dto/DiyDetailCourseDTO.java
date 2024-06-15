@@ -26,42 +26,48 @@ public class DiyDetailCourseDTO {
   private String fileUrl;
 
   public DetailCourseEntity toEntity(RouteEntity routeEntity) {
-    return DetailCourseEntity.builder()
+    DetailCourseEntity detailCourseEntity = DetailCourseEntity.builder()
             .route(routeEntity)
             .dayNum(this.dayNum)
-            .course1(this.courses.get(0))
-            .course2(this.courses.get(1))
-            .course3(this.courses.get(2))
-            .course4(this.courses != null && this.courses.size() > 3 ? this.courses.get(3) : null)
-            .course5(this.courses != null && this.courses.size() > 4 ? this.courses.get(4) : null)
-            .course6(this.courses != null && this.courses.size() > 5 ? this.courses.get(5) : null)
-            .course7(this.courses != null && this.courses.size() > 6 ? this.courses.get(6) : null)
-            .course8(this.courses != null && this.courses.size() > 7 ? this.courses.get(7) : null)
-            .course9(this.courses != null && this.courses.size() > 8 ? this.courses.get(8) : null)
-            .course10(this.courses != null && this.courses.size() > 9 ? this.courses.get(9) : null)
             .fileUrl(this.fileUrl)
             .build();
+
+    // 코스 수 만큼 setCourse
+    for (int i = 0; i < this.courses.size(); i++) {
+      detailCourseEntity.setCourse(i + 1, this.courses.get(i));
+    }
+
+    return detailCourseEntity;
   }
 
   public static List<DiyDetailCourseDTO> toDetailCourseDTOList(List<DetailCourseEntity> detailCourseEntities) {
     return detailCourseEntities.stream()
-            .map(detailCourse -> DiyDetailCourseDTO.builder()
-                    .detailCourseNum(detailCourse.getDetailCourseNum())
-                    .dayNum(detailCourse.getDayNum())
-                    .courses(Arrays.asList(
-                            detailCourse.getCourse1(),
-                            detailCourse.getCourse2(),
-                            detailCourse.getCourse3(),
-                            detailCourse.getCourse4(),
-                            detailCourse.getCourse5(),
-                            detailCourse.getCourse6(),
-                            detailCourse.getCourse7(),
-                            detailCourse.getCourse8(),
-                            detailCourse.getCourse9(),
-                            detailCourse.getCourse10()
-                    ).stream().filter(Objects::nonNull).collect(Collectors.toList()))
-                    .fileUrl(detailCourse.getFileUrl())
-                    .build())
+            .map(detailCourse -> {
+              DiyDetailCourseDTO dto = DiyDetailCourseDTO.builder()
+                      .detailCourseNum(detailCourse.getDetailCourseNum())
+                      .dayNum(detailCourse.getDayNum())
+                      .fileUrl(detailCourse.getFileUrl())
+                      .build();
+
+              // 필드를 리스트로 변환하고 널 필드 제거
+              List<String> courses = Arrays.asList(
+                              detailCourse.getCourse1(),
+                              detailCourse.getCourse2(),
+                              detailCourse.getCourse3(),
+                              detailCourse.getCourse4(),
+                              detailCourse.getCourse5(),
+                              detailCourse.getCourse6(),
+                              detailCourse.getCourse7(),
+                              detailCourse.getCourse8(),
+                              detailCourse.getCourse9(),
+                              detailCourse.getCourse10()
+                      ).stream()
+                      .filter(Objects::nonNull)
+                      .collect(Collectors.toList());
+
+              dto.setCourses(courses);
+              return dto;
+            })
             .collect(Collectors.toList());
   }
 }
