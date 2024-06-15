@@ -8,14 +8,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DetailCourseDTO {
+public class DiyDetailCourseDTO {
   private Long detailCourseNum;
   //private RouteEntity route;
   //private Long routeNum;
@@ -39,5 +41,27 @@ public class DetailCourseDTO {
             .course10(this.courses != null && this.courses.size() > 9 ? this.courses.get(9) : null)
             .fileUrl(this.fileUrl)
             .build();
+  }
+
+  public static List<DiyDetailCourseDTO> toDetailCourseDTOList(List<DetailCourseEntity> detailCourseEntities) {
+    return detailCourseEntities.stream()
+            .map(detailCourse -> DiyDetailCourseDTO.builder()
+                    .detailCourseNum(detailCourse.getDetailCourseNum())
+                    .dayNum(detailCourse.getDayNum())
+                    .courses(Arrays.asList(
+                            detailCourse.getCourse1(),
+                            detailCourse.getCourse2(),
+                            detailCourse.getCourse3(),
+                            detailCourse.getCourse4(),
+                            detailCourse.getCourse5(),
+                            detailCourse.getCourse6(),
+                            detailCourse.getCourse7(),
+                            detailCourse.getCourse8(),
+                            detailCourse.getCourse9(),
+                            detailCourse.getCourse10()
+                    ).stream().filter(Objects::nonNull).collect(Collectors.toList()))
+                    .fileUrl(detailCourse.getFileUrl())
+                    .build())
+            .collect(Collectors.toList());
   }
 }

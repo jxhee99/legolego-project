@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 public class DiyService {
   @Autowired
   private DiyRepository diyRepository;
-
   @Autowired
   private DiyLikeRepository diyLikeRepository;
   @Autowired
@@ -30,8 +29,12 @@ public class DiyService {
   //diy 생성
   public DiyEntity createDiy(RequestDTO requestDTO) {
     //airline, route, detailcourse dto를 엔티티로 변환 후 레파지토리에 저장
-    AirlineEntity airlineEntity = saveAirline(requestDTO.getAirline());
-    RouteEntity routeEntity = saveRoute(requestDTO.getRoute());
+    AirlineEntity airlineEntity = requestDTO.getAirline().toEntity();
+    airlineRepository.save(airlineEntity);
+
+    RouteEntity routeEntity = requestDTO.getRoute().toEntity();
+    routeRepository.save(routeEntity);
+
     saveDetailCourses(requestDTO.getDetailCourses(), routeEntity);
 
     //diyEntity 생성 후 저장
@@ -57,29 +60,34 @@ public class DiyService {
     //조회수 증가
     diyRepository.incrementViewNum(packageNum);
 
+    //패키지 조회
     DiyEntity diyEntity = diyRepository.findById(packageNum)
             .orElseThrow(() -> new NullPointerException("패키지를 찾을 수 없습니다"));
 
-    //로그인한 유저가 응원하기 참여했는지 확인
+    //로그인한 사용자가 가수요 참여했는 지 검사
     boolean isLiked = diyLikeRepository.existsByUserNumAndDiy(currentUserNum, diyEntity);
 
-    AirlineDTO airlineDTO = toAirlineDTO(diyEntity.getAirline());
-    RouteDTO routeDTO = toRouteDTO(diyEntity.getRoute());
-    List<DetailCourseDTO> detailCourseDTOList = toDetailCourseDTOList(diyEntity.getRoute());
-    PackageFormDTO packageFormDTO = PackageFormDTO.getDiyEntity(diyEntity);
+    //엔티티를 dto로 변환
+    DiyAirlineDTO diyAirlineDTO = DiyAirlineDTO.toAirlineDTO(diyEntity.getAirline());
+    DiyRouteDTO diyRouteDTO = DiyRouteDTO.toRouteDTO(diyEntity.getRoute());
+    List<DiyDetailCourseDTO> diyDetailCourseDTOList = DiyDetailCourseDTO.toDetailCourseDTOList(
+            detailCourseRepository.findByRoute(diyEntity.getRoute())
+    );
+    DiyDTO diyDTO = DiyDTO.toDiyDTO(diyEntity);
 
+    //ResponseDTO 형태로 반환
     return ResponseDTO.builder()
-            .airline(airlineDTO)
-            .route(routeDTO)
-            .packageForm(packageFormDTO)
-            .detailCourses(detailCourseDTOList)
+            .airline(diyAirlineDTO)
+            .route(diyRouteDTO)
+            .packageForm(diyDTO)
+            .detailCourses(diyDetailCourseDTOList)
             .userNum(diyEntity.getUserNum())
             .likedNum(diyEntity.getPackageLikedNum())
             .viewNum(diyEntity.getPackageViewNum())
             .isLiked(isLiked)
             .build();
   }
-
+//put 수정
   public DiyEntity updateDiy(Long packageNum, RequestDTO requestDTO) {
     DiyEntity diyEntity = diyRepository.findById(packageNum)
             .orElseThrow(() -> new NullPointerException("패키지를 찾을 수 없습니다"));
@@ -93,29 +101,19 @@ public class DiyService {
     updateDiyEntity(diyEntity, requestDTO.getPackageForm());
     return diyRepository.save(diyEntity);
   }
-public DiyEntity updateDiyPatch(Long packageNum, RequestDTO requestDTO) {
-  DiyEntity diyEntity = diyRepository.findById(packageNum)
-          .orElseThrow(() -> new NullPointerException("패키지를 찾을 수 없습니다"));
+//patch 수정
+  public DiyEntity updateDiyPatch(Long packageNum, RequestDTO requestDTO) {
+    DiyEntity diyEntity = diyRepository.findById(packageNum)
+            .orElseThrow(() -> new NullPointerException("패키지를 찾을 수 없습니다"));
 
-  updatePartialAirline(diyEntity.getAirline(), requestDTO.getAirline());
-  updatePartialRoute(diyEntity.getRoute(), requestDTO.getRoute());
-  updateDetailCourses(diyEntity.getRoute(), requestDTO.getDetailCourses());
-  updatePartialDiyEntity(diyEntity, requestDTO.getPackageForm());
+    updatePartialAirline(diyEntity.getAirline(), requestDTO.getAirline());
+    updatePartialRoute(diyEntity.getRoute(), requestDTO.getRoute());
+    updatePartialCourse(diyEntity.getRoute(), requestDTO.getDetailCourses());
+    updatePartialDiyEntity(diyEntity, requestDTO.getPackageForm());
 
-  //DetailCourse 업데이트(삭제 후 새로 저장 방식: 밑의 방법이 예상치 못한 버그가 많으면 적용
-//  List<DetailCourseDTO> detailCourseDTOs = requestDTO.getDetailCourses();
-//  if (detailCourseDTOs != null && !detailCourseDTOs.isEmpty()) {
-//    // 기존의 DetailCourse 삭제 후 새로 저장
-//    detailCourseRepository.deleteByRoute(routeEntity);
-//    for (DetailCourseDTO detailCourseDTO : detailCourseDTOs) {
-//      //detailCourseDTO.setRouteNum(routeEntity.getRouteNum());
-//      DetailCourseEntity detailCourseEntity = detailCourseDTO.toEntity(routeEntity);
-//      detailCourseRepository.save(detailCourseEntity);
-//    }
-//  }
-  return diyRepository.save(diyEntity);
-}
-
+    return diyRepository.save(diyEntity);
+  }
+//삭제
   public void deleteDiy(Long packageNum){
     DiyEntity diyEntity = diyRepository.findById(packageNum)
             .orElseThrow(() -> new NullPointerException("패키지를 찾을 수 없습니다"));
@@ -128,82 +126,84 @@ public DiyEntity updateDiyPatch(Long packageNum, RequestDTO requestDTO) {
     detailCourseRepository.deleteByRoute(diyEntity.getRoute());
   }
 
-  private AirlineEntity saveAirline(AirlineDTO airlineDTO) {
-    AirlineEntity airlineEntity = airlineDTO.toEntity();
-    return airlineRepository.save(airlineEntity);
-  }
 
-  private RouteEntity saveRoute(RouteDTO routeDTO) {
-    RouteEntity routeEntity = routeDTO.toEntity();
-    return routeRepository.save(routeEntity);
-  }
-
-  private void saveDetailCourses(List<DetailCourseDTO> detailCourseDTOs, RouteEntity routeEntity) {
-    for (DetailCourseDTO detailCourseDTO : detailCourseDTOs) {
-      DetailCourseEntity detailCourseEntity = detailCourseDTO.toEntity(routeEntity);
+  private void saveDetailCourses(List<DiyDetailCourseDTO> diyDetailCourseDTOS, RouteEntity routeEntity) {
+    for (DiyDetailCourseDTO diyDetailCourseDTO : diyDetailCourseDTOS) {
+      DetailCourseEntity detailCourseEntity = diyDetailCourseDTO.toEntity(routeEntity);
       detailCourseRepository.save(detailCourseEntity);
     }
   }
 
-  private AirlineDTO toAirlineDTO(AirlineEntity airlineEntity) {
-    AirlineDTO airlineDTO = new AirlineDTO();
-    BeanUtils.copyProperties(airlineEntity, airlineDTO);
-    return airlineDTO;
-  }
-
-  private RouteDTO toRouteDTO(RouteEntity routeEntity) {
-    RouteDTO routeDTO = new RouteDTO();
-    BeanUtils.copyProperties(routeEntity, routeDTO);
-    return routeDTO;
-  }
-
-  private List<DetailCourseDTO> toDetailCourseDTOList(RouteEntity routeEntity) {
-    List<DetailCourseEntity> detailCourseEntities = detailCourseRepository.findByRoute(routeEntity);
-    return detailCourseEntities.stream()
-            .map(detailCourse ->DetailCourseDTO.builder()
-                .detailCourseNum(detailCourse.getDetailCourseNum())
-                .dayNum(detailCourse.getDayNum())
-                .courses(Arrays.asList(
-                        detailCourse.getCourse1(),
-                        detailCourse.getCourse2(),
-                        detailCourse.getCourse3(),
-                        detailCourse.getCourse4(),
-                        detailCourse.getCourse5(),
-                        detailCourse.getCourse6(),
-                        detailCourse.getCourse7(),
-                        detailCourse.getCourse8(),
-                        detailCourse.getCourse9(),
-                        detailCourse.getCourse10()
-                ).stream().filter(Objects::nonNull).collect(Collectors.toList()))
-                .fileUrl(detailCourse.getFileUrl())
-                .build())
-            .collect(Collectors.toList());
-  }
-  private void updateAirline(AirlineEntity airlineEntity, AirlineDTO airlineDTO) {
-    BeanUtils.copyProperties(airlineDTO, airlineEntity);
+  //put update관련 메서드
+  private void updateAirline(AirlineEntity airlineEntity, DiyAirlineDTO diyAirlineDTO) {
+    BeanUtils.copyProperties(diyAirlineDTO, airlineEntity);
     airlineRepository.save(airlineEntity);
   }
 
-  private void updateRoute(RouteEntity routeEntity, RouteDTO routeDTO) {
-    BeanUtils.copyProperties(routeDTO, routeEntity);
+  private void updateRoute(RouteEntity routeEntity, DiyRouteDTO diyRouteDTO) {
+    BeanUtils.copyProperties(diyRouteDTO, routeEntity);
     routeRepository.save(routeEntity);
   }
+  private void updateDiyEntity(DiyEntity diyEntity, DiyDTO diyDTO) {
+    BeanUtils.copyProperties(diyDTO, diyEntity);
+    diyRepository.save(diyEntity);
+  }
 
-  private void updateDetailCourses(RouteEntity routeEntity, List<DetailCourseDTO> detailCourseDTOs) {
-    if(detailCourseDTOs != null){
+  //patch update 관련 메서드
+  private void updatePartialAirline(AirlineEntity airlineEntity, DiyAirlineDTO diyAirlineDTO) {
+    if (diyAirlineDTO != null) {
+      if (diyAirlineDTO.getAirlineName() != null) {
+        airlineEntity.setAirlineName(diyAirlineDTO.getAirlineName());
+      }
+      if (diyAirlineDTO.getStartFlightNum() != null) {
+        airlineEntity.setStartFlightNum(diyAirlineDTO.getStartFlightNum());
+      }
+      if (diyAirlineDTO.getStartingPoint() != null) {
+        airlineEntity.setStartingPoint(diyAirlineDTO.getStartingPoint());
+      }
+      if (diyAirlineDTO.getDestination() != null) {
+        airlineEntity.setDestination(diyAirlineDTO.getDestination());
+      }
+      if (diyAirlineDTO.getBoardingDate() != null) {
+        airlineEntity.setBoardingDate(diyAirlineDTO.getBoardingDate());
+      }
+      if (diyAirlineDTO.getComeFlightNum() != null) {
+        airlineEntity.setComeFlightNum(diyAirlineDTO.getComeFlightNum());
+      }
+      if (diyAirlineDTO.getComingDate() != null) {
+        airlineEntity.setComingDate(diyAirlineDTO.getComingDate());
+      }
+      airlineRepository.save(airlineEntity);
+    }
+  }
+
+  private void updatePartialRoute(RouteEntity routeEntity, DiyRouteDTO diyRouteDTO) {
+    if (diyRouteDTO != null) {
+      if (diyRouteDTO.getStartDate() != null) {
+        routeEntity.setStartDate(diyRouteDTO.getStartDate());
+      }
+      if (diyRouteDTO.getLastDate() != null) {
+        routeEntity.setLastDate(diyRouteDTO.getLastDate());
+      }
+      routeRepository.save(routeEntity);
+    }
+  }
+
+  private void updatePartialCourse(RouteEntity routeEntity, List<DiyDetailCourseDTO> diyDetailCourseDTOS) {
+    if(diyDetailCourseDTOS != null){
       List<DetailCourseEntity> existingCourses = detailCourseRepository.findByRoute(routeEntity);
       Map<Long, DetailCourseEntity> existingCourseMap = existingCourses.stream()
               .collect(Collectors.toMap(DetailCourseEntity::getDetailCourseNum, Function.identity()));
 
-      for (DetailCourseDTO detailCourseDTO : detailCourseDTOs) {
-        if (detailCourseDTO.getDetailCourseNum() != null && existingCourseMap.containsKey(detailCourseDTO.getDetailCourseNum())) {
-          DetailCourseEntity existingCourse = existingCourseMap.get(detailCourseDTO.getDetailCourseNum());
-          updateDetailCourseEntity(existingCourse, detailCourseDTO);
+      for (DiyDetailCourseDTO diyDetailCourseDTO : diyDetailCourseDTOS) {
+        if (diyDetailCourseDTO.getDetailCourseNum() != null && existingCourseMap.containsKey(diyDetailCourseDTO.getDetailCourseNum())) {
+          DetailCourseEntity existingCourse = existingCourseMap.get(diyDetailCourseDTO.getDetailCourseNum());
+          updateDetailCourseEntity(existingCourse, diyDetailCourseDTO);
           detailCourseRepository.save(existingCourse);
-          existingCourseMap.remove(detailCourseDTO.getDetailCourseNum());
+          existingCourseMap.remove(diyDetailCourseDTO.getDetailCourseNum());
         } else {
           // 새로운 엔티티 추가
-          DetailCourseEntity newCourse = detailCourseDTO.toEntity(routeEntity);
+          DetailCourseEntity newCourse = diyDetailCourseDTO.toEntity(routeEntity);
           detailCourseRepository.save(newCourse);
         }
       }
@@ -214,66 +214,7 @@ public DiyEntity updateDiyPatch(Long packageNum, RequestDTO requestDTO) {
       }
     }
   }
-
-  private void updatePartialAirline(AirlineEntity airlineEntity, AirlineDTO airlineDTO) {
-    if (airlineDTO != null) {
-      if (airlineDTO.getAirlineName() != null) {
-        airlineEntity.setAirlineName(airlineDTO.getAirlineName());
-      }
-      if (airlineDTO.getStartFlightNum() != null) {
-        airlineEntity.setStartFlightNum(airlineDTO.getStartFlightNum());
-      }
-      if (airlineDTO.getStartingPoint() != null) {
-        airlineEntity.setStartingPoint(airlineDTO.getStartingPoint());
-      }
-      if (airlineDTO.getDestination() != null) {
-        airlineEntity.setDestination(airlineDTO.getDestination());
-      }
-      if (airlineDTO.getBoardingDate() != null) {
-        airlineEntity.setBoardingDate(airlineDTO.getBoardingDate());
-      }
-      if (airlineDTO.getComeFlightNum() != null) {
-        airlineEntity.setComeFlightNum(airlineDTO.getComeFlightNum());
-      }
-      if (airlineDTO.getComingDate() != null) {
-        airlineEntity.setComingDate(airlineDTO.getComingDate());
-      }
-      airlineRepository.save(airlineEntity);
-    }
-  }
-
-  private void updatePartialRoute(RouteEntity routeEntity, RouteDTO routeDTO) {
-    if (routeDTO != null) {
-      if (routeDTO.getStartDate() != null) {
-        routeEntity.setStartDate(routeDTO.getStartDate());
-      }
-      if (routeDTO.getLastDate() != null) {
-        routeEntity.setLastDate(routeDTO.getLastDate());
-      }
-      routeRepository.save(routeEntity);
-    }
-  }
-
-  private void updatePartialDiyEntity(DiyEntity diyEntity, PackageFormDTO packageFormDTO) {
-    if (packageFormDTO != null) {
-      if (packageFormDTO.getPackageName() != null) {
-        diyEntity.setPackageName(packageFormDTO.getPackageName());
-      }
-      if (packageFormDTO.getProfileImg() != null) {
-        diyEntity.setProfileImg(packageFormDTO.getProfileImg());
-      }
-      if (packageFormDTO.getShortDescription() != null) {
-        diyEntity.setShortDescription(packageFormDTO.getShortDescription());
-      }
-      diyRepository.save(diyEntity);
-    }
-  }
-
-  private void updateDiyEntity(DiyEntity diyEntity, PackageFormDTO packageFormDTO) {
-    BeanUtils.copyProperties(packageFormDTO, diyEntity);
-    diyRepository.save(diyEntity);
-  }
-  private void updateDetailCourseEntity(DetailCourseEntity entity, DetailCourseDTO dto) {
+  private void updateDetailCourseEntity(DetailCourseEntity entity, DiyDetailCourseDTO dto) {
     if (dto.getDayNum() != null) {
       entity.setDayNum(dto.getDayNum());
     }
@@ -294,4 +235,19 @@ public DiyEntity updateDiyPatch(Long packageNum, RequestDTO requestDTO) {
       entity.setFileUrl(dto.getFileUrl());
     }
   }
+  private void updatePartialDiyEntity(DiyEntity diyEntity, DiyDTO diyDTO) {
+    if (diyDTO != null) {
+      if (diyDTO.getPackageName() != null) {
+        diyEntity.setPackageName(diyDTO.getPackageName());
+      }
+      if (diyDTO.getProfileImg() != null) {
+        diyEntity.setProfileImg(diyDTO.getProfileImg());
+      }
+      if (diyDTO.getShortDescription() != null) {
+        diyEntity.setShortDescription(diyDTO.getShortDescription());
+      }
+      diyRepository.save(diyEntity);
+    }
+  }
+
 }

@@ -22,6 +22,7 @@ public class DiyController {
   @PostMapping
   public ResponseEntity<?> createDiy(@RequestBody RequestDTO requestDTO) {
     try{
+      //유저 관련 부분 추후 수정
       diyService.createDiy(requestDTO);
       return new ResponseEntity<>(HttpStatus.CREATED);
     }catch (RuntimeException e){
@@ -37,12 +38,18 @@ public class DiyController {
 
   //상세조회
   @GetMapping("/{package_num}")
-  public ResponseEntity<ResponseDTO> getDiyDetail(@PathVariable Long package_num) {
-    //로그인한 사용자 임시 하드코딩
-    Long currentUserNum = 3L;
-    ResponseDTO responseDTO = diyService.getDiyDetail(package_num, currentUserNum);
-    return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+  public ResponseEntity<?> getDiyDetail(@PathVariable Long package_num) {
+    try {
+      //로그인한 사용자 임시 하드코딩
+      Long currentUserNum = 3L;
+      ResponseDTO responseDTO = diyService.getDiyDetail(package_num, currentUserNum);
+      return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+    }
+    catch (RuntimeException e){
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
+
   //put방식
   @PutMapping("/{package_num}")
   //추후 수정 권한 검사 추가

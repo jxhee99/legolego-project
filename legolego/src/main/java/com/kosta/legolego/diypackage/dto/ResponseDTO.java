@@ -7,10 +7,10 @@ import java.util.List;
 @Builder
 @Data
 public class ResponseDTO {
-  private AirlineDTO airline;
-  private RouteDTO route;
-  private List<DetailCourseDTO> detailCourses;
-  private PackageFormDTO packageForm;
+  private DiyAirlineDTO airline;
+  private DiyRouteDTO route;
+  private List<DiyDetailCourseDTO> detailCourses;
+  private DiyDTO packageForm;
   private Long userNum;
   private int likedNum;
   private int viewNum;

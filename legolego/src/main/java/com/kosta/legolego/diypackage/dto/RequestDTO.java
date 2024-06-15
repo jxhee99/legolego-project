@@ -7,9 +7,9 @@ import java.util.List;
 
 @Data
 public class RequestDTO {
-  private AirlineDTO airline;
-  private RouteDTO route;
-  private List<DetailCourseDTO> detailCourses;
-  private PackageFormDTO packageForm;
+  private DiyAirlineDTO airline;
+  private DiyRouteDTO route;
+  private List<DiyDetailCourseDTO> detailCourses;
+  private DiyDTO packageForm;
   private Long userNum;
 }

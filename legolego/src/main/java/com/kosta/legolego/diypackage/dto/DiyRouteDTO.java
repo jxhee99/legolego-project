@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDate;
 
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RouteDTO {
+public class DiyRouteDTO {
   private Long routeNum;
   private LocalDate startDate;
   private LocalDate lastDate;
@@ -23,5 +24,10 @@ public class RouteDTO {
             .startDate(this.startDate)
             .lastDate(this.lastDate)
             .build();
+  }
+  public static DiyRouteDTO toRouteDTO(RouteEntity routeEntity) {
+    DiyRouteDTO diyRouteDTO = new DiyRouteDTO();
+    BeanUtils.copyProperties(routeEntity, diyRouteDTO);
+    return diyRouteDTO;
   }
 }

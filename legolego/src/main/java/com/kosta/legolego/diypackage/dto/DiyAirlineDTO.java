@@ -5,15 +5,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.BeanUtils;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AirlineDTO {
+public class DiyAirlineDTO {
   private Long airlineNum;
   private String airlineName;
   private String startingPoint;
@@ -35,4 +35,10 @@ public class AirlineDTO {
             .comingDate(this.comingDate)
             .build();
   }
+  public static DiyAirlineDTO toAirlineDTO(AirlineEntity airlineEntity) {
+    DiyAirlineDTO diyAirlineDTO = new DiyAirlineDTO();
+    BeanUtils.copyProperties(airlineEntity, diyAirlineDTO);
+    return diyAirlineDTO;
+  }
+
 }
