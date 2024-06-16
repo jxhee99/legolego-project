@@ -198,7 +198,9 @@ public class DiyService {
     }
   }
   private void updateDetailCourseEntity(DetailCourseEntity entity, DiyDetailCourseDTO dto) {
-    Optional.ofNullable(dto.getDayNum()).ifPresent(entity::setDayNum);
+    if (dto.getDayNum() != null) {
+      entity.setDayNum(dto.getDayNum());
+    }
 
     List<String> courses = dto.getCourses();
     //필드 갯수 만큼 코스 설정
@@ -208,7 +210,9 @@ public class DiyService {
         entity.setCourse(i + 1, courses.get(i));
       }
     }
-    Optional.ofNullable(dto.getFileUrl()).ifPresent(entity::setFileUrl);
+    if (dto.getFileUrl() != null) {
+      entity.setFileUrl(dto.getFileUrl());
+    }
   }
   private void updatePartialDiyEntity(DiyEntity diyEntity, DiyDTO diyDTO) {
     if (diyDTO != null) {

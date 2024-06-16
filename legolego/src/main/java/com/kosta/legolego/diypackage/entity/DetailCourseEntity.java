@@ -54,7 +54,7 @@ public class DetailCourseEntity {
   @Column(name = "course_10" ,length = 255)
   private String course10;
 
-  @Column(name = "file_url")
+  @Column(name = "file_url", nullable = false)
   private String fileUrl;
 
   @ManyToOne
