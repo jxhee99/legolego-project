@@ -3,6 +3,7 @@ package com.kosta.legolego.diypackage.controller;
 import com.kosta.legolego.diypackage.service.AirlineService;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +47,35 @@ public class AirlineController {
     result.put("returnData", returnDataArray);
 
     return result.toString(4); // 정렬된 JSON 문자열 반환
+  }
+
+  @GetMapping("/api/airport-code")
+  public String getAirportCode(@RequestParam String cityKor) {
+
+    //공항코드 가져오기
+    String airportCode = service.fetchAirportCode();
+
+    JSONObject jsonObject = XML.toJSONObject(airportCode);
+    JSONObject response = jsonObject.getJSONObject("response");
+    JSONObject body = response.getJSONObject("body");
+    JSONObject items = body.getJSONObject("items");
+    JSONArray itemArray = items.getJSONArray("item");
+
+    // itemArray 배열을 순회하여 cityKor 값이 일치하는 객체 찾기
+    for (int i = 0; i < itemArray.length(); i++) {
+      JSONObject item = itemArray.getJSONObject(i);
+      if (item.getString("cityKor").equals(cityKor)) {
+        String cityCode = item.getString("cityCode");
+        JSONObject result = new JSONObject();
+        result.put("cityCode", cityCode);
+        return result.toString();
+      }
+    }
+
+    // 일치하는 cityKor가 없을 경우 null 반환
+    JSONObject result = new JSONObject();
+    result.put("cityCode", JSONObject.NULL);
+    return result.toString();
   }
 
 }

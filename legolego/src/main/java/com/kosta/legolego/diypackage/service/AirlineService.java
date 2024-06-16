@@ -17,11 +17,12 @@ public class AirlineService {
   @Value("${service.api.key}")
   private String apiKey;
 
+  //항공스케줄 정보 조회
   public String fetchFlightData(String schDate, String schDeptCityCode, String schArrvCityCode) {
     StringBuffer result = new StringBuffer();
     try {
       String apiUrl = String.format(
-              "http://openapi.airport.co.kr/service/rest/FlightScheduleList/getIflightScheduleList?ServiceKey=%s&schDate=%s&schDeptCityCode=%s&schArrvCityCode=%s&pageNo=1",
+              "http://openapi.airport.co.kr/service/rest/FlightScheduleList/getIflightScheduleList?ServiceKey=%s&schDate=%s&schDeptCityCode=%s&schArrvCityCode=%s&pageNo=1&numOfRows=20",
               apiKey, schDate, schDeptCityCode, schArrvCityCode
       );
       URL url = new URL(apiUrl);
@@ -48,6 +49,7 @@ public class AirlineService {
     return result.toString();
   }
 
+  //필요한 정보만 반환
   public JSONArray parseAndExtractFlightData(String xmlData) {
     JSONArray extractedDataArray = new JSONArray();
     Set<String> uniqueFlights = new HashSet<>();
@@ -87,5 +89,29 @@ public class AirlineService {
       e.printStackTrace();
     }
     return extractedDataArray;
+  }
+
+  //공항코드 조회
+  public String fetchAirportCode() {
+    StringBuffer result = new StringBuffer();
+    try {
+      String apiUrl = String.format(
+              "http://openapi.airport.co.kr/service/rest/AirportCodeList/getAirportCodeList?ServiceKey=%s&numOfRows=1352",
+              apiKey
+      );
+      URL url = new URL(apiUrl);
+      HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+      urlConnection.connect();
+      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
+      String returnLine;
+      while ((returnLine = bufferedReader.readLine()) != null) {
+        result.append(returnLine);
+      }
+      bufferedReader.close();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return result.toString();
   }
 }
