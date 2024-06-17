@@ -66,8 +66,7 @@ public class DiyService {
   //상세조회
   public ResponseDTO getDiyDetail(Long packageNum, Long currentUserNum) {
     //조회수 증가
-
-   //주석을 풀어주세요!!!!!!!!!!! diyRepository.incrementViewNum(packageNum);
+    diyRepository.incrementViewNum(packageNum);
 
     //패키지 조회
     DiyPackage diyPackage = diyRepository.findById(packageNum)
