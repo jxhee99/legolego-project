@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/reviews")
 public class ReviewController {
 
-    @Autowired
-    ReviewService reviewService;
-
-    @PostMapping("/{order_num}")
-    public ResponseEntity<ReviewDto> createReview(@PathVariable("order_num") Long orderNum, @RequestBody ReviewDto reviewDto){
-        ReviewDto newReview = reviewService.createReview(orderNum, reviewDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newReview);
-    }
+//    @Autowired
+//    ReviewService reviewService;
+//
+//    @PostMapping("/{order_num}")
+//    public ResponseEntity<ReviewDto> createReview(@PathVariable("order_num") Long orderNum, @RequestBody ReviewDto reviewDto){
+//        ReviewDto newReview = reviewService.createReview(orderNum, reviewDto);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(newReview);
+//    }
 
 }
