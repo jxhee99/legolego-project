@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Table(name = "DIY_package")
@@ -32,17 +35,25 @@ public class DiyPackage {
     @Column(nullable = false)
     private Timestamp regDate;
 
-    @Column
+
+    @Column(nullable = true)
     private Timestamp modDate;
 
-    @Column(nullable = false)
+    @Column(name = "package_liked_num", nullable = true)
     private Integer packageLikedNum = 0;
 
-    @Column(nullable = false)
+    @Column(name = "package_view_num", nullable = true)
     private Integer packageViewNum = 0;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String shortDescription;
+
+    @Column(name = "package_approval", nullable = false)
+    private Boolean packageApproval = false;
+
+    @OneToMany(mappedBy = "diyPackage", cascade = CascadeType.ALL)
+    private List<DiyList> diyLists = new ArrayList<>();
+
 
 //    @ManyToOne
 //    @JoinColumn(name = "airline_num", nullable = false)
