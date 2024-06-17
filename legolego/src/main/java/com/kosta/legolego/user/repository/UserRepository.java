@@ -1,7 +1,13 @@
 package com.kosta.legolego.user.repository;
 
-import com.kosta.legolego.user.entity.User;
+import com.kosta.legolego.user.entity.SiteUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+
+import java.util.Optional;
+
+
+public interface UserRepository extends JpaRepository<SiteUser, String> {
+    Optional<SiteUser> findByUserEmail(String userEmail);
+
 }
