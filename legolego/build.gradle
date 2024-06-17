@@ -40,6 +40,7 @@ dependencies {
 	//	runtimeOnly 'com.mysql:mysql-connector-j'
 	//	implementation 'mysql:mysql-connector-java'
 
+
 	//login용 추가
 	//회원가입 확인용 타임리프
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
@@ -68,6 +69,10 @@ dependencies {
 	testImplementation 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
+
+
+	//json변환라이브러리
+	implementation group: 'org.json', name: 'json', version: '20240303'
 
 }
 
