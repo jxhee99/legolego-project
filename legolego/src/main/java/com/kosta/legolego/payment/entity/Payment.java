@@ -1,5 +1,6 @@
 package com.kosta.legolego.payment.entity;
 
+import com.kosta.legolego.orders.entity.Order;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,9 @@ public class Payment {
 
     @Column(name = "status", length = 20)
     private String status;
+
+    @ManyToOne
+    private Order order;
 
 //    @ManyToOne
 //    @JoinColumn(name = "product_num", nullable = false)

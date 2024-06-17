@@ -27,9 +27,9 @@ public class Product {
     @JoinColumn(name = "admin_num", nullable = false)
     private Admin admin;
 
-    @OneToOne
-    @PrimaryKeyJoinColumn(name = "package_num")
-    private DiyPackage diyPackage;
+//    @OneToOne
+//    @PrimaryKeyJoinColumn(name = "package_num")
+//    private DiyPackage diyPackage;
 
     // 상품 정보 필드
     @Column(name = "product_name", nullable = false, length = 255)
@@ -67,8 +67,8 @@ public class Product {
         if(!this.productNum.equals(productDto.getProductNum()))
             throw new IllegalArgumentException("상품 수정 실패! 잘못된 productNum 입력");
 
-        if(productDto.getProductName() != null)
-            this.productName = productDto.getProductName();
+//        if(productDto.getProductName() != null)
+//            this.productName = productDto.getProductName();
 
         if(productDto.getProductImage() != null)
             this.productImage = productDto.getProductImage();
