@@ -20,7 +20,7 @@ public class ProductService {
 //  상품 전체 조회
     public List<ProductDto> getAllProducts(){
         return productRepository.findAll().stream()
-                .map(ProductDto::createProductDto)
+                .map(ProductDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -28,20 +28,20 @@ public class ProductService {
     public ProductDto getProductById(Long productNum){
         Product product = productRepository.findById(productNum)
                 .orElseThrow(()-> new RuntimeException("상품을 찾을 수 없습니다."));
-        return ProductDto.createProductDto(product);
+        return ProductDto.fromEntity(product);
     }
 
 //    상품 검색
     public List<ProductDto> searchProducts(String keyword){
         return productRepository.findByProductNameContaining(keyword).stream()
-                .map(ProductDto::createProductDto)
+                .map(ProductDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
 //    관리자용 상품 전체 조회
 public List<ProductDto> getAllProductsForAdmin(){
         return productRepository.findAll().stream()
-                .map(ProductDto::createProductDto)
+                .map(ProductDto::fromEntity)
                 .collect(Collectors.toList());
 }
 
@@ -53,7 +53,7 @@ public List<ProductDto> getAllProductsForAdmin(){
 
         Product updatedProduct = productRepository.save(product);
 
-        return ProductDto.createProductDto(updatedProduct);
+        return ProductDto.fromEntity(updatedProduct);
     }
 
 //    관리자 상품 삭제

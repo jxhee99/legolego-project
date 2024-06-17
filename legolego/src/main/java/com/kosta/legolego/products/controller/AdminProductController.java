@@ -20,6 +20,9 @@ public class AdminProductController {
     @Autowired
     ProductService productService;
 
+
+//   상품 등록
+
 //  관리자 상품 전체 조회
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProductsForAdmin(){
@@ -50,4 +53,6 @@ public class AdminProductController {
     public void deleteProduct(@PathVariable("product_num") Long product_num){
         productService.deleteProduct(product_num);
     }
+
+
 }

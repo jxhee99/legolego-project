@@ -2,6 +2,7 @@ package com.kosta.legolego.products.entity;
 
 import com.kosta.legolego.admin.entity.Admin;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
+import com.kosta.legolego.orders.entity.Order;
 import com.kosta.legolego.products.dto.ProductDto;
 import com.kosta.legolego.user.entity.User;
 import jakarta.persistence.*;
@@ -9,6 +10,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,7 +25,15 @@ public class Product {
     @Column(name = "product_num")
     private Long productNum; // Spring Boot에서 Long으로 id를 선언하면서 bigint로 타입이 지정
 
-    // DIY 패키지 필드
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_num", nullable = false)
+    private Admin admin;
+
+    @OneToOne
+    @PrimaryKeyJoinColumn(name = "package_num")
+    private DiyPackage diyPackage;
+
+    // 상품 정보 필드
     @Column(name = "product_name", nullable = false, length = 255)
     private String productName;
 
@@ -45,17 +55,14 @@ public class Product {
     @Column(name = "wishlist_count")
     private int wishlistCount = 0;
 
-    @ManyToOne
-    @JoinColumn(name = "admin_num", nullable = false)
-    private Admin admin;
+//    패키지 엔티티에서 사용자와 관계가 설정되어 있기 때문에 직접 사용자와 관계 설정 x
+//    패키지 엔티티를 통해서 필요한 사용자의 정보를 가져오기
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "user_num", nullable = false)
+//    private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "package_num", nullable = false)
-    private DiyPackage diyPackage;
-
-    @ManyToOne
-    @JoinColumn(name = "user_num", nullable = false)
-    private User user;
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<Order> order;
 
 //    상품 수정 시 변경 할 수 있는 필드
     public void patch(ProductDto productDto){
