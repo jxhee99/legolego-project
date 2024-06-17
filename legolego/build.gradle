@@ -39,6 +39,8 @@ dependencies {
 	//	mysql
 	//	runtimeOnly 'com.mysql:mysql-connector-j'
 	//	implementation 'mysql:mysql-connector-java'
+	//json변환라이브러리
+	implementation group: 'org.json', name: 'json', version: '20240303'
 }
 
 tasks.withType(JavaCompile) {
