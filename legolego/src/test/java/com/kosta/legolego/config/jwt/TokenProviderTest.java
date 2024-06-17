@@ -2,7 +2,7 @@ package com.kosta.legolego.config.jwt;
 
 import com.kosta.legolego.user.config.jwt.JwtProperties;
 import com.kosta.legolego.user.config.jwt.TokenProvider;
-import com.kosta.legolego.user.entity.SiteUser;
+import com.kosta.legolego.user.entity.User;
 import com.kosta.legolego.user.repository.UserRepository;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
@@ -16,7 +16,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Duration;
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +38,7 @@ public class TokenProviderTest {
         // given : 토큰에 유저 정보를 추가하기 위한 테스트 유저를 만든다.
         String uniqueEmail = UUID.randomUUID().toString() + "@mail.com";
 
-        SiteUser testUser = userRepository.save(SiteUser.builder()
+        User testUser = userRepository.save(User.builder()
                 .userEmail(uniqueEmail)
                 .userPw("test")
                 .username("testUser")
@@ -116,9 +115,9 @@ public class TokenProviderTest {
         assertThat(((UserDetails) authentication.getPrincipal()).getUsername()).isEqualTo(userEmail);
     }
     // 테스트용 사용자 생성 메소드
-    private SiteUser createTestUser() {
+    private User createTestUser() {
         String uniqueEmail = UUID.randomUUID().toString() + "@mail.com";
-        return userRepository.save(SiteUser.builder()
+        return userRepository.save(User.builder()
                 .userEmail(uniqueEmail)
                 .userPw("test")
                 .username("testUser")
@@ -132,7 +131,7 @@ public class TokenProviderTest {
     @Test
     void getUserId() {
         // given : 토큰 제공자의 generateToken() 메소드를 호출해 토큰을 만든다.
-        SiteUser testUser = createTestUser();
+        User testUser = createTestUser();
         String token = tokenProvider.generateToken(testUser, Duration.ofDays(14));
 
         // when : 토큰 제공자의 getUserId() 메소드를 호출해 유저 ID를 반환받는다.

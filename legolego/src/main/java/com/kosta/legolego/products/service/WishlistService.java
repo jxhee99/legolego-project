@@ -6,7 +6,7 @@ import com.kosta.legolego.products.entity.Wishlist;
 import com.kosta.legolego.products.repository.ProductRepository;
 import com.kosta.legolego.products.repository.WishlistRepository;
 import com.kosta.legolego.user.entity.User;
-import com.kosta.legolego.user.repository.UserRepository2;
+import com.kosta.legolego.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +24,12 @@ public class WishlistService {
     ProductRepository productRepository;
 
     @Autowired
-    UserRepository2 userRepository2;
+    UserRepository userRepository;
 
     // 상품 찜 하기
     public void addToWishlist(Long userNum, Long productNum){
         // 1. 사용자와 상품을 엔티티로 조회
-        User user = userRepository2.findById(userNum)
+        User user = userRepository.findById(userNum)
                 .orElseThrow(()-> new RuntimeException("상품을 찾을 수 없습니다"));;
         Product product = productRepository.findById(productNum)
                 .orElseThrow(()-> new RuntimeException("상품을 찾을 수 없습니다"));

@@ -3,7 +3,7 @@ package com.kosta.legolego.user.service;
 
 import com.kosta.legolego.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import com.kosta.legolego.user.entity.SiteUser;
+import com.kosta.legolego.user.entity.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +14,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public SiteUser create(String userEmail, String userPw, String username, String userNickname, String userPhone) {
-        SiteUser user = new SiteUser();
+    public User create(String userEmail, String userPw, String userName, String userNickname, String userPhone) {
+        User user = new User();
         user.setUserEmail(userEmail);
         user.setUserPw(passwordEncoder.encode(userPw));
-        user.setUsername(username);
+        user.setUserName(userName);
         user.setUserNickname(userNickname);
         user.setUserPhone(userPhone);
-        user.setUserStatus(SiteUser.UserStatus.registered);
+        user.setUserStatus(User.UserStatus.registered);
 
         this.userRepository.save(user);
         return saveSiteUser(user); // saveSiteUser 메서드 호출하여 저장
@@ -30,16 +30,16 @@ public class UserService {
 
 
     // 새로 추가할 saveSiteUser 메서드
-    public SiteUser saveSiteUser(SiteUser siteUser) {
-        if (siteUser.getUserNickname() == null || siteUser.getUsername() == null || siteUser.getUserPhone() == null) {
-            throw new IllegalArgumentException("User nickname, username, and user phone must not be null");
+    public User saveSiteUser(User user) {
+        if (user.getUserNickname() == null || user.getUserName() == null || user.getUserPhone() == null) {
+            throw new IllegalArgumentException("User nickname, userName, and user phone must not be null");
         }
-        return userRepository.save(siteUser);
+        return userRepository.save(user);
     }
 
 
 
-    public SiteUser findByUserEmail(String userEmail) {
+    public User findByUserEmail(String userEmail) {
         return userRepository.findByUserEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Unexpected user"));
     }

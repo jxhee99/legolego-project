@@ -6,7 +6,7 @@ import com.kosta.legolego.config.jwt.JwtFactory;
 import com.kosta.legolego.user.config.jwt.JwtProperties;
 import com.kosta.legolego.user.dto.CreateAccessTokenRequest;
 import com.kosta.legolego.user.entity.RefreshToken;
-import com.kosta.legolego.user.entity.SiteUser;
+import com.kosta.legolego.user.entity.User;
 
 import com.kosta.legolego.user.repository.RefreshTokenRepository;
 import com.kosta.legolego.user.repository.UserRepository;
@@ -62,7 +62,7 @@ class TokenApiControllerTest {
         // given
         final String url = "/api/token";
 
-        SiteUser testUser = userRepository.save(SiteUser.builder()
+        User testUser = userRepository.save(User.builder()
                 .userEmail("user1@gmail.com")
                 .userPw("test")
                 .username("testUser")

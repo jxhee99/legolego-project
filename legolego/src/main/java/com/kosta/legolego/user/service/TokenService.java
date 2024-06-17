@@ -2,7 +2,7 @@ package com.kosta.legolego.user.service;
 
 
 import com.kosta.legolego.user.config.jwt.TokenProvider;
-import com.kosta.legolego.user.entity.SiteUser;
+import com.kosta.legolego.user.entity.User;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
@@ -24,8 +24,8 @@ public class TokenService {
         }
 
         String userEmail = refreshTokenService.findByRefreshToken(refreshToken).getUserEmail();
-        SiteUser siteUser = userService.findByUserEmail(userEmail);
+        User user = userService.findByUserEmail(userEmail);
 
-        return tokenProvider.generateToken(siteUser, Duration.ofHours(2));
+        return tokenProvider.generateToken(user, Duration.ofHours(2));
     }
 }

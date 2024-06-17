@@ -7,7 +7,7 @@ import com.kosta.legolego.orders.repository.OrderRepository;
 import com.kosta.legolego.products.entity.Product;
 import com.kosta.legolego.products.repository.ProductRepository;
 import com.kosta.legolego.user.entity.User;
-import com.kosta.legolego.user.repository.UserRepository2;
+import com.kosta.legolego.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,14 +26,14 @@ public class OrderService {
     ProductRepository productRepository;
 
     @Autowired
-    UserRepository2 userRepository2;
+    UserRepository userRepository;
 
 //    새로운 주문 생성
     public OrderDto createOrder(OrderDto orderDto){
         log.info("Creating order for userNum: {} and productNum: {}",
                 orderDto.getUserNum(), orderDto.getProductNum());
 
-        User user = userRepository2.findById(orderDto.getUserNum())
+        User user = userRepository.findById(orderDto.getUserNum())
                 .orElseThrow(()->new RuntimeException("일치하는 사용자를 찾을 수 없습니다."));
         Product product = productRepository.findById(orderDto.getProductNum())
                 .orElseThrow(()-> new RuntimeException("일치하는 상품을 찾을 수 없습니다."));
