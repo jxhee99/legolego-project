@@ -39,6 +39,36 @@ dependencies {
 	//	mysql
 	//	runtimeOnly 'com.mysql:mysql-connector-j'
 	//	implementation 'mysql:mysql-connector-java'
+
+	//login용 추가
+	//회원가입 확인용 타임리프
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+
+	//스프링시큐리티를 위한 스타터
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+
+	//스프링 시큐리티 테스트용 의존성
+	testImplementation 'org.springframework.security:spring-security-test'
+
+	//회원가입용 hibernate
+	implementation('org.hibernate.validator:hibernate-validator:6.1.2.Final')
+
+	//jpa용
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	//jwt용
+	implementation 'io.jsonwebtoken:jjwt:0.9.1' // 자바 JWT 라이브러리
+	implementation 'javax.xml.bind:jaxb-api:2.3.1' // XML 문서와 Java 객체 간 매핑 자동화
+
+	// lombok 테스트 라이브러리
+	testImplementation 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
+
 }
 
 tasks.withType(JavaCompile) {
