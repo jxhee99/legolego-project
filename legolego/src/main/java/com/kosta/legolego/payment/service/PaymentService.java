@@ -22,11 +22,6 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class PaymentService {
 
-//    private final IamportClient api;
-//
-//    public PaymentService(){
-//        this.api = new IamportClient("6556015464164602", "MEMrF1IW43bg0uC9bmNtbjcCnfOZHbq3tXwaJwbIruxkPqfiDwJ1RMIvaqKaO6Phd6u2EG1RHqmaN9OC");
-//    }
 
     @Value("${iamport.api.key}")
     private String apiKey;
