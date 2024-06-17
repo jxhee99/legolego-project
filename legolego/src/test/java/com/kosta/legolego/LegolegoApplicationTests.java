@@ -8,6 +8,7 @@ class LegolegoApplicationTests {
 
 	@Test
 	void contextLoads() {
+
 	}
 
 }

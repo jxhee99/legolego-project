@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Entity
 @Table(name = "DIY_package")
 @Getter
@@ -34,6 +35,7 @@ public class DiyPackage {
     @Column(nullable = false)
     private Timestamp regDate;
 
+
     @Column(nullable = true)
     private Timestamp modDate;
 
@@ -51,6 +53,7 @@ public class DiyPackage {
 
     @OneToMany(mappedBy = "diyPackage", cascade = CascadeType.ALL)
     private List<DiyList> diyLists = new ArrayList<>();
+
 
 //    @ManyToOne
 //    @JoinColumn(name = "airline_num", nullable = false)
