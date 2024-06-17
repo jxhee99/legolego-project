@@ -1,10 +1,8 @@
 package com.kosta.legolego.products.entity;
 
 import com.kosta.legolego.admin.entity.Admin;
-import com.kosta.legolego.diypackage.entity.DiyPackage;
 import com.kosta.legolego.orders.entity.Order;
 import com.kosta.legolego.products.dto.ProductDto;
-import com.kosta.legolego.user.entity.User;
 import jakarta.persistence.*;
         import lombok.*;
 
