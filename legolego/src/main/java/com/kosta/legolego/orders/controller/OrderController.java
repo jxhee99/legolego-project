@@ -36,6 +36,13 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    // merchantUid로 주문 정보 조회
+    @GetMapping("/merchant/{merchant_uid}")
+    public ResponseEntity<OrderDto> getOrderByMerchantUid(@PathVariable("merchant_uid") String merchantUid) {
+        OrderDto orderDto = orderService.getOrderByMerchantUid(merchantUid);
+        return ResponseEntity.status(HttpStatus.OK).body(orderDto);
+    }
+
 //    관리자 주문 조회
     @GetMapping("/admin")
     public ResponseEntity<List<OrderDto>> getAllOrders(){

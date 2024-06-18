@@ -29,7 +29,7 @@ public class Product {
     private Admin admin;
 
     @OneToOne
-    @PrimaryKeyJoinColumn(name = "package_num")
+    @JoinColumn(name = "package_num")
     private DiyPackage diyPackage;
 
     // 상품 정보 필드

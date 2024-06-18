@@ -21,6 +21,7 @@ configurations {
 
 repositories {
 	mavenCentral()
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -69,10 +70,12 @@ dependencies {
 	testImplementation 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
-
-
 	//json변환라이브러리
 	implementation group: 'org.json', name: 'json', version: '20240303'
+
+	// portone 라이브러리
+	implementation 'com.github.iamport:iamport-rest-client-java:0.1.6'
+
 
 }
 

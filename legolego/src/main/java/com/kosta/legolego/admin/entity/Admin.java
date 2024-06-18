@@ -26,7 +26,7 @@ public class Admin {
         @Column(name = "admin_name", nullable = false, length = 50)
         private String adminName;
 
-        @Column(name = "admin_aproval", nullable = false)
+        @Column(name = "admin_approval", nullable = false)
         private Boolean adminApproval = false;
     
 }

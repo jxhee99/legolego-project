@@ -1,5 +1,6 @@
 package com.kosta.legolego.products.dto;
 
+import com.kosta.legolego.diypackage.entity.DiyPackage;
 import com.kosta.legolego.products.entity.Product;
 import lombok.*;
 
@@ -11,10 +12,12 @@ import java.util.Date;
 @ToString
 @Getter
 @Setter
-public class ProductDto { // 상세 조회 시 필요한 모든 데이터
+public class ProductDto { // 조회 시 필요한 모든 데이터
+
     private Long productNum;
+    private DiyPackage diyPackage;
     private String productName; // = packageName
-    private String productImage;
+    private String productImage; // = diypackage img 필드
     private BigDecimal price;
     private Date recruitmentDeadline; // 모집 기간
     private Boolean recruitmentConfirmed; // 모집 확정 여부
@@ -27,8 +30,9 @@ public class ProductDto { // 상세 조회 시 필요한 모든 데이터
     public static ProductDto fromEntity(Product product){
         return new ProductDto(
                 product.getProductNum(),
+                product.getDiyPackage(),
                 product.getDiyPackage().getPackageName(),
-                product.getProductImage(),
+                product.getDiyPackage().getProfileImg(),
                 product.getPrice(),
                 product.getRecruitmentDeadline(),
                 product.getRecruitmentConfirmed(),

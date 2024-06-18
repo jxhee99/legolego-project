@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Entity
@@ -21,7 +22,13 @@ public class Payment {
     private Long paymentNum;
 
     @Column(name = "payment_date", nullable = false)
-    private Date paymentDate;
+    private Timestamp paymentDate;
+
+    @Column(name = "imp_uid")
+    private String impUid;
+
+    @Column(name = "merchant_uid", nullable = false)
+    private  String merchantUid;
 
     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
