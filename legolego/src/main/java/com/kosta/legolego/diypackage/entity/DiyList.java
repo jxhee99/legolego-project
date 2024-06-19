@@ -38,16 +38,18 @@ public class DiyList {
     @Column(name = "mod_date", nullable = true)
     private Timestamp modDate;
 
-    @Column(name = "is_offer_sent", nullable = false)
-    private Boolean isOfferSent = false;
+    @Column(name = "is_selected", nullable = false)
+    private Boolean isSelected = false; // 작성자 제안 수락 여부
+
+    @Column(name = "is_registered", nullable = false)
+    private Boolean isRegistered; // 관리자 상품 등록 여부
+
+    @Column(name = "product_num", nullable = true)
+    private Long ProductNum;
 
     @ManyToOne
     @JoinColumn(name = "package_num", nullable = false)
     @JsonIgnore
     private DiyPackage diyPackage;
 
-    // product 참조 추가
-    @OneToOne
-    @JoinColumn(name = "product_num", nullable = false)
-    private Product product;
 }
