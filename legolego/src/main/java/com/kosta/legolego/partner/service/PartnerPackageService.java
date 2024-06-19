@@ -2,6 +2,7 @@ package com.kosta.legolego.partner.service;
 
 import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
+import com.kosta.legolego.partner.dto.OfferFormDto;
 import com.kosta.legolego.partner.entity.Partner;
 import com.kosta.legolego.diypackage.entity.OverLikedList;
 import com.kosta.legolego.diypackage.repository.OverLikedListRepository;
@@ -10,6 +11,8 @@ import com.kosta.legolego.partner.repository.PartnerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,4 +50,21 @@ public class PartnerPackageService {
     return filteredOverLikedList;
 
   }
+  public DiyList submitOfferForm(OfferFormDto offerFormDto, Long partnerNum) {
+    //파트너Num으로 해당 파트너 조회
+    Partner partner = partnerRepository.findById(partnerNum)
+            .orElseThrow(() -> new NullPointerException("찾을 수 없는 파트너 번호"));
+
+    //OfferFormDto의 파트너 셋팅
+    offerFormDto.setPartner(partner);
+
+    //OfferFormDto를 엔티티로 변환
+    DiyList diyList = offerFormDto.toEntity(offerFormDto);
+
+    //등록시간 설정
+    Timestamp now = Timestamp.from(Instant.now());
+    diyList.setRegDate(now);
+
+    return partnerLikedListRepository.save(diyList);
+    }
 }

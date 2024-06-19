@@ -3,6 +3,7 @@ package com.kosta.legolego.partner.dto;
 import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.partner.entity.Partner;
 import com.kosta.legolego.user.entity.User;
+import com.kosta.legolego.diypackage.entity.DiyPackage;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -34,5 +35,19 @@ public class OfferFormDto {
         this.regDate = diyList.getRegDate();
         this.modDate = diyList.getModDate();
         this.user = diyList.getDiyPackage().getUser();
+    }
+
+    public static DiyList toEntity(OfferFormDto offerFormDto) {
+        DiyList diyList = new DiyList();
+        diyList.setPrice(offerFormDto.getPrice());
+        diyList.setNecessaryPeople(offerFormDto.getNecessaryPeople());
+        diyList.setSpecialBenefits(offerFormDto.getSpecialBenefits());
+        diyList.setPartner(offerFormDto.getPartner());
+        diyList.setIsRegistered(false);
+        DiyPackage diyPackage = new DiyPackage();
+        diyPackage.setPackageNum(offerFormDto.getPackageNum());
+        diyList.setDiyPackage(diyPackage);
+
+        return diyList;
     }
 }
