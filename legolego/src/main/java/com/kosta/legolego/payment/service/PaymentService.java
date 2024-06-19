@@ -65,7 +65,7 @@ public class PaymentService {
         return paymentData;
     }
 
-//    포트원 api 사용해서 엑세스 토큰 발급 받기
+    //    포트원 api 사용해서 엑세스 토큰 발급 받기
     public String getAccessToken(String apiKey, String apiSecret) throws Exception {
         String url = "https://api.iamport.kr/users/getToken"; // portone 토큰 발급 api 엔드포인트
 
@@ -97,7 +97,7 @@ public class PaymentService {
         return accessToken;
     }
 
-//    포트원 api 사용해서 결제 정보 조회
+    //    포트원 api 사용해서 결제 정보 조회
     public String getPaymentData(String impUid, String accessToken) throws Exception {
         String url = "https://api.iamport.kr/payments/" + impUid;
 

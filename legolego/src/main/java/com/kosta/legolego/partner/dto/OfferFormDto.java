@@ -17,7 +17,7 @@ public class OfferFormDto {
 
     private Long packageNum;
     private BigDecimal price;
-    private Integer necessaryPeople;
+    private Integer necessaryPeople; // 필수 인원
     private String specialBenefits;
     private Long listNum;
     private Timestamp regDate;

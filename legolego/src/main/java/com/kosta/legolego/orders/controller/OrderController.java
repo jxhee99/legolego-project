@@ -43,14 +43,14 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(orderDto);
     }
 
-//    관리자 주문 조회
+    //    관리자 주문 조회
     @GetMapping("/admin")
     public ResponseEntity<List<OrderDto>> getAllOrders(){
         List<OrderDto> orders = orderService.getAllOrders();
         return ResponseEntity.ok(orders);
     }
 
-//  사용자 주문 조회
+    //  사용자 주문 조회
     @GetMapping
     public ResponseEntity<List<OrderDto>> getUserOrders(@RequestParam("user_num") Long userNum){
         List<OrderDto> orders = orderService.getUserOrders(userNum);
@@ -59,14 +59,14 @@ public class OrderController {
 
     }
 
-//  사용자 주문 상세 조회
+    //  사용자 주문 상세 조회
     @GetMapping("/{order_num}")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable("order_num") Long orderNum){
         OrderDto orderDto = orderService.getOrderById(orderNum);
         return ResponseEntity.status(HttpStatus.OK).body(orderDto);
     }
 
-//  특정 주문 취소
+    //  특정 주문 취소
     @DeleteMapping("/{order_num}")
     public ResponseEntity<Void> deleteOrder(@PathVariable("order_num") Long orderNum){
         orderService.deleteOrder(orderNum);

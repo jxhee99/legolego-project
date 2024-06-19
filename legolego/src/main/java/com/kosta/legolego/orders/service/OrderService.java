@@ -39,7 +39,7 @@ public class OrderService {
         Product product = productRepository.findById(orderDto.getProductNum())
                 .orElseThrow(()-> new RuntimeException("일치하는 상품을 찾을 수 없습니다."));
 
-         Order order = OrderDto.toEntity(orderDto);
+        Order order = OrderDto.toEntity(orderDto);
         order.setUser(user);
         order.setProduct(product);
 
@@ -69,7 +69,7 @@ public class OrderService {
 
     }
 
-//    관리자 모든 주문 조회
+    //    관리자 모든 주문 조회
     public List<OrderDto> getAllOrders(){
         List<Order> orders = orderRepository.findAll();
         return orders.stream()
@@ -77,7 +77,7 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-//    사용자 주문 조회
+    //    사용자 주문 조회
     public List<OrderDto> getUserOrders(@RequestParam("user_num") Long userNum){
         List<Order> orders = orderRepository.findByUser_userNum(userNum);
         return orders.stream()
@@ -86,7 +86,7 @@ public class OrderService {
     }
 
 
-//    특정 주문 취소
+    //    특정 주문 취소
     public void deleteOrder(Long orderNum){
         orderRepository.deleteById(orderNum);
     }
