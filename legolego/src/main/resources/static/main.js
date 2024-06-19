@@ -10,9 +10,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 userEmail: "wngml2666@naver.com",
                 userPhone: "010-1111-1111",
                 productNum: 1, // 예시로 설정한 제품 ID (실제로는 적절한 값을 설정)
-                amount: 2, // 예시로 설정한 수량
-                price: 50, // 예시로 설정한 가격
-                totalPrice: amount * price // 예시로 설정한 총 가격
+                price: 100, // 예시로 설정한 가격
+                totalPrice: 100 // 예시로 설정한 총 가격
             }),
             contentType: 'application/json',
             success: function(response) {

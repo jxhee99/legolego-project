@@ -1,6 +1,7 @@
 package com.kosta.legolego.diypackage.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.kosta.legolego.products.entity.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,4 +45,9 @@ public class DiyList {
     @JoinColumn(name = "package_num", nullable = false)
     @JsonIgnore
     private DiyPackage diyPackage;
+
+    // product 참조 추가
+    @OneToOne
+    @JoinColumn(name = "product_num", nullable = false)
+    private Product product;
 }

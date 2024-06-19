@@ -1,6 +1,7 @@
 package com.kosta.legolego.products.entity;
 
 import com.kosta.legolego.admin.entity.Admin;
+import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
 import com.kosta.legolego.orders.entity.Order;
 import com.kosta.legolego.products.dto.ProductDto;
@@ -8,6 +9,7 @@ import jakarta.persistence.*;
         import lombok.*;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -28,9 +30,14 @@ public class Product {
     @JoinColumn(name = "admin_num", nullable = false)
     private Admin admin;
 
+//    @OneToOne
+//    @JoinColumn(name = "package_num")
+//    private DiyPackage diyPackage; // package list 로 가지고 오자
+
+    // 참조 변경
     @OneToOne
-    @JoinColumn(name = "package_num")
-    private DiyPackage diyPackage;
+    @JoinColumn(name = "list_num", nullable = false)
+    private DiyList diyList; // 가 참조하고 있는 DiyPackage가 참조하고 있는 User의 닉네임 가져오기
 
     // 상품 정보 필드
     @Column(name = "product_name", nullable = false, length = 255)
@@ -39,11 +46,14 @@ public class Product {
     @Column(name = "product_img", length = 255)
     private String productImage;
 
+    @Column(name = "reg_date", nullable = false)
+    private Timestamp regDate;
+
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price; // BigDecimal : 고정 소수점 숫자를 정확하게 표현할 수 있는 클래스
 
     @Column(name = "recruitment_deadline", nullable = false)
-    private Date recruitmentDeadline;
+    private Timestamp recruitmentDeadline;
 
     @Column(name = "recruitment_confirmed", nullable = false)
     private Boolean recruitmentConfirmed = false ;
