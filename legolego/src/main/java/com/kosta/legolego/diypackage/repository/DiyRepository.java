@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface DiyRepository extends JpaRepository<DiyPackage, Long> {
-//  @Modifying
-//  @Transactional
-//  @Query("UPDATE DiyEntity d SET d.packageViewNum = d.packageViewNum + 1 WHERE d.packageNum = :packageNum")
-//  void incrementViewNum(@Param("packageNum") Long packageNum);
+  @Modifying
+  @Transactional
+  @Query("UPDATE DiyPackage d SET d.packageViewNum = d.packageViewNum + 1 WHERE d.packageNum = :packageNum")
+  void incrementViewNum(@Param("packageNum") Long packageNum);
 }
