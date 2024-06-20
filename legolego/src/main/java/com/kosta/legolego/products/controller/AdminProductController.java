@@ -37,7 +37,7 @@ public class AdminProductController {
     }
 
 //  정식 상품 수정
-    @PatchMapping("/{product_num}")
+    @PatchMapping("/{product_num}/edit")
     public ResponseEntity<ProductDto> updateProductById(@PathVariable("product_num") Long product_num, @RequestBody ProductDto productDto){
         try {
             ProductDto updatedProduct = productService.updateProduct(product_num, productDto);
