@@ -52,7 +52,6 @@ public class ProductController {
     }
 
     // 사용자의 찜 목록 조회
-    // 사용자로 옮겨야 할 듯
     @GetMapping("/{user_num}/wishlist")
     private ResponseEntity<List<WishlistDto>> getWishlist(@RequestParam("user_num") Long user_num){
         List<WishlistDto> wishlist = wishlistService.getWishlistByUser(user_num);

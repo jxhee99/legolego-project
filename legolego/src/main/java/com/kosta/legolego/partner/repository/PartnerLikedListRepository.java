@@ -10,3 +10,4 @@ public interface PartnerLikedListRepository extends JpaRepository<DiyList, Long>
     List<DiyList> findByDiyPackage_PackageApprovalTrue();
     List<DiyList> findByPartner(Partner partner);
 }
+

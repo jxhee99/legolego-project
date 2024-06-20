@@ -32,7 +32,7 @@ public class Product {
 
 //    @OneToOne
 //    @JoinColumn(name = "package_num")
-//    private DiyPackage diyPackage; // package list 로 가지고 오자
+//    private DiyPackage diyPackage; // package list로 대신 가져오기
 
     // 참조 변경
     @OneToOne
@@ -53,16 +53,16 @@ public class Product {
     private BigDecimal price; // BigDecimal : 고정 소수점 숫자를 정확하게 표현할 수 있는 클래스
 
     @Column(name = "recruitment_deadline", nullable = false)
-    private Timestamp recruitmentDeadline;
+    private Timestamp recruitmentDeadline; // 모집 기간
 
     @Column(name = "recruitment_confirmed", nullable = false)
-    private Boolean recruitmentConfirmed = false ;
+    private Boolean recruitmentConfirmed = false ; // 모집 확정 여부
 
     @Column(name = "product_view_num")
-    private Integer productViewNum = 0;
+    private Integer productViewNum = 0; // 조회수
 
     @Column(name = "wishlist_count")
-    private int wishlistCount = 0;
+    private int wishlistCount = 0; // 좋아요 수
 
 //    패키지 엔티티에서 사용자와 관계가 설정되어 있기 때문에 직접 사용자와 관계 설정 x
 //    패키지 엔티티를 통해서 필요한 사용자의 정보를 가져오기
