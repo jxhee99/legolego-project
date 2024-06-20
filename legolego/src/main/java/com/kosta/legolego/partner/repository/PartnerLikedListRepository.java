@@ -9,5 +9,6 @@ import java.util.List;
 public interface PartnerLikedListRepository extends JpaRepository<DiyList, Long> {
     List<DiyList> findByDiyPackage_PackageApprovalTrue();
     List<DiyList> findByPartner(Partner partner);
+    List<DiyList> findByIsSelected(boolean isSelected);
 }
 

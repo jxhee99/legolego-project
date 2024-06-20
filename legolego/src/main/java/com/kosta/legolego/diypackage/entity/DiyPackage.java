@@ -49,8 +49,8 @@ public class DiyPackage {
   @Column(name = "package_approval", nullable = false)
   private Boolean packageApproval = false;
 
-  @OneToMany(mappedBy = "diyPackage", cascade = CascadeType.ALL)
-  private List<DiyList> diyLists = new ArrayList<>();
+//  @OneToMany(mappedBy = "diyPackage", cascade = CascadeType.ALL)
+//  private List<DiyList> diyLists = new ArrayList<>();
   
   //추후 조인
   @ManyToOne

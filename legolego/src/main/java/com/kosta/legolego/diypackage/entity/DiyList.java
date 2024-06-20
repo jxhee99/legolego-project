@@ -56,7 +56,7 @@ public class DiyList {
 
     @ManyToOne
     @JoinColumn(name = "package_num", nullable = false)
-    @JsonIgnore
+   // @JsonIgnore
     private DiyPackage diyPackage;
 
 }
