@@ -30,6 +30,9 @@ public class DiyService {
   @Autowired
   private UserRepository userRepository;
 
+  @Autowired
+  private OverLikedListRepository overLikedListRepository;
+
   //diy 생성
   public DiyPackage createDiy(RequestDTO requestDTO) {
     //airline, route, detailcourse dto를 엔티티로 변환 후 레파지토리에 저장
@@ -127,6 +130,8 @@ public class DiyService {
             .orElseThrow(() -> new NullPointerException("패키지를 찾을 수 없습니다"));
 
     List<DiyLikeEntity> diyLikes = diyLikeRepository.findByDiy(diyPackage);
+
+    overLikedListRepository.deleteByDiyPackage(diyPackage);
     diyLikeRepository.deleteAll(diyLikes);
     diyRepository.delete(diyPackage);
     airlineRepository.delete(diyPackage.getAirline());
