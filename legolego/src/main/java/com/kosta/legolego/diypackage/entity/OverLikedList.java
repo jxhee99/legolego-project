@@ -1,16 +1,14 @@
 package com.kosta.legolego.diypackage.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @Getter
 @Entity
+@Setter
 public class OverLikedList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

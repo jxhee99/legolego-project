@@ -1,6 +1,7 @@
 package com.kosta.legolego.partner.dto;
 
 import com.kosta.legolego.diypackage.entity.DiyList;
+import com.kosta.legolego.diypackage.entity.DiyPackage;
 import com.kosta.legolego.partner.entity.Partner;
 import com.kosta.legolego.user.entity.User;
 import lombok.*;
@@ -35,4 +36,5 @@ public class OfferFormDto {
         this.modDate = diyList.getModDate();
         this.user = diyList.getDiyPackage().getUser();
     }
+
 }
