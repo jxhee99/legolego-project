@@ -1,10 +1,7 @@
 package com.kosta.legolego.diypackage.dto;
 
 import com.kosta.legolego.diypackage.entity.RouteEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDate;

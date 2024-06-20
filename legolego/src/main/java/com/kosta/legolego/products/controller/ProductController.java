@@ -1,5 +1,6 @@
 package com.kosta.legolego.products.controller;
 
+import com.kosta.legolego.products.dto.ProductDetailDto;
 import com.kosta.legolego.products.dto.ProductDto;
 import com.kosta.legolego.products.dto.WishlistDto;
 import com.kosta.legolego.products.service.WishlistService;
@@ -32,9 +33,9 @@ public class ProductController {
 
 //  상품 상세 조회
     @GetMapping("/{product_num}")
-    public ResponseEntity<ProductDto> getProductById(@PathVariable("product_num") Long product_num){
-        ProductDto productDto = productService.getProductById(product_num);
-        return ResponseEntity.status(HttpStatus.OK).body(productDto);
+    public ResponseEntity<ProductDetailDto> getProductById(@PathVariable("product_num") Long productNum){
+        ProductDetailDto productDetailDto = productService.getProductByDetailId(productNum);
+        return ResponseEntity.status(HttpStatus.OK).body(productDetailDto);
     }
 
     //  상품 검색
@@ -53,7 +54,7 @@ public class ProductController {
 
     // 사용자의 찜 목록 조회
     @GetMapping("/{user_num}/wishlist")
-    private ResponseEntity<List<WishlistDto>> getWishlist(@RequestParam("user_num") Long user_num){
+    private ResponseEntity<List<WishlistDto>> getWishlist(@PathVariable("user_num") Long user_num){
         List<WishlistDto> wishlist = wishlistService.getWishlistByUser(user_num);
         return new ResponseEntity<>(wishlist, HttpStatus.OK);
     }

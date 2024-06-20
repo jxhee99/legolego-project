@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.module.ResolutionException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,13 +35,19 @@ public class WishlistService {
         Product product = productRepository.findById(productNum)
                 .orElseThrow(()-> new RuntimeException("상품을 찾을 수 없습니다"));
 
-        // 2. 찜하기 엔티티 생성 후 저장
+        // 2. 사용자 중복 찜 불가능(패키지 하나 - 유저 한 명)
+        Optional<Wishlist> existingWish = wishlistRepository.findByUser_userNumAndProduct_productNum(userNum, productNum);
+        if(existingWish.isPresent()) {
+            throw new RuntimeException("이미 찜한 상품입니다.");
+        }
+
+        // 3. 찜하기 엔티티 생성 후 저장
         Wishlist wishlist = new Wishlist();
         wishlist.setUser(user);
         wishlist.setProduct(product);
         wishlistRepository.save(wishlist);
 
-        // 3. 상품 테이블의 wishlist count 필드 업데이트
+        // 4. 상품 테이블의 wishlist count 필드 업데이트
         product.setWishlistCount(product.getWishlistCount() +1);
         productRepository.save(product);
     }

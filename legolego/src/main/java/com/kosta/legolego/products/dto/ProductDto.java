@@ -26,7 +26,7 @@ public class ProductDto { // 조회 시 필요한 모든 데이터
     private Boolean recruitmentConfirmed; // 모집 확정 여부
     private Integer productViewNum; // 조회수
     private Integer wishlistCount; // 찜 개수
-    private Long adminNum; // 디테일에서만 보이게 조정
+//    private Long adminNum; // 디테일에서만 보이게 조정
     private String userNickname; // 작성자 닉네임
 
     public static ProductDto fromEntity(Product product){
@@ -41,7 +41,7 @@ public class ProductDto { // 조회 시 필요한 모든 데이터
                 product.getRecruitmentConfirmed(),
                 product.getProductViewNum(),
                 product.getWishlistCount(),
-                product.getAdmin().getAdminNum(),
+//                product.getAdmin().getAdminNum(),
                 product.getDiyList().getDiyPackage().getUser().getUserNickname() // User
         );
     }

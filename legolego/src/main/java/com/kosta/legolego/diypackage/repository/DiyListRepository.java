@@ -5,6 +5,7 @@ import com.kosta.legolego.diypackage.entity.DiyPackage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DiyListRepository extends JpaRepository<DiyList, Long> {
 
@@ -19,5 +20,7 @@ public interface DiyListRepository extends JpaRepository<DiyList, Long> {
 
     // 선택되지 않은 다른 제안 패키지 조회
     List<DiyList> findAllByDiyPackage_packageNumAndIsSelected_Null(Long packageNum);
+
+    Optional<DiyList> findByProductNum(Long productNum);
 
 }
