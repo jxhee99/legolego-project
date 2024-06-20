@@ -18,10 +18,10 @@ public class AirlineController {
   @Autowired
   AirlineService service;
   @GetMapping("/api/airline")
-  public String getFlightSchedule(@RequestParam String schDate,
-                                  @RequestParam String returnDate,
-                                  @RequestParam String schDeptCityCode,
-                                  @RequestParam String schArrvCityCode) {
+  public String getFlightSchedule(@RequestParam("schDate") String schDate,
+                                  @RequestParam("returnDate") String returnDate,
+                                  @RequestParam("schDeptCityCode") String schDeptCityCode,
+                                  @RequestParam("schArrvCityCode") String schArrvCityCode) {
     // 가는 날 스케줄 데이터 가져오기
     String scheduleData = service.fetchFlightData(schDate, schDeptCityCode, schArrvCityCode);
     JSONArray startDataArray;
@@ -50,7 +50,7 @@ public class AirlineController {
   }
 
   @GetMapping("/api/airport-code")
-  public String getAirportCode(@RequestParam String cityKor) {
+  public String getAirportCode(@RequestParam("cityKor") String cityKor) {
 
     //공항코드 가져오기
     String airportCode = service.fetchAirportCode();

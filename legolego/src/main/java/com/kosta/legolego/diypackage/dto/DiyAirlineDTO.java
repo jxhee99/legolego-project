@@ -15,22 +15,24 @@ import java.time.LocalDateTime;
 @Builder
 public class DiyAirlineDTO {
   private Long airlineNum;
-  private String airlineName;
+  private String startAirlineName;
   private String startingPoint;
   private String destination;
   private String startFlightNum;
   private LocalDateTime boardingDate;
+  private String comeAirlineName;
   private String comeFlightNum;
   private LocalDateTime comingDate;
 
   public AirlineEntity toEntity() {
     return AirlineEntity.builder()
             .airlineNum(this.airlineNum)
-            .airlineName(this.airlineName)
+            .startAirlineName(this.startAirlineName)
             .startingPoint(this.startingPoint)
             .destination(this.destination)
             .startFlightNum(this.startFlightNum)
             .boardingDate(this.boardingDate)
+            .comeAirlineName(this.comeAirlineName)
             .comeFlightNum(this.comeFlightNum)
             .comingDate(this.comingDate)
             .build();

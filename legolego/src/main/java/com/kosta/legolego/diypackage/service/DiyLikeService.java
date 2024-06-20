@@ -3,8 +3,10 @@ package com.kosta.legolego.diypackage.service;
 import com.kosta.legolego.diypackage.dto.DiyLikeDTO;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
 import com.kosta.legolego.diypackage.entity.DiyLikeEntity;
+import com.kosta.legolego.diypackage.entity.OverLikedList;
 import com.kosta.legolego.diypackage.repository.DiyLikeRepository;
 import com.kosta.legolego.diypackage.repository.DiyRepository;
+import com.kosta.legolego.diypackage.repository.OverLikedListRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,9 @@ public class DiyLikeService {
 
   @Autowired
   private DiyLikeRepository diyLikeRepository;
+
+  @Autowired
+  private OverLikedListRepository overLikedListRepository;
 
   @Transactional
   public DiyLikeEntity diyLike(DiyLikeDTO diyLikeDTO) {
@@ -44,6 +49,14 @@ public class DiyLikeService {
     //저장
     diyRepository.save(diyPackage);
     diyLikeRepository.save(diyLikeEntity);
+
+    // 좋아요 수가 25에 도달했을 경우 OverLikedList에 추가,  테스트용으로 2개로 설정
+    if (diyPackage.getPackageLikedNum() == 2) {
+      OverLikedList overLikedList = new OverLikedList();
+      overLikedList.setDiyPackage(diyPackage);
+      overLikedListRepository.save(overLikedList);
+
+    }
 
     return diyLikeEntity;
   }

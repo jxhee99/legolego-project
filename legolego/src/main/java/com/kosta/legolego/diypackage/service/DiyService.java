@@ -30,6 +30,9 @@ public class DiyService {
   @Autowired
   private UserRepository userRepository;
 
+  @Autowired
+  private OverLikedListRepository overLikedListRepository;
+
   //diy 생성
   public DiyPackage createDiy(RequestDTO requestDTO) {
     //airline, route, detailcourse dto를 엔티티로 변환 후 레파지토리에 저장
@@ -66,8 +69,7 @@ public class DiyService {
   //상세조회
   public ResponseDTO getDiyDetail(Long packageNum, Long currentUserNum) {
     //조회수 증가
-
-   //주석을 풀어주세요!!!!!!!!!!! diyRepository.incrementViewNum(packageNum);
+    diyRepository.incrementViewNum(packageNum);
 
     //패키지 조회
     DiyPackage diyPackage = diyRepository.findById(packageNum)
@@ -128,6 +130,8 @@ public class DiyService {
             .orElseThrow(() -> new NullPointerException("패키지를 찾을 수 없습니다"));
 
     List<DiyLikeEntity> diyLikes = diyLikeRepository.findByDiy(diyPackage);
+
+    overLikedListRepository.deleteByDiyPackage(diyPackage);
     diyLikeRepository.deleteAll(diyLikes);
     diyRepository.delete(diyPackage);
     airlineRepository.delete(diyPackage.getAirline());
@@ -161,11 +165,12 @@ public class DiyService {
   //patch update 관련 메서드
   private void updatePartialAirline(AirlineEntity airlineEntity, DiyAirlineDTO diyAirlineDTO) {
     if (diyAirlineDTO != null) {
-      Optional.ofNullable(diyAirlineDTO.getAirlineName()).ifPresent(airlineEntity::setAirlineName);
+      Optional.ofNullable(diyAirlineDTO.getStartAirlineName()).ifPresent(airlineEntity::setStartAirlineName);
       Optional.ofNullable(diyAirlineDTO.getStartFlightNum()).ifPresent(airlineEntity::setStartFlightNum);
       Optional.ofNullable(diyAirlineDTO.getStartingPoint()).ifPresent(airlineEntity::setStartingPoint);
       Optional.ofNullable(diyAirlineDTO.getDestination()).ifPresent(airlineEntity::setDestination);
       Optional.ofNullable(diyAirlineDTO.getBoardingDate()).ifPresent(airlineEntity::setBoardingDate);
+      Optional.ofNullable(diyAirlineDTO.getComeAirlineName()).ifPresent(airlineEntity::setComeAirlineName);
       Optional.ofNullable(diyAirlineDTO.getComeFlightNum()).ifPresent(airlineEntity::setComeFlightNum);
       Optional.ofNullable(diyAirlineDTO.getComingDate()).ifPresent(airlineEntity::setComingDate);
 

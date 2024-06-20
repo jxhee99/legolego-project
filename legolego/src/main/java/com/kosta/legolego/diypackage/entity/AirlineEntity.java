@@ -21,8 +21,8 @@ public class AirlineEntity {
   @Column(name = "airline_num")
   private Long airlineNum;
 
-  @Column(name = "airline_name", nullable = false, length = 50)
-  private String airlineName;
+  @Column(name = "start_airline_name", nullable = false, length = 50)
+  private String startAirlineName;
 
   @Column(name = "starting_point", nullable = false, length = 50)
   private String startingPoint;
@@ -35,6 +35,9 @@ public class AirlineEntity {
 
   @Column(name = "boarding_date", nullable = false)
   private LocalDateTime boardingDate;
+
+  @Column(name = "come_airline_name", nullable = false, length = 50)
+  private String comeAirlineName;
 
   @Column(name = "come_flight_num", nullable = false, length = 20)
   private String comeFlightNum;
