@@ -12,4 +12,7 @@ public interface DiyLikeRepository extends JpaRepository<DiyLikeEntity, Long> {
   boolean existsByUserNumAndDiy(Long userNum, DiyPackage diy);
 
   List<DiyLikeEntity> findByDiy(DiyPackage diy);
+
+  // 사용자가 응원하기 버튼 누른 게시물 리스트 확인
+  List<DiyLikeEntity> findByUserNum(Long userNum);
 }
