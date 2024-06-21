@@ -43,7 +43,6 @@ public class User {
         private User.UserStatus userStatus = UserStatus.registered;
 
 
-
         @Builder
         public User(String userEmail, String userPw, String userName, String userNickname, String userPhone) {
                 this.userEmail = userEmail;

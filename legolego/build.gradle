@@ -74,6 +74,17 @@ dependencies {
 	//json변환라이브러리
 	implementation group: 'org.json', name: 'json', version: '20240303'
 
+	//메일 송신용
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'com.sun.mail:jakarta.mail:2.0.1'
+
+	//비밀번호 재설정용
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	//이메일 validation용
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+
 }
 
 tasks.withType(JavaCompile) {
@@ -83,3 +94,13 @@ tasks.withType(JavaCompile) {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+
+// 이메일찾기 할때 사용
+	apply plugin: 'java'
+
+	// 컴파일 옵션 설정
+	compileJava {
+		options.compilerArgs += ["-parameters"]
+	}
+
