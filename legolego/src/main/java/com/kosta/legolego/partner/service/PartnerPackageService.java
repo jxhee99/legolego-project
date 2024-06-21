@@ -31,20 +31,18 @@ public class PartnerPackageService {
   public List<OverLikedList> getOverLikedList(Long partnerNum){
     // Partner 엔티티 조회
     Partner partner = partnerRepository.findById(partnerNum)
-            .orElseThrow(() -> new NullPointerException("찾을 수 없는 파트너 번호"));
+            .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 파트너 번호: " + partnerNum));
 
-    //모든 항목을 조회
-    List <OverLikedList> overLikedListAll = overLikedListRepository.findAll();
+    // 파트너와 관련된 DiyPackage들 조회
+    Set<DiyPackage> diyPackages = findDiyPackagesForPartner(partner);
 
-    //DiyList 테이블에서 partner가 일치하는 항목 조회
-    List<DiyList> diyListForPartner = partnerLikedListRepository.findByPartner(partner);
+    // isSelected가 true인 DiyPackage들 조회
+    Set<DiyPackage> selectedPackages = findSelectedDiyPackages();
 
-    //DiyList 항목의 package 목록 추출
-    Set<DiyPackage> diyPackages = diyListForPartner.stream().map(DiyList::getDiyPackage).collect(Collectors.toSet());
-
-    //overLikedListAll에서 DiyList의 packageNum과 일치하지 않는 항목 필터링
-    List<OverLikedList> filteredOverLikedList = overLikedListAll.stream()
-            .filter(overLiked -> !diyPackages.contains(overLiked.getDiyPackage()))
+    // OverLikedList 필터링
+    List<OverLikedList> filteredOverLikedList = overLikedListRepository.findAll().stream()
+            .filter(overLikedList -> !diyPackages.contains(overLikedList.getDiyPackage()))
+            .filter(overLikedList -> !selectedPackages.contains(overLikedList.getDiyPackage()))
             .collect(Collectors.toList());
 
     return filteredOverLikedList;
@@ -53,7 +51,7 @@ public class PartnerPackageService {
   public DiyList submitOfferForm(OfferFormDto offerFormDto, Long partnerNum) {
     //파트너Num으로 해당 파트너 조회
     Partner partner = partnerRepository.findById(partnerNum)
-            .orElseThrow(() -> new NullPointerException("찾을 수 없는 파트너 번호"));
+            .orElseThrow(() ->  new IllegalArgumentException("찾을 수 없는 파트너 번호: " + partnerNum));
 
     //OfferFormDto의 파트너 셋팅
     offerFormDto.setPartner(partner);
@@ -67,4 +65,21 @@ public class PartnerPackageService {
 
     return partnerLikedListRepository.save(diyList);
     }
+
+  // 파트너와 관련된 DiyPackage들 조회
+  private Set<DiyPackage> findDiyPackagesForPartner(Partner partner) {
+    List<DiyList> diyListForPartner = partnerLikedListRepository.findByPartner(partner);
+    return diyListForPartner.stream()
+            .map(DiyList::getDiyPackage)
+            .collect(Collectors.toSet());
+  }
+
+  // isSelected가 true인 DiyPackage들 조회
+  private Set<DiyPackage> findSelectedDiyPackages() {
+    List<DiyList> selectedDiyList = partnerLikedListRepository.findByIsSelected(true);
+    return selectedDiyList.stream()
+            .map(DiyList::getDiyPackage)
+            .collect(Collectors.toSet());
+  }
+
 }
