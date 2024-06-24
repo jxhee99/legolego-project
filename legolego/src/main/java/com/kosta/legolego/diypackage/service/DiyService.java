@@ -224,8 +224,8 @@ public class DiyService {
         entity.setCourse(i + 1, courses.get(i));
       }
     }
-    if (dto.getFileUrl() != null) {
-      entity.setFileUrl(dto.getFileUrl());
+    if (dto.getFileUrls() != null) {
+      entity.setFileUrls(dto.getFileUrls());
     }
   }
   private void updatePartialDiyEntity(DiyPackage diyPackage, DiyDTO diyDTO) {

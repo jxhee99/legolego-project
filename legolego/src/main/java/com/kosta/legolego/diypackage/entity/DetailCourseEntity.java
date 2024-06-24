@@ -1,5 +1,6 @@
 package com.kosta.legolego.diypackage.entity;
 
+import com.kosta.legolego.image.entity.Image;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @Builder
 @NoArgsConstructor
@@ -54,8 +56,9 @@ public class DetailCourseEntity {
   @Column(name = "course_10" ,length = 255)
   private String course10;
 
+  @OneToMany(mappedBy = "detailCourse")
   @Column(name = "file_url", nullable = false)
-  private String fileUrl;
+  private List<Image> fileUrls; // 이미지 리스트로 받아오기
 
   @ManyToOne
   @JoinColumn(name = "route_num", nullable = false)
