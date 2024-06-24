@@ -26,12 +26,13 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-//	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	implementation 'org.mariadb.jdbc:mariadb-java-client:3.4.0'
@@ -50,11 +51,11 @@ dependencies {
 
 
 	//스프링시큐리티를 위한 스타터
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+//	implementation 'org.springframework.boot:spring-boot-starter-security'
 
 
 	//스프링 시큐리티 테스트용 의존성
-	testImplementation 'org.springframework.security:spring-security-test'
+//	testImplementation 'org.springframework.security:spring-security-test'
 
 	//회원가입용 hibernate
 	implementation('org.hibernate.validator:hibernate-validator:6.1.2.Final')
@@ -76,6 +77,14 @@ dependencies {
 	// portone 라이브러리
 	implementation 'com.github.iamport:iamport-rest-client-java:0.1.6'
 
+	// Servlet API 제공
+	implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
+
+	// 비밀번호 재설정 시 이메일 전송
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	// Redis 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 }
 
@@ -83,6 +92,10 @@ tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 }
 
-tasks.named('test') {
+//tasks.named('test') {
+//	useJUnitPlatform()
+//}
+
+test {
 	useJUnitPlatform()
 }
