@@ -1,5 +1,6 @@
 package com.kosta.legolego.payment.service;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +22,7 @@ import org.springframework.http.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -156,11 +158,28 @@ public class PaymentService {
     }
 
     // 환불 처리
-    public  void refundWithToken(String token, String orderNumber, String reason) throws Exception{
-        String url = "http://api.import.kr/payments/cancel";
+    public void processRefund(Order order, String reason) throws Exception{
+        log.info("환불처리 시작 - 주문 번호 : {}, 이유 : {}", order.getOrderNum(), reason);
+        Optional<Payment> paymentOptional = paymentRepository.findByOrder(order);
+        if(paymentOptional.isPresent()) {
+            Payment payment = paymentOptional.get();
+            log.info("결제 정보 조회 성공 - merchantUid() : {}", payment.getMerchantUid());
+            String token = getAccessToken(apiKey, apiSecret);
+            log.info("토큰 발급 성공 - Token() : {}", token);
+            refundWithToken(token, payment.getMerchantUid(), reason);
+        } else {
+            log.error("결제 정보를 찾을 수 없습니다.");
+            throw new RuntimeException("결제 정보를 찾을 수 없습니다.");
+        }
+    }
+
+    // 환불 요청
+    public  void refundWithToken(String token, String merchantUid, String reason) throws Exception{
+        String url = "https://api.iamport.kr/payments/cancel";
 
         // 요청 본문 생성
-        String requestJson = new ObjectMapper().writeValueAsString(new RefundRequest(orderNumber, reason));
+        String requestJson = new ObjectMapper().writeValueAsString(new RefundRequest(merchantUid, reason));
+        log.info("환불 요청 본문 - Request Json : {}", requestJson);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -168,7 +187,17 @@ public class PaymentService {
 
         HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
 
-        restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        log.info("환불 요청 응답 - Response : {}", response);
+
+        JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
+        if(!rootNode.path("code").asText().equals("0")) {
+            log.error("환불 요청 실패 - Response : {}", response.getBody());
+            throw new RuntimeException("환불 요청에 실패했습니다.");
+        }
+
+        log.info("환불 요청 성공 - MerchantUid() : {}",merchantUid);
+
     }
 
 
@@ -187,12 +216,15 @@ public class PaymentService {
         }
     }
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private static class RefundRequest {
-        private String merchant_uid;
+        @JsonProperty("merchant_uid")
+        private String merchantUid;
+        @JsonProperty("reason")
         private String reason;
 
         public RefundRequest(String merchantUid, String reason){
-            this.merchant_uid = merchantUid;
+            this.merchantUid = merchantUid;
             this.reason = reason;
         }
     }

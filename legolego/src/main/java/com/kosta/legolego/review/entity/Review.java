@@ -1,11 +1,13 @@
 package com.kosta.legolego.review.entity;
 
+import com.kosta.legolego.orders.entity.Order;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Entity
@@ -24,12 +26,15 @@ public class Review {
     private String content;
 
     @Column(name = "create_date", nullable = false)
-    private Date createdData;
+    private Timestamp createdDate;
 
     @Column(name = "rating", nullable = false)
     private Integer rating;
 
-//    @ManyToOne
-//    @JoinColumn(name = "board_num", nullable = false)
-//    private PreTripBoard preTripBoard;
+    @ManyToOne
+    @JoinColumn(name = "board_num", nullable = true)
+    private PreTripBoard preTripBoard;
+
+    @OneToOne(mappedBy = "review", fetch = FetchType.LAZY)
+    private Order order;
 }

@@ -20,7 +20,7 @@ public class OrderDto {
     private String userPhone;
     private Long productNum;
     private BigDecimal price; // 가격
-    private int amount; // 수량
+    private int quantity; // 수량
     private BigDecimal totalPrice; // 가격과 수량을 곱한 값
     private String merchantUid;
 
@@ -35,7 +35,7 @@ public class OrderDto {
                 order.getUser().getUserPhone(),
                 order.getProduct().getProductNum(),
                 order.getProduct().getPrice(),
-                order.getAmount(),
+                order.getQuantity(),
                 order.getTotalPrice(),
                 order.getMerchantUid()
         );
@@ -45,7 +45,7 @@ public class OrderDto {
         Order order = new Order();
         User user = new User();
         order.setOrderNum(orderDto.getOrderNum());
-        order.setAmount(orderDto.getAmount());
+        order.setQuantity(orderDto.getQuantity());
         order.setTotalPrice(orderDto.getTotalPrice());
         order.setMerchantUid(orderDto.getMerchantUid());
         return order;

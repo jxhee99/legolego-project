@@ -4,7 +4,6 @@ import com.kosta.legolego.diypackage.dto.DiyAirlineDTO;
 import com.kosta.legolego.diypackage.dto.DiyDetailCourseDTO;
 import com.kosta.legolego.diypackage.dto.DiyRouteDTO;
 import com.kosta.legolego.diypackage.entity.DiyList;
-import com.kosta.legolego.products.entity.Product;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

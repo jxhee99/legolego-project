@@ -5,6 +5,7 @@ import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
 import com.kosta.legolego.orders.entity.Order;
 import com.kosta.legolego.products.dto.ProductDto;
+import com.kosta.legolego.review.entity.PreTripBoard;
 import jakarta.persistence.*;
         import lombok.*;
 
@@ -55,6 +56,9 @@ public class Product {
     @Column(name = "recruitment_deadline", nullable = false)
     private Timestamp recruitmentDeadline; // 모집 기간
 
+    @Column(name = "necessary_people", nullable = false)
+    private int necessaryPeople; // 모집 인원
+
     @Column(name = "recruitment_confirmed", nullable = false)
     private Boolean recruitmentConfirmed = false ; // 모집 확정 여부
 
@@ -72,6 +76,10 @@ public class Product {
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<Order> order;
+
+    // 지난여행게시판 관계 추가
+    @OneToOne(mappedBy = "product")
+    private PreTripBoard preTripBoard;
 
 //    상품 수정 시 변경 할 수 있는 필드
     public void patch(ProductDto productDto){

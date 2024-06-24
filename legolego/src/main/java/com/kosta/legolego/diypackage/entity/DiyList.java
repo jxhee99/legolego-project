@@ -26,11 +26,11 @@ public class DiyList {
     @Column(name = "list_num")
     private Long listNum;
 
-    @Column(name = "price", nullable = true)
+    @Column(name = "price", nullable = true, precision = 10, scale = 2) // 수정
     private BigDecimal price;
 
     @Column(name = "necessary_people", nullable = true)
-    private Integer necessaryPeople = 0;
+    private Integer necessaryPeople;
 
     @Column(name = "special_benefits", nullable = true)
     private String specialBenefits;

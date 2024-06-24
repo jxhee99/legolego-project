@@ -28,18 +28,19 @@ public class Payment {
     private String impUid;
 
     @Column(name = "merchant_uid", nullable = false)
-    private  String merchantUid;
+    private  String merchantUid; // 주문 테이블에서 가져오는 주문 고유 번호
 
     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
-    private BigDecimal amount;
+    private BigDecimal amount; // 총 가격
 
     @Column(name = "payment_method", nullable = false, length = 50)
-    private String paymentMethod;
+    private String paymentMethod; // 결제 방법
 
     @Column(name = "status", length = 20)
-    private String status;
+    private String status; // 결제 상태
 
     @ManyToOne
+    @JoinColumn(name = "order_num")
     private Order order;
 
 //    @ManyToOne

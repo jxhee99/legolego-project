@@ -107,6 +107,7 @@ public class DiyListService {
             product.setRecruitmentDeadline(timestamp); // 입력받은 recruitmentDeadline를 product recruitmentDeadline에 삽입
             product.setRegDate(new Timestamp(System.currentTimeMillis()));
             product.setPrice(diyList.getPrice());
+            product.setNecessaryPeople(diyList.getNecessaryPeople());
             product.setProductName(diyList.getDiyPackage().getPackageName());
             product.setProductImage(diyList.getDiyPackage().getProfileImg());
             product.setAdmin(admin);

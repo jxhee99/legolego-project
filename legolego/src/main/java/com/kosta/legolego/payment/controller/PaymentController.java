@@ -78,6 +78,7 @@ public class PaymentController {
         }
     }
 
+    //  결제 정보 검증
     @PostMapping("/validation/{imp_uid}")
     public ResponseEntity<String> validatePayment(@RequestBody PaymentRequestDto paymentRequestDto){
         try {
