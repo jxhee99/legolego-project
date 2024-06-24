@@ -17,4 +17,5 @@ public class PaymentDto {
     private String paymentMethod;
     private String status;
     private Long productNum;
+    private Long orderNum;
 }

@@ -12,9 +12,13 @@ import com.kosta.legolego.products.dto.ProductDetailInfo;
 import com.kosta.legolego.products.dto.ProductDto;
 import com.kosta.legolego.products.entity.Product;
 import com.kosta.legolego.products.repository.ProductRepository;
+import com.kosta.legolego.review.entity.PreTripBoard;
+import com.kosta.legolego.review.repository.PreTripBoardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +37,9 @@ public class ProductService {
 
     @Autowired
     AdminRepository adminRepository;
+
+    @Autowired
+    PreTripBoardRepository preTripBoardRepository;
 
 
 //  상품 전체 조회
@@ -103,6 +110,22 @@ public ProductDto updateProduct(Long productNum, ProductDto productDto, Long adm
           throw new IllegalArgumentException("상품 삭제 실패! 대상 상품이 없습니다.");
       }
       productRepository.deleteById(productNum);
+    }
+
+    // 지난 여행 게시판으로 이동
+    @Transactional
+    public void moveConfirmedProductsToPreTripBoard() {
+        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+
+        List<Product> products = productRepository.findByConfirmedAndBoardingDateBefore(currentTimestamp);
+
+        for(Product product : products) {
+            PreTripBoard preTripBoard = new PreTripBoard();
+
+            preTripBoard.setProduct(product);
+
+            preTripBoardRepository.save(preTripBoard);
+        }
     }
 
 }

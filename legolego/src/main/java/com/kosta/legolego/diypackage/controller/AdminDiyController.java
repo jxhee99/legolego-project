@@ -15,7 +15,7 @@ public class AdminDiyController {
   @Autowired
   DiyService diyService;
   @DeleteMapping("/{package_num}")
-  public ResponseEntity<Void> deleteDiy(@PathVariable Long package_num) {
+  public ResponseEntity<Void> deleteDiy(@PathVariable("package_num") Long package_num) {
     //관리자인지 권한 검사 추후 추가 예정
     diyService.deleteDiy(package_num);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
