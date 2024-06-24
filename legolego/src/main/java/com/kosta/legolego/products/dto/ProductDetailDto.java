@@ -28,6 +28,7 @@ public class ProductDetailDto {
     private BigDecimal price;
     private Timestamp regDate; // 등록일
     private Timestamp recruitmentDeadline;  // 모집 마감일
+    private int necessaryPeople; // 모집 인원
     private Boolean recruitmentConfirmed; // 모집 확정 여부
     private Integer productViewNum; // 조회수
     private Integer wishlistCount; // 찜 개수
@@ -48,6 +49,7 @@ public class ProductDetailDto {
                 .price(product.getPrice())
                 .regDate(product.getRegDate())
                 .recruitmentDeadline(product.getRecruitmentDeadline())
+                .necessaryPeople(product.getNecessaryPeople())
                 .recruitmentConfirmed(product.getRecruitmentConfirmed())
                 .wishlistCount(product.getWishlistCount())
                 .productViewNum(product.getProductViewNum())

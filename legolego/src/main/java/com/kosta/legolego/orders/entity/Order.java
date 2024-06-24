@@ -34,14 +34,16 @@ public class Order {
     @JoinColumn(name = "product_num", nullable = false)
     private Product product; // product_name, product_price 정보 조회
 
-    @Column(name = "amount", nullable = false)
-    private int amount = 1;
+//    amount -> quantity 필드명 변경
+    @Column(name = "quantity", nullable = false)
+    private int quantity = 1; // 수량
 
     @Column(name = "merchant_uid", length = 100, unique = true)
     private String merchantUid; // 결제 요청 전에 생성되는 고유 주문 번호
 
-    @Column(name = "order_day")
-    private Timestamp orderDay; // 주문일
+//    주문일과 결제일 사실상 같은 것 같아서 주석처리함
+//    @Column(name = "order_day")
+//    private Timestamp orderDay; // 주문일
 
     @Column(name = "payment_status")
     private Boolean paymentStatus = false; // 결제 상태
