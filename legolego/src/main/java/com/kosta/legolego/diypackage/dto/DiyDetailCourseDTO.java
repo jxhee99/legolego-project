@@ -35,7 +35,7 @@ public class DiyDetailCourseDTO {
         for (int i = 0; i < this.courses.size(); i++) {
             detailCourseEntity.setCourse(i + 1, this.courses.get(i));
         }
-
+        //
         return detailCourseEntity;
     }
 
