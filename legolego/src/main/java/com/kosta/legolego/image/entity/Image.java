@@ -18,7 +18,7 @@ public class Image {
     @Column(name = "image_num")
     private Long ImageNum;
 
-    @Column(name = "image_url") // null 들어올 수 없게 해야하는데 만약, 이미지가 안 들어올 때를 생각하면 null 허용해야 할 것 같기도
+    @Column(name = "image_url", length = 1000) // null 들어올 수 없게 해야하는데 만약, 이미지가 안 들어올 때를 생각하면 null 허용해야 할 것 같기도
     private String imageUrl;
 
     @ManyToOne

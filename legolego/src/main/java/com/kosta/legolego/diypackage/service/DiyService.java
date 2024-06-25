@@ -41,7 +41,7 @@ public class DiyService {
   private ImageRepository imageRepository;
 
   //diy 생성
-  public DiyPackage createDiy(RequestDTO requestDTO) {
+  public Long createDiy(RequestDTO requestDTO) {
     //airline, route, detailcourse dto를 엔티티로 변환 후 레파지토리에 저장
     AirlineEntity airlineEntity = requestDTO.getAirline().toEntity();
     airlineRepository.save(airlineEntity);
@@ -72,7 +72,8 @@ public class DiyService {
             .packageApproval(false)
             .build();
 
-    return diyRepository.save(diyPackage);
+    DiyPackage savedDiyPackage = diyRepository.save(diyPackage);
+    return savedDiyPackage.getPackageNum(); // 저장된 패키지 번호 반환
   }
   //전체조회
   public List<DiyPackage> getDiyPackages(){

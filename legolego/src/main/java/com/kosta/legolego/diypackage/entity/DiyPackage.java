@@ -26,7 +26,7 @@ public class DiyPackage {
   @Column(name = "package_name", nullable = false, length = 255)
   private String packageName;
 
-  @Column(name = "profile_img", nullable = false, length = 255)
+  @Column(name = "profile_img", nullable = false, length = 1000)
   private String profileImg;
 
   @Column(name = "reg_date", nullable = false)
