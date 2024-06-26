@@ -44,7 +44,7 @@ public class Product {
     @Column(name = "product_name", nullable = false, length = 255)
     private String productName;
 
-    @Column(name = "product_img", length = 255)
+    @Column(name = "product_img", length = 1000)
     private String productImage;
 
     @Column(name = "reg_date", nullable = false)
