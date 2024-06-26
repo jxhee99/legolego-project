@@ -14,8 +14,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUser_userNum(Long userNum);
 
     Optional<Order> findByMerchantUid(String merchantUid);
-    long countByProduct(Product product);
+//    long countByProduct(Product product);
 
+    long countByPaymentStatus(Boolean PaymentStatus);
     List<Order> findByUser_userNumAndProduct_productNum(Long userNum, Long productNum);
 
 }
