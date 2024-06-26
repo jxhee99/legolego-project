@@ -4,9 +4,13 @@ import com.kosta.legolego.admin.repository.AdminRepository;
 import com.kosta.legolego.diypackage.dto.DiyAirlineDTO;
 import com.kosta.legolego.diypackage.dto.DiyDetailCourseDTO;
 import com.kosta.legolego.diypackage.dto.DiyRouteDTO;
+import com.kosta.legolego.diypackage.entity.DetailCourseEntity;
 import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.repository.DetailCourseRepository;
 import com.kosta.legolego.diypackage.repository.DiyListRepository;
+import com.kosta.legolego.image.entity.Image;
+import com.kosta.legolego.image.repository.ImageRepository;
+import com.kosta.legolego.image.service.ImageService;
 import com.kosta.legolego.products.dto.ProductDetailDto;
 import com.kosta.legolego.products.dto.ProductDetailInfo;
 import com.kosta.legolego.products.dto.ProductDto;
@@ -36,10 +40,16 @@ public class ProductService {
     DetailCourseRepository detailCourseRepository;
 
     @Autowired
+    ImageRepository imageRepository;
+
+    @Autowired
     AdminRepository adminRepository;
 
     @Autowired
     PreTripBoardRepository preTripBoardRepository;
+
+    @Autowired
+    ImageService imageService;
 
 
 //  상품 전체 조회
@@ -57,11 +67,22 @@ public class ProductService {
         DiyList diyList = diyListRepository.findByProductNum(productNum)
                 .orElseThrow(()->new RuntimeException("Diy 리스트를 찾을 수 없습니다."));
 
+        // DIY 패키지의 항공사 정보를 DTO로 변환
         DiyAirlineDTO diyAirlineDTO = DiyAirlineDTO.toAirlineDTO(diyList.getDiyPackage().getAirline());
+        // DIY 패키지의 경로 정보를 DTO로 변환
         DiyRouteDTO diyRouteDTO = DiyRouteDTO.toRouteDTO(diyList.getDiyPackage().getRoute());
+        // 경로에 따라 상세 코스 리스트를 찾아와 DTO로 변환
         List<DiyDetailCourseDTO> diyDetailCourseDTOList = DiyDetailCourseDTO
                 .toDetailCourseDTOList(detailCourseRepository
                         .findByRoute(diyList.getDiyPackage().getRoute()));
+
+        // 각 상세 코스에 대해 이미지 가져오기
+        for (DiyDetailCourseDTO diyDetailCourseDTO : diyDetailCourseDTOList) {
+            Long detailCourseNum = diyDetailCourseDTO.getDetailCourseNum();
+            List<String> imageUrls = imageService.getImagesByDetailCourse(detailCourseNum);
+            diyDetailCourseDTO.setFileUrls(imageUrls);
+        }
+
 
         ProductDetailInfo info = new ProductDetailInfo(diyList, diyAirlineDTO, diyRouteDTO, diyDetailCourseDTOList);
 
