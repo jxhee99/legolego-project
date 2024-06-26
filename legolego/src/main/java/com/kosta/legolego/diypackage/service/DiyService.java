@@ -3,9 +3,12 @@ package com.kosta.legolego.diypackage.service;
 import com.kosta.legolego.diypackage.dto.*;
 import com.kosta.legolego.diypackage.entity.*;
 import com.kosta.legolego.diypackage.repository.*;
+import com.kosta.legolego.image.repository.ImageRepository;
+import com.kosta.legolego.image.service.ImageService;
 import com.kosta.legolego.user.entity.User;
 import com.kosta.legolego.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 @Transactional
+@Slf4j
 @Service
 public class DiyService {
   @Autowired
@@ -29,12 +33,15 @@ public class DiyService {
   private DetailCourseRepository detailCourseRepository;
   @Autowired
   private UserRepository userRepository;
-
   @Autowired
   private OverLikedListRepository overLikedListRepository;
+  @Autowired
+  private ImageService imageService;
+  @Autowired
+  private ImageRepository imageRepository;
 
   //diy 생성
-  public DiyPackage createDiy(RequestDTO requestDTO) {
+  public Long createDiy(RequestDTO requestDTO) {
     //airline, route, detailcourse dto를 엔티티로 변환 후 레파지토리에 저장
     AirlineEntity airlineEntity = requestDTO.getAirline().toEntity();
     airlineRepository.save(airlineEntity);
@@ -44,13 +51,19 @@ public class DiyService {
 
     saveDetailCourses(requestDTO.getDetailCourses(), routeEntity);
 
+    //첫번째 디테일 코스 dto
+    DiyDetailCourseDTO firstDetailDto = requestDTO.getDetailCourses().get(0);
+
+    //dto의 fileurls 중 첫번째 url
+    String firstUrl = firstDetailDto.getFileUrls().get(0);
+
     User user = userRepository.findById(requestDTO.getUserNum())
             .orElseThrow(() -> new NullPointerException("유저를 찾을 수 없습니다"));
 
     //diyEntity 생성 후 저장
     DiyPackage diyPackage = DiyPackage.builder()
             .packageName(requestDTO.getPackageForm().getPackageName())
-            .profileImg(requestDTO.getPackageForm().getProfileImg())
+            .profileImg(firstUrl)
             .shortDescription(requestDTO.getPackageForm().getShortDescription())
             .regDate(LocalDate.now())
             .airline(airlineEntity)
@@ -59,7 +72,8 @@ public class DiyService {
             .packageApproval(false)
             .build();
 
-    return diyRepository.save(diyPackage);
+    DiyPackage savedDiyPackage = diyRepository.save(diyPackage);
+    return savedDiyPackage.getPackageNum(); // 저장된 패키지 번호 반환
   }
   //전체조회
   public List<DiyPackage> getDiyPackages(){
@@ -78,12 +92,20 @@ public class DiyService {
     //로그인한 사용자가 가수요 참여했는 지 검사
     boolean isLiked = diyLikeRepository.existsByUserNumAndDiy(currentUserNum, diyPackage);
 
+
+
     //엔티티를 dto로 변환
     DiyAirlineDTO diyAirlineDTO = DiyAirlineDTO.toAirlineDTO(diyPackage.getAirline());
     DiyRouteDTO diyRouteDTO = DiyRouteDTO.toRouteDTO(diyPackage.getRoute());
     List<DiyDetailCourseDTO> diyDetailCourseDTOList = DiyDetailCourseDTO.toDetailCourseDTOList(
             detailCourseRepository.findByRoute(diyPackage.getRoute())
     );
+    // 각 DiyDetailCourseDTO에 이미지 URL 리스트를 설정
+    for (DiyDetailCourseDTO diyDetailCourseDTO : diyDetailCourseDTOList) {
+      Long detailCourseNum = diyDetailCourseDTO.getDetailCourseNum();
+      List<String> imageUrls = imageService.getImagesByDetailCourse(detailCourseNum);
+      diyDetailCourseDTO.setFileUrls(imageUrls);
+    }
     DiyDTO diyDTO = DiyDTO.toDiyDTO(diyPackage);
 
     //ResponseDTO 형태로 반환
@@ -131,6 +153,14 @@ public class DiyService {
 
     List<DiyLikeEntity> diyLikes = diyLikeRepository.findByDiy(diyPackage);
 
+    // DetailCourseEntity 리스트 가져오기
+    List<DetailCourseEntity> detailCourses = detailCourseRepository.findByRoute(diyPackage.getRoute());
+
+    // 각 DetailCourseEntity에 연결된 Image 삭제
+    for (DetailCourseEntity detailCourse : detailCourses) {
+      imageRepository.deleteByDetailCourse(detailCourse);
+    }
+
     overLikedListRepository.deleteByDiyPackage(diyPackage);
     diyLikeRepository.deleteAll(diyLikes);
     diyRepository.delete(diyPackage);
@@ -142,10 +172,19 @@ public class DiyService {
 
   private void saveDetailCourses(List<DiyDetailCourseDTO> diyDetailCourseDTOS, RouteEntity routeEntity) {
     for (DiyDetailCourseDTO diyDetailCourseDTO : diyDetailCourseDTOS) {
+
       DetailCourseEntity detailCourseEntity = diyDetailCourseDTO.toEntity(routeEntity);
-      detailCourseRepository.save(detailCourseEntity);
+      detailCourseEntity = detailCourseRepository.save(detailCourseEntity);
+
+      if (diyDetailCourseDTO.getFileUrls() != null && !diyDetailCourseDTO.getFileUrls().isEmpty()) {
+        imageService.saveImageUrls(diyDetailCourseDTO.getFileUrls(), detailCourseEntity.getDetailCourseNum());
+      } else {
+        log.warn("No Image URLs to save for DetailCourseEntity ID: {}", detailCourseEntity.getDetailCourseNum());
+      }
     }
   }
+
+
 
   //put update관련 메서드
   private void updateAirline(AirlineEntity airlineEntity, DiyAirlineDTO diyAirlineDTO) {
@@ -224,9 +263,9 @@ public class DiyService {
         entity.setCourse(i + 1, courses.get(i));
       }
     }
-    if (dto.getFileUrl() != null) {
-      entity.setFileUrl(dto.getFileUrl());
-    }
+//    if (dto.getFileUrls() != null) {
+//      entity.setFileUrls(dto.getFileUrls());
+//    }
   }
   private void updatePartialDiyEntity(DiyPackage diyPackage, DiyDTO diyDTO) {
     if (diyDTO != null) {

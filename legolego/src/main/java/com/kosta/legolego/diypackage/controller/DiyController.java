@@ -20,15 +20,15 @@ public class DiyController {
   DiyLikeService diyLikeService;
 
   @PostMapping
-  public ResponseEntity<?> createDiy(@RequestBody RequestDTO requestDTO) {
-    try{
-      //유저 관련 부분 추후 수정
-      diyService.createDiy(requestDTO);
-      return new ResponseEntity<>(HttpStatus.CREATED);
-    }catch (RuntimeException e){
-      return ResponseEntity.badRequest().body(e.getMessage());
+  public ResponseEntity<Long> createDiy(@RequestBody RequestDTO requestDTO) {
+    try {
+      Long packageNum = diyService.createDiy(requestDTO);
+      return ResponseEntity.status(HttpStatus.CREATED).body(packageNum);
+    } catch (RuntimeException e) {
+      return ResponseEntity.badRequest().body(null); // 예외 처리
     }
   }
+
   //전체 조회
   @GetMapping
   public ResponseEntity<List<DiyPackage>> getDiyPackages() {

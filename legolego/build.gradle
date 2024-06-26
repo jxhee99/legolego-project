@@ -1,101 +1,88 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.3.0'
-	id 'io.spring.dependency-management' version '1.1.5'
+    id 'java'
+    id 'org.springframework.boot' version '3.3.0'
+    id 'io.spring.dependency-management' version '1.1.5'
 }
 
 group = 'com.kosta'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
-	maven { url 'https://jitpack.io' }
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-	implementation 'org.mariadb.jdbc:mariadb-java-client:3.4.0'
-	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-
-	//	mysql
-	//	runtimeOnly 'com.mysql:mysql-connector-j'
-	//	implementation 'mysql:mysql-connector-java'
-
-
-	//login용 추가
-	//회원가입 확인용 타임리프
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
-	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-
-
-	//스프링시큐리티를 위한 스타터
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 //	implementation 'org.springframework.boot:spring-boot-starter-security'
-
-
-	//스프링 시큐리티 테스트용 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 //	testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	//회원가입용 hibernate
-	implementation('org.hibernate.validator:hibernate-validator:6.1.2.Final')
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.4.0'
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 
-	//jpa용
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    //	mysql
+    //	runtimeOnly 'com.mysql:mysql-connector-j'
+    //	implementation 'mysql:mysql-connector-java'
 
-	//jwt용
-	implementation 'io.jsonwebtoken:jjwt:0.9.1' // 자바 JWT 라이브러리
-	implementation 'javax.xml.bind:jaxb-api:2.3.1' // XML 문서와 Java 객체 간 매핑 자동화
 
-	// lombok 테스트 라이브러리
-	testImplementation 'org.projectlombok:lombok'
-	testAnnotationProcessor 'org.projectlombok:lombok'
+    //login용 추가
+    //회원가입 확인용 타임리프
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
-	//json변환라이브러리
-	implementation group: 'org.json', name: 'json', version: '20240303'
 
-	// portone 라이브러리
-	implementation 'com.github.iamport:iamport-rest-client-java:0.1.6'
+    //스프링시큐리티를 위한 스타터
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 
-	// Servlet API 제공
-	implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
 
-	// 비밀번호 재설정 시 이메일 전송
-	implementation 'org.springframework.boot:spring-boot-starter-mail'
+    //스프링 시큐리티 테스트용 의존성
+    testImplementation 'org.springframework.security:spring-security-test'
 
-	// Redis 의존성 추가
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    //회원가입용 hibernate
+    implementation('org.hibernate.validator:hibernate-validator:6.1.2.Final')
+
+    //jpa용
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    //jwt용
+    implementation 'io.jsonwebtoken:jjwt:0.9.1' // 자바 JWT 라이브러리
+    implementation 'javax.xml.bind:jaxb-api:2.3.1' // XML 문서와 Java 객체 간 매핑 자동화
+
+    // lombok 테스트 라이브러리
+    testImplementation 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
+    //json변환라이브러리
+    implementation group: 'org.json', name: 'json', version: '20240303'
+
+    // portone 라이브러리
+    implementation 'com.github.iamport:iamport-rest-client-java:0.1.6'
+
 
 }
 
 tasks.withType(JavaCompile) {
-	options.encoding = 'UTF-8'
+    options.encoding = 'UTF-8'
 }
 
-//tasks.named('test') {
-//	useJUnitPlatform()
-//}
-
-test {
-	useJUnitPlatform()
+tasks.named('test') {
+    useJUnitPlatform()
 }
