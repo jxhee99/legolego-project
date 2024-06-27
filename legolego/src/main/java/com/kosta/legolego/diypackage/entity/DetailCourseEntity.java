@@ -29,10 +29,10 @@ public class DetailCourseEntity {
   @Column(name = "course_1" ,nullable = false, length = 255)
   private String course1;
 
-  @Column(name = "course_2" ,nullable = false, length = 255)
+  @Column(name = "course_2" , length = 255)
   private String course2;
 
-  @Column(name = "course_3" ,nullable = false, length = 255)
+  @Column(name = "course_3" ,length = 255)
   private String course3;
 
   @Column(name = "course_4" ,length = 255)
