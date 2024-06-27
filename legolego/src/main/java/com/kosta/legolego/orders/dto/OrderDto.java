@@ -43,7 +43,6 @@ public class OrderDto {
 
     public static Order toEntity(OrderDto orderDto){
         Order order = new Order();
-        User user = new User();
         order.setOrderNum(orderDto.getOrderNum());
         order.setQuantity(orderDto.getQuantity());
         order.setTotalPrice(orderDto.getTotalPrice());

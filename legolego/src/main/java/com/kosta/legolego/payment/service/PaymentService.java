@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kosta.legolego.admin.repository.AdminRepository;
 import com.kosta.legolego.orders.entity.Order;
 import com.kosta.legolego.orders.repository.OrderRepository;
 import com.kosta.legolego.payment.entity.Payment;
@@ -174,6 +175,7 @@ public class PaymentService {
     }
 
     // 환불 요청
+    @Transactional
     public  void refundWithToken(String token, String merchantUid, String reason) throws Exception{
         String url = "https://api.iamport.kr/payments/cancel";
 

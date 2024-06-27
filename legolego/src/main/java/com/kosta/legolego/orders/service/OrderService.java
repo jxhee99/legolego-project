@@ -57,15 +57,15 @@ public class OrderService {
         log.info("Order created with orderNum: {}", savedOrder.getOrderNum());
 
         // 상품 모집인원 확인 및 모집 확정 업데이트
-        updateProductRecruitmentStatus(product, order);
+        updateProductRecruitmentStatus(product);
 
         return OrderDto.fromEntity(savedOrder); // 엔티티 -> DTO 변환
     }
 
     // 모집 확정 메서드 (necessaryPeople 보다 많을 경우)
-    private void updateProductRecruitmentStatus(Product product, Order order){
+    private void updateProductRecruitmentStatus(Product product){
 //        long orderCount = orderRepository.countByProduct(product);
-        long paymentCount = orderRepository.countByPaymentStatus(order.getPaymentStatus());
+        long paymentCount = orderRepository.countByProductAndPaymentStatus(product, true);
 
         if(paymentCount >= product.getNecessaryPeople() ) {
             product.setRecruitmentConfirmed(true);
