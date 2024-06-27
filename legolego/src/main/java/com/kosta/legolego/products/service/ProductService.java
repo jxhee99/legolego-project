@@ -4,11 +4,9 @@ import com.kosta.legolego.admin.repository.AdminRepository;
 import com.kosta.legolego.diypackage.dto.DiyAirlineDTO;
 import com.kosta.legolego.diypackage.dto.DiyDetailCourseDTO;
 import com.kosta.legolego.diypackage.dto.DiyRouteDTO;
-import com.kosta.legolego.diypackage.entity.DetailCourseEntity;
 import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.repository.DetailCourseRepository;
 import com.kosta.legolego.diypackage.repository.DiyListRepository;
-import com.kosta.legolego.image.entity.Image;
 import com.kosta.legolego.image.repository.ImageRepository;
 import com.kosta.legolego.image.service.ImageService;
 import com.kosta.legolego.products.dto.ProductDetailDto;
@@ -18,15 +16,19 @@ import com.kosta.legolego.products.entity.Product;
 import com.kosta.legolego.products.repository.ProductRepository;
 import com.kosta.legolego.review.entity.PreTripBoard;
 import com.kosta.legolego.review.repository.PreTripBoardRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Service
 public class ProductService {
 
@@ -38,9 +40,6 @@ public class ProductService {
 
     @Autowired
     DetailCourseRepository detailCourseRepository;
-
-    @Autowired
-    ImageRepository imageRepository;
 
     @Autowired
     AdminRepository adminRepository;
@@ -135,14 +134,20 @@ public ProductDto updateProduct(Long productNum, ProductDto productDto, Long adm
 
     // 지난 여행 게시판으로 이동
     @Transactional
+    @Scheduled(cron = "0 0 0 * * ?") // 자정마다 실행 -> 추후 변경 예정
     public void moveConfirmedProductsToPreTripBoard() {
-        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+//        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+        LocalDateTime currentTimestamp = LocalDateTime.now();
+        log.info("Current timestamp: {}", currentTimestamp);
 
         List<Product> products = productRepository.findByConfirmedAndBoardingDateBefore(currentTimestamp);
+        log.info("Found {} products to move to pre-trip board", products.size());
 
         for(Product product : products) {
-            PreTripBoard preTripBoard = new PreTripBoard();
+            log.info("Moving product {} to pre-trip board", product.getProductNum());
 
+            PreTripBoard preTripBoard = new PreTripBoard();
+            product.setReviewAble(true); // 리뷰 작성 권한을 부여
             preTripBoard.setProduct(product);
 
             preTripBoardRepository.save(preTripBoard);

@@ -1,6 +1,7 @@
 package com.kosta.legolego.review.entity;
 
 import com.kosta.legolego.orders.entity.Order;
+import com.kosta.legolego.review.dto.ReviewDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,6 +36,15 @@ public class Review {
     @JoinColumn(name = "board_num", nullable = true)
     private PreTripBoard preTripBoard;
 
-    @OneToOne(mappedBy = "review", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "review", fetch = FetchType.EAGER)
     private Order order;
+
+    // 후기 수정 시 변경 할 수 있는 필드
+    public void patch(ReviewDto reviewDto) {
+        if(reviewDto.getRating() != null)
+            this.rating = reviewDto.getRating();
+
+        if(reviewDto.getContent() != null)
+            this.content = reviewDto.getContent();
+    }
 }

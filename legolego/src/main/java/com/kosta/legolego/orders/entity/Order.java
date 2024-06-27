@@ -54,7 +54,7 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payment> payments;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY) // fetch = FetchType.LAZY : 관련 엔티티 실제로 접근할 때까지 로드되지 않음
     @JoinColumn(name = "review_num")
     private Review review; // 주문에 대한 리뷰 작성 여부 : boolean 타입으로 체크
 
