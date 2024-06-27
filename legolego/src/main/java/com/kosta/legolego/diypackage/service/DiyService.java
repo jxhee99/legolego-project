@@ -13,6 +13,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
@@ -51,14 +52,19 @@ public class DiyService {
 
     saveDetailCourses(requestDTO.getDetailCourses(), routeEntity);
 
-    //첫번째 디테일 코스 dto
-    DiyDetailCourseDTO firstDetailDto = requestDTO.getDetailCourses().get(0);
+    // requestDTO의 detailCourses 리스트를 순회하면서 fileUrls에서 처음 만나는 null이 아닌 값을 찾기
+    String firstUrl = requestDTO.getDetailCourses().stream()
+            .map(detailCourse -> detailCourse.getFileUrls().stream()
+                    .filter(url -> url != null && !url.isEmpty())
+                    .findFirst())
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("이미지 최소 한개 필요"));
 
-    //dto의 fileurls 중 첫번째 url
-    String firstUrl = firstDetailDto.getFileUrls().get(0);
 
     User user = userRepository.findById(requestDTO.getUserNum())
-            .orElseThrow(() -> new NullPointerException("유저를 찾을 수 없습니다"));
+            .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다"));
 
     //diyEntity 생성 후 저장
     DiyPackage diyPackage = DiyPackage.builder()
@@ -77,7 +83,8 @@ public class DiyService {
   }
   //전체조회
   public List<DiyPackage> getDiyPackages(){
-    return diyRepository.findAll();
+    //최신등록순으로 반환(등록일에 날짜만 받고 있어서...packageNum으로 내림차순)
+    return diyRepository.findAllByOrderByPackageNumDesc();
   }
 
   //상세조회
@@ -87,7 +94,7 @@ public class DiyService {
 
     //패키지 조회
     DiyPackage diyPackage = diyRepository.findById(packageNum)
-            .orElseThrow(() -> new NullPointerException("패키지를 찾을 수 없습니다"));
+            .orElseThrow(() -> new  IllegalArgumentException("패키지를 찾을 수 없습니다"));
 
     //로그인한 사용자가 가수요 참여했는 지 검사
     boolean isLiked = diyLikeRepository.existsByUserNumAndDiy(currentUserNum, diyPackage);
@@ -117,13 +124,14 @@ public class DiyService {
             .user(diyPackage.getUser())
             .likedNum(diyPackage.getPackageLikedNum())
             .viewNum(diyPackage.getPackageViewNum())
+            .regDate(diyPackage.getRegDate())
             .isLiked(isLiked)
             .build();
   }
 //put 수정
   public DiyPackage updateDiy(Long packageNum, RequestDTO requestDTO) {
     DiyPackage diyPackage = diyRepository.findById(packageNum)
-            .orElseThrow(() -> new NullPointerException("패키지를 찾을 수 없습니다"));
+            .orElseThrow(() -> new  IllegalArgumentException("패키지를 찾을 수 없습니다"));
 
     updateAirline(diyPackage.getAirline(), requestDTO.getAirline());
     updateRoute(diyPackage.getRoute(), requestDTO.getRoute());
@@ -137,7 +145,7 @@ public class DiyService {
 //patch 수정
   public DiyPackage updateDiyPatch(Long packageNum, RequestDTO requestDTO) {
     DiyPackage diyPackage = diyRepository.findById(packageNum)
-            .orElseThrow(() -> new NullPointerException("패키지를 찾을 수 없습니다"));
+            .orElseThrow(() -> new  IllegalArgumentException("패키지를 찾을 수 없습니다"));
 
     updatePartialAirline(diyPackage.getAirline(), requestDTO.getAirline());
     updatePartialRoute(diyPackage.getRoute(), requestDTO.getRoute());
@@ -149,7 +157,7 @@ public class DiyService {
 //삭제
   public void deleteDiy(Long packageNum){
     DiyPackage diyPackage = diyRepository.findById(packageNum)
-            .orElseThrow(() -> new NullPointerException("패키지를 찾을 수 없습니다"));
+            .orElseThrow(() -> new  IllegalArgumentException("패키지를 찾을 수 없습니다"));
 
     List<DiyLikeEntity> diyLikes = diyLikeRepository.findByDiy(diyPackage);
 
