@@ -28,12 +28,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByUserEmail(email);
         if (user != null) {
-//            return new CustomUserDetails(user);
-            return org.springframework.security.core.userdetails.User.builder()
-                    .username(user.getUserEmail())
-                    .password(user.getUserPw())
-                    .roles("USER")
-                    .build();
+            return new CustomUserDetails(user);
+//            return org.springframework.security.core.userdetails.User.builder()
+//                    .username(user.getUserEmail())
+//                    .password(user.getUserPw())
+//                    .roles("USER")
+//                    .build();
         }
 
         Admin admin = adminRepository.findByAdminEmail(email);

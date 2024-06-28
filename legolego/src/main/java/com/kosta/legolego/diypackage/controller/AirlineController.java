@@ -17,7 +17,7 @@ public class AirlineController {
 
   @Autowired
   AirlineService service;
-  @GetMapping("/api/airline")
+  @GetMapping("/user/airline")
   public String getFlightSchedule(@RequestParam("schDate") String schDate,
                                   @RequestParam("returnDate") String returnDate,
                                   @RequestParam("schDeptCityCode") String schDeptCityCode,
