@@ -4,9 +4,11 @@ import com.kosta.legolego.diypackage.dto.*;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
 import com.kosta.legolego.diypackage.service.DiyService;
 import com.kosta.legolego.diypackage.service.DiyLikeService;
+import com.kosta.legolego.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,8 +22,9 @@ public class DiyController {
   DiyLikeService diyLikeService;
 
   @PostMapping
-  public ResponseEntity<Long> createDiy(@RequestBody RequestDTO requestDTO) {
+  public ResponseEntity<Long> createDiy(@RequestBody RequestDTO requestDTO, @AuthenticationPrincipal CustomUserDetails userDetails) {
     try {
+      requestDTO.setUserNum(userDetails.getUserNum());
       Long packageNum = diyService.createDiy(requestDTO);
       return ResponseEntity.status(HttpStatus.CREATED).body(packageNum);
     } catch (RuntimeException e) {

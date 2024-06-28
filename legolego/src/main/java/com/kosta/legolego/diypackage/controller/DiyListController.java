@@ -3,9 +3,11 @@ package com.kosta.legolego.diypackage.controller;
 
 import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.service.DiyListService;
+import com.kosta.legolego.security.CustomUserDetails;
 import com.kosta.legolego.user.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -15,26 +17,34 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/diylists")
+//@RequestMapping("/diylists")
 public class DiyListController {
 
     @Autowired
     DiyListService diyListService;
 
-    @GetMapping("/admin")
+    @GetMapping("/admin/diylists")
     public ResponseEntity<List<DiyList>> getDiyListForAdmin() {
         List<DiyList> diyLists = diyListService.getAllDiyListsForAdmin();
         return ResponseEntity.ok(diyLists);
     }
 
-    @GetMapping("/partner/{partner_num}")
-    public ResponseEntity<List<DiyList>> getDiyListsForPartner(@PathVariable("partner_num") Long partnerNum){
+    @GetMapping("/partner/diylists")
+    public ResponseEntity<List<DiyList>> getDiyListsForPartner(@AuthenticationPrincipal CustomUserDetails userDetails){
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Long partnerNum = userDetails.getUserNum();
         List<DiyList> diyListsForPartner = diyListService.getDiyListsForPartner(partnerNum);
         return ResponseEntity.ok(diyListsForPartner);
     }
 
     @GetMapping("/user/{user_num}")
-    public ResponseEntity<List<DiyList>> getDiyListsForUser(@PathVariable("user_num") Long userNum){
+    public ResponseEntity<List<DiyList>> getDiyListsForUser(@AuthenticationPrincipal CustomUserDetails userDetails){
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Long userNum = userDetails.getUserNum();
         List<DiyList> diyListsForUser = diyListService.getDiyListsForUser(userNum);
         return ResponseEntity.ok(diyListsForUser);
     }

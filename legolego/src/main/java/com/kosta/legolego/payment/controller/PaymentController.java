@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Slf4j
 @RestController
-@RequestMapping("/payments")
+@RequestMapping("/user/payments")
 @RequiredArgsConstructor
 public class PaymentController {
 

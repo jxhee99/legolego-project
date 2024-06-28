@@ -22,11 +22,11 @@ public class JwtTokenProvider {
     private String secretKey;
 
     @Value("${jwt.issuer}")
-    private String issuer;
+    private String issuer; // 토큰의 발행자 정보 설정
 
-    private final long ACCESS_TOKEN_VALIDITY = 3600000;  // 1시간
+    private final long ACCESS_TOKEN_VALIDITY = 3600000;  // 엑세스 토큰 유효 시간 : 1시간
 
-    // Jwt 토큰 생성
+    // 주어진 역할(사용자) 정보를 기반으로 Jwt 토큰 생성
     public String createToken(UserDetails userDetails) {
         Claims claims = Jwts.claims().setSubject(userDetails.getUsername());
         claims.put("roles", userDetails.getAuthorities());
@@ -43,7 +43,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // 토큰 유효성 검증
+    // JWT 토큰 유효성 검증
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
@@ -53,10 +53,12 @@ public class JwtTokenProvider {
         }
     }
 
+    // JWT 토큰에서 사용자 이름 추출
     public String getUsername(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 
+    // HTTP 요청에서 JWT 토큰 추출
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {

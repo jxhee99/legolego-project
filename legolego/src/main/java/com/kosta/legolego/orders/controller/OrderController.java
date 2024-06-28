@@ -14,14 +14,14 @@ import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
-@RequestMapping("/orders")
+//@RequestMapping("/orders")
 @RestController
 public class OrderController {
 
     @Autowired
     private OrderService orderService;
 
-    @PostMapping
+    @PostMapping("/user/orders")
     public ResponseEntity<Map<String, String>> createOrder(@RequestBody OrderDto orderDto) {
         // 주문번호를 UUID로 생성
         String orderNumber = UUID.randomUUID().toString();
@@ -37,21 +37,21 @@ public class OrderController {
     }
 
     // merchantUid로 주문 정보 조회
-    @GetMapping("/merchant/{merchant_uid}")
+    @GetMapping("/user/merchant/{merchant_uid}")
     public ResponseEntity<OrderDto> getOrderByMerchantUid(@PathVariable("merchant_uid") String merchantUid) {
         OrderDto orderDto = orderService.getOrderByMerchantUid(merchantUid);
         return ResponseEntity.status(HttpStatus.OK).body(orderDto);
     }
 
     //    관리자 주문 조회
-    @GetMapping("/admin")
+    @GetMapping("/admin/orders")
     public ResponseEntity<List<OrderDto>> getAllOrders(){
         List<OrderDto> orders = orderService.getAllOrders();
         return ResponseEntity.ok(orders);
     }
 
     //  사용자 주문 조회
-    @GetMapping
+    @GetMapping("/user/orders")
     public ResponseEntity<List<OrderDto>> getUserOrders(@RequestParam("user_num") Long userNum){
         List<OrderDto> orders = orderService.getUserOrders(userNum);
         return ResponseEntity.ok(orders);
@@ -60,14 +60,14 @@ public class OrderController {
     }
 
     //  사용자 주문 상세 조회
-    @GetMapping("/{order_num}")
+    @GetMapping("/user/orders/{order_num}")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable("order_num") Long orderNum){
         OrderDto orderDto = orderService.getOrderById(orderNum);
         return ResponseEntity.status(HttpStatus.OK).body(orderDto);
     }
 
     //  특정 주문 취소
-    @DeleteMapping("/{order_num}")
+    @DeleteMapping("/user/orders/{order_num}")
     public ResponseEntity<Void> deleteOrder(@PathVariable("order_num") Long orderNum){
         orderService.deleteOrder(orderNum);
         return ResponseEntity.noContent().build();
