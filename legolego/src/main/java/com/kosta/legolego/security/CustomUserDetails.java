@@ -3,6 +3,7 @@ package com.kosta.legolego.security;
 import com.kosta.legolego.admin.entity.Admin;
 import com.kosta.legolego.partner.entity.Partner;
 import com.kosta.legolego.user.entity.User;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,13 +11,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
+@Getter
 public class CustomUserDetails implements UserDetails {
 
+    private Long userNum;
     private String email;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user) {
+        this.userNum = user.getUserNum();
         this.email = user.getUserEmail();
         this.password = user.getUserPw();
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
