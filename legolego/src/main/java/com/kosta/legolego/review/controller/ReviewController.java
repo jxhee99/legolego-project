@@ -24,4 +24,28 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.CREATED).body(newReview);
     }
 
+    // 리뷰 수정
+    @PatchMapping("/{review_num}/{user_num}/edit")
+    public ResponseEntity<ReviewDto> updateReviewById(@PathVariable("review_num") Long reviewNum, @PathVariable("user_num") Long userNum, @RequestBody ReviewDto reviewDto) {
+
+        try {
+            ReviewDto updatedReview = reviewService.updateReview(reviewNum, reviewDto, userNum);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedReview);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    // 리뷰 삭제
+    @DeleteMapping("/{review_num}/{user_num}/delete")
+    public void deleteReview(@PathVariable("review_num") Long reviewNum, @PathVariable("user_num") Long userNum) {
+            reviewService.deleteReview(reviewNum, userNum);
+    }
+
+    // only admin - 리뷰 삭제
+    @DeleteMapping("/{review_num}/admin/{admin_num}")
+    public void deleteReviewForAdmin(@PathVariable("review_num") Long reviewNum, @PathVariable("admin_num") Long adminNum) {
+        reviewService.deleteReviewForAdmin(reviewNum, adminNum);
+    }
+
 }

@@ -1,22 +1,18 @@
 package com.kosta.legolego.orders.service;
 
-import
-        com.kosta.legolego.orders.dto.OrderDto;
+import com.kosta.legolego.orders.dto.OrderDto;
 import com.kosta.legolego.orders.entity.Order;
 import com.kosta.legolego.orders.repository.OrderRepository;
-import com.kosta.legolego.payment.repository.PaymentRepository;
 import com.kosta.legolego.payment.service.PaymentService;
 import com.kosta.legolego.products.entity.Product;
 import com.kosta.legolego.products.repository.ProductRepository;
 import com.kosta.legolego.user.entity.User;
 import com.kosta.legolego.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 @Slf4j
@@ -68,9 +64,10 @@ public class OrderService {
 
     // 모집 확정 메서드 (necessaryPeople 보다 많을 경우)
     private void updateProductRecruitmentStatus(Product product){
-        long orderCount = orderRepository.countByProduct(product);
+//        long orderCount = orderRepository.countByProduct(product);
+        long paymentCount = orderRepository.countByProductAndPaymentStatus(product, true);
 
-        if(orderCount >= product.getNecessaryPeople()) {
+        if(paymentCount >= product.getNecessaryPeople() ) {
             product.setRecruitmentConfirmed(true);
             productRepository.save(product);
         }

@@ -44,7 +44,7 @@ public class Product {
     @Column(name = "product_name", nullable = false, length = 255)
     private String productName;
 
-    @Column(name = "product_img", length = 255)
+    @Column(name = "product_img", length = 1000)
     private String productImage;
 
     @Column(name = "reg_date", nullable = false)
@@ -76,6 +76,10 @@ public class Product {
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<Order> order;
+
+    // 리뷰 쓰기 가능 필드 추가
+    @Column(name = "review_able")
+    private Boolean reviewAble = false;
 
     // 지난여행게시판 관계 추가
     @OneToOne(mappedBy = "product")

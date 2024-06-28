@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface PreTripBoardRepository extends JpaRepository<PreTripBoard, Long> {
     PreTripBoard findByProduct(Product product);
     boolean existsByProduct(Product product);
+//    Long findByBoardNum(Long borad)
 }
