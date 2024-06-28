@@ -14,25 +14,27 @@ import java.util.Collections;
 @Getter
 public class CustomUserDetails implements UserDetails {
 
-    private Long userNum;
+    private Long id;
     private String email;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user) {
-        this.userNum = user.getUserNum();
+        this.id = user.getUserNum();
         this.email = user.getUserEmail();
         this.password = user.getUserPw();
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     public CustomUserDetails(Admin admin) {
+        this.id = admin.getAdminNum();
         this.email = admin.getAdminEmail();
         this.password = admin.getAdminPw();
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
 
     public CustomUserDetails(Partner partner) {
+        this.id = partner.getPartnerNum();
         this.email = partner.getPartnerEmail();
         this.password = partner.getPartnerPw();
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_PARTNER"));
