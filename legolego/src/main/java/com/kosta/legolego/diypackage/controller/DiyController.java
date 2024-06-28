@@ -7,14 +7,10 @@ import com.kosta.legolego.diypackage.service.DiyLikeService;
 import com.kosta.legolego.security.CustomUserDetails;
 
 import com.kosta.legolego.security.CustomUserDetailsService;
-import com.kosta.legolego.user.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,9 +22,6 @@ public class DiyController {
   DiyService diyService;
   @Autowired
   DiyLikeService diyLikeService;
-
-  @Autowired
-  private CustomUserDetailsService customUserDetailsService;
 
   @PostMapping("/user/packages")
   public ResponseEntity<Long> createDiy(@RequestBody RequestDTO requestDTO, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -52,10 +45,10 @@ public class DiyController {
 
   //상세조회
   @GetMapping("/packages/{package_num}")
-  public ResponseEntity<?> getDiyDetail(@PathVariable("package_num") Long package_num) {
+  public ResponseEntity<?> getDiyDetail(@PathVariable("package_num") Long package_num, @AuthenticationPrincipal CustomUserDetails userDetails) {
     try {
-      //로그인한 사용자 임시 하드코딩
-      Long currentUserNum = 3L;
+
+      Long currentUserNum = userDetails.getId();
       ResponseDTO responseDTO = diyService.getDiyDetail(package_num, currentUserNum);
       return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
@@ -99,11 +92,19 @@ public class DiyController {
   }
 
   //가수요 참여
-  @PostMapping("/user/packages/likes/{package_num}")
-  public ResponseEntity<?> likeDiy(@PathVariable("package_num") Long package_num, @RequestBody DiyLikeDTO diyLikeDTO) {
-    //로그인한 사용자인지 등 userNum에 관한 처리 추후에 추가
+  @PostMapping("/user/packages/likes/{package_num}" )
+  public ResponseEntity<?> likeDiy(@PathVariable("package_num") Long package_num, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    // 사용자가 인증되지 않았을 경우 null 확인
+    if (userDetails == null) {
+      return new ResponseEntity<>("User not authenticated", HttpStatus.UNAUTHORIZED);
+    }
+    Long userNum =userDetails.getId();
+
     try {
+      DiyLikeDTO diyLikeDTO = new DiyLikeDTO();
+      diyLikeDTO.setUserNum(userNum);
       diyLikeDTO.setPackageNum(package_num);
+      diyLikeDTO.setUserNum(userNum);
       diyLikeService.diyLike(diyLikeDTO);
       return new ResponseEntity<>(HttpStatus.OK);
     } catch (RuntimeException e) {

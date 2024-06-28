@@ -99,6 +99,8 @@ public class DiyService {
     //로그인한 사용자가 가수요 참여했는 지 검사
     boolean isLiked = diyLikeRepository.existsByUserNumAndDiy(currentUserNum, diyPackage);
 
+    //작성자 인지 검사
+    boolean isWriter = diyPackage.getUser().getUserNum() == currentUserNum;
 
 
     //엔티티를 dto로 변환
@@ -113,6 +115,7 @@ public class DiyService {
       List<String> imageUrls = imageService.getImagesByDetailCourse(detailCourseNum);
       diyDetailCourseDTO.setFileUrls(imageUrls);
     }
+    WriterDTO writerDTO = WriterDTO.toWriterDTO(diyPackage);
     DiyDTO diyDTO = DiyDTO.toDiyDTO(diyPackage);
 
     //ResponseDTO 형태로 반환
@@ -120,12 +123,13 @@ public class DiyService {
             .airline(diyAirlineDTO)
             .route(diyRouteDTO)
             .packageForm(diyDTO)
+            .user(writerDTO)
             .detailCourses(diyDetailCourseDTOList)
-            .user(diyPackage.getUser())
             .likedNum(diyPackage.getPackageLikedNum())
             .viewNum(diyPackage.getPackageViewNum())
             .regDate(diyPackage.getRegDate())
             .isLiked(isLiked)
+            .isWriter(isWriter)
             .build();
   }
 //put 수정
