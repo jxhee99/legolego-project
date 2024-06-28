@@ -1,6 +1,7 @@
 package com.kosta.legolego.partner.entity;
 
 import com.kosta.legolego.diypackage.entity.DiyList;
+import com.kosta.legolego.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,6 +14,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Partner {
+
+    public enum PartnerStatus{
+        registered,
+        withdrawal
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +37,8 @@ public class Partner {
     @Column(name = "partner_phone", nullable = false, length = 15)
     private String partnerPhone;
 
-    @Column(name = "partner_status", nullable = false)
-    private Boolean partnerStatus = false;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "partner_status")
+    private Partner.PartnerStatus partnerStatus = Partner.PartnerStatus.registered;
 
 }
