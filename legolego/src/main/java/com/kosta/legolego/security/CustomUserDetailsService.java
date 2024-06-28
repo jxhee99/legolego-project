@@ -38,12 +38,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         Admin admin = adminRepository.findByAdminEmail(email);
         if (admin != null) {
-//            return new CustomUserDetails(admin);
-            return org.springframework.security.core.userdetails.User.builder()
-                    .username(admin.getAdminEmail())
-                    .password(admin.getAdminPw())
-                    .roles("ADMIN")
-                    .build();
+           return new CustomUserDetails(admin);
+//            return org.springframework.security.core.userdetails.User.builder()
+//                    .username(admin.getAdminEmail())
+//                    .password(admin.getAdminPw())
+//                    .roles("ADMIN")
+//                    .build();
         }
 
         Partner partner = partnerRepository.findByPartnerEmail(email);

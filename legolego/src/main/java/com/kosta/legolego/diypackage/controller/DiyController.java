@@ -31,7 +31,7 @@ public class DiyController {
   @PostMapping("/user/packages")
   public ResponseEntity<Long> createDiy(@RequestBody RequestDTO requestDTO, @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-    Long userNum = userDetails.getUserNum();
+    Long userNum = userDetails.getId();
     try {
       requestDTO.setUserNum(userNum);
       Long packageNum = diyService.createDiy(requestDTO);
