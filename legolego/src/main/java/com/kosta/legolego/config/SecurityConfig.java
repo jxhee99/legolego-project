@@ -21,6 +21,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration  // 생성자 주입 간편화
 @EnableWebSecurity  // 스프링 시큐리티 활성화
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -37,44 +39,22 @@ public class SecurityConfig {
         this.customUserDetailsService = customUserDetailsService;
     }
 
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http.csrf(AbstractHttpConfigurer::disable)
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authorizeHttpRequests(authorize -> authorize
-//                        .requestMatchers("/admin/**").hasRole("ADMIN")
-//                        .requestMatchers("/partner/**").hasRole("PARTNER")
-//                        .requestMatchers("/user/**").hasRole("USER")
-//                        .anyRequest().authenticated()
-//                )
-//                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-//
-//        return http.build();
-//    }
-
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http.csrf(AbstractHttpConfigurer::disable)
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authorizeHttpRequests(authorize -> authorize
-//                        .requestMatchers("/auth/signup", "/auth/login").permitAll()
-//                        .requestMatchers("/admin/**").hasRole("ADMIN")
-//                        .requestMatchers("/partner/**").hasRole("PARTNER")
-//                        .requestMatchers("/user/**").hasRole("USER")
-//                        .anyRequest().authenticated()
-//                )
-//                .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-//
-//        return http.build();
-//    }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll() // 모든 요청 허용
+
+                        .requestMatchers("/auth/signup", "/auth/login", "/packages", "/auth/check-nickname/**", "/auth/check-email/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/partner/**").hasRole("PARTNER")
+                        .requestMatchers("/user/**").hasRole("USER")
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+                .cors(withDefaults());
                 );
+
 
         return http.build();
     }
