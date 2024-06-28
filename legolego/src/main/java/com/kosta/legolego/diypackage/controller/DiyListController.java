@@ -34,17 +34,17 @@ public class DiyListController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        Long partnerNum = userDetails.getUserNum();
+        Long partnerNum = userDetails.getId();
         List<DiyList> diyListsForPartner = diyListService.getDiyListsForPartner(partnerNum);
         return ResponseEntity.ok(diyListsForPartner);
     }
 
-    @GetMapping("/user/{user_num}")
+    @GetMapping("/user/diylists")
     public ResponseEntity<List<DiyList>> getDiyListsForUser(@AuthenticationPrincipal CustomUserDetails userDetails){
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        Long userNum = userDetails.getUserNum();
+        Long userNum = userDetails.getId();
         List<DiyList> diyListsForUser = diyListService.getDiyListsForUser(userNum);
         return ResponseEntity.ok(diyListsForUser);
     }
@@ -57,7 +57,7 @@ public class DiyListController {
 //    }
 
     // 가격 제안 수락
-    @PostMapping("/user/{user_num}/accept")
+    @PostMapping("/user/accept")
     public ResponseEntity<DiyList> acceptProposal(@RequestParam("list_num") Long listNum, @RequestParam("package_num") Long packageNum) {
         DiyList acceptedProposal = diyListService.acceptProposal(listNum, packageNum);
         log.info("list_num : {}, package_num : {}", listNum, packageNum);

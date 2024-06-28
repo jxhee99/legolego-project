@@ -57,7 +57,7 @@ public class ProductController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        Long userNum = userDetails.getUserNum();
+        Long userNum = userDetails.getId();
         wishlistService.addToWishlist(userNum, productNum);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
