@@ -11,21 +11,21 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/reviews")
+//@RequestMapping("/reviews")
 public class ReviewController {
 
     @Autowired
     ReviewService reviewService;
 
     // 리뷰 생성
-    @PostMapping("/{order_num}")
+    @PostMapping("/user/reviews/{order_num}")
     public ResponseEntity<ReviewDto> createReview(@PathVariable("order_num") Long orderNum, @RequestBody ReviewDto reviewDto){
         ReviewDto newReview = reviewService.createReview(orderNum, reviewDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(newReview);
     }
 
     // 리뷰 수정
-    @PatchMapping("/{review_num}/{user_num}/edit")
+    @PatchMapping("/user/{user_num}/reviews/{review_num}/edit")
     public ResponseEntity<ReviewDto> updateReviewById(@PathVariable("review_num") Long reviewNum, @PathVariable("user_num") Long userNum, @RequestBody ReviewDto reviewDto) {
 
         try {
@@ -37,13 +37,13 @@ public class ReviewController {
     }
 
     // 리뷰 삭제
-    @DeleteMapping("/{review_num}/{user_num}/delete")
+    @DeleteMapping("/user/{user_num}/reviews/{review_num}/delete")
     public void deleteReview(@PathVariable("review_num") Long reviewNum, @PathVariable("user_num") Long userNum) {
             reviewService.deleteReview(reviewNum, userNum);
     }
 
     // only admin - 리뷰 삭제
-    @DeleteMapping("/{review_num}/admin/{admin_num}")
+    @DeleteMapping("/admin/{admin_num}/reviews/{review_num}")
     public void deleteReviewForAdmin(@PathVariable("review_num") Long reviewNum, @PathVariable("admin_num") Long adminNum) {
         reviewService.deleteReviewForAdmin(reviewNum, adminNum);
     }
