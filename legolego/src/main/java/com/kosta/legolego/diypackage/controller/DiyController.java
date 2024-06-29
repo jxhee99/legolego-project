@@ -25,7 +25,9 @@ public class DiyController {
 
   @PostMapping("/user/packages")
   public ResponseEntity<Long> createDiy(@RequestBody RequestDTO requestDTO, @AuthenticationPrincipal CustomUserDetails userDetails) {
-
+    if (userDetails == null || !userDetails.getRole().equals("ROLE_USER")) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
     Long userNum = userDetails.getId();
     try {
       requestDTO.setUserNum(userNum);
@@ -47,12 +49,10 @@ public class DiyController {
   @GetMapping("/packages/{package_num}")
   public ResponseEntity<?> getDiyDetail(@PathVariable("package_num") Long package_num, @AuthenticationPrincipal CustomUserDetails userDetails) {
     try {
-
-      Long currentUserNum = userDetails.getId();
+      Long currentUserNum = (userDetails != null&& userDetails.getRole().equals("ROLE_USER")) ? userDetails.getId() : null;
       ResponseDTO responseDTO = diyService.getDiyDetail(package_num, currentUserNum);
       return new ResponseEntity<>(responseDTO, HttpStatus.OK);
-    }
-    catch (RuntimeException e){
+    } catch (RuntimeException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -95,7 +95,7 @@ public class DiyController {
   @PostMapping("/user/packages/likes/{package_num}" )
   public ResponseEntity<?> likeDiy(@PathVariable("package_num") Long package_num, @AuthenticationPrincipal CustomUserDetails userDetails) {
     // 사용자가 인증되지 않았을 경우 null 확인
-    if (userDetails == null) {
+    if (userDetails == null || !userDetails.getRole().equals("ROLE_USER")) {
       return new ResponseEntity<>("User not authenticated", HttpStatus.UNAUTHORIZED);
     }
     Long userNum =userDetails.getId();
