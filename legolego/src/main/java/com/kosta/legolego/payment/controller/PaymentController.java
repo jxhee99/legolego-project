@@ -6,6 +6,7 @@ import com.kosta.legolego.orders.repository.OrderRepository;
 import com.kosta.legolego.orders.service.OrderService;
 import com.kosta.legolego.payment.dto.PaymentRequestDto;
 import com.kosta.legolego.payment.service.PaymentService;
+import com.kosta.legolego.security.CustomUserDetails;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
@@ -16,12 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 
 @Slf4j
 @RestController
-@RequestMapping("/payments")
+@RequestMapping("/user/payments")
 @RequiredArgsConstructor
 public class PaymentController {
 
@@ -46,7 +48,12 @@ public class PaymentController {
 
     // 결제 완료 요청 및 결제 실패 시 환불 처리
     @PostMapping("/complete")
-    public ResponseEntity<String> paymentComplete(@RequestBody PaymentRequestDto paymentRequestDto) {
+    public ResponseEntity<String> paymentComplete(@AuthenticationPrincipal CustomUserDetails userDetails
+,@RequestBody PaymentRequestDto paymentRequestDto) {
+        if (userDetails == null || !userDetails.getRole().equals("ROLE_USER")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         try {
             String impUid = paymentRequestDto.getImpUid();
             String merchantUid = paymentRequestDto.getMerchantUid();
@@ -80,7 +87,11 @@ public class PaymentController {
 
     //  결제 정보 검증
     @PostMapping("/validation/{imp_uid}")
-    public ResponseEntity<String> validatePayment(@RequestBody PaymentRequestDto paymentRequestDto){
+    public ResponseEntity<String> validatePayment(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody PaymentRequestDto paymentRequestDto){
+        if (userDetails == null || !userDetails.getRole().equals("ROLE_USER")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         try {
             String impUid = paymentRequestDto.getImpUid();
             String merchantUid = paymentRequestDto.getMerchantUid();

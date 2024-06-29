@@ -11,6 +11,7 @@ import com.kosta.legolego.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class OrderService {
     PaymentService paymentService;
 
     //    새로운 주문 정보 생성
+    @Transactional
     public OrderDto createOrder(OrderDto orderDto){
         log.info("Creating order for userNum: {} and productNum: {}",
                 orderDto.getUserNum(), orderDto.getProductNum());
@@ -112,6 +114,7 @@ public class OrderService {
 
 
     //    특정 주문 취소
+    @Transactional
     public void deleteOrder(Long orderNum){
 
         Order order = orderRepository.findById(orderNum)

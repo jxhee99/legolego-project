@@ -77,11 +77,6 @@ public class DiyListService {
     // 상품 등록 승인 (only admin)
     public DiyList registerProduct(Long adminNum, Long listNum, String recruitmentDeadline) {
 
-        // 관리자인지 확인
-        if(!adminRepository.existsById(adminNum)) {
-            throw new IllegalArgumentException("상품을 등록할 수 있는 권한이 없습니다.");
-        }
-
         Optional<DiyList> diyListOptional = diyListRepository.findById(listNum);
         if(diyListOptional.isPresent()) {
             DiyList diyList = diyListOptional.get();
@@ -92,9 +87,6 @@ public class DiyListService {
             }
 
             Admin admin = adminRepository.findByAdminNum(adminNum);
-            if (admin == null) {
-                throw new IllegalArgumentException("관리자를 찾을 수 없습니다.");
-            }
 
             // String 타입을 Timestamp 타입으로 변환
             DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
