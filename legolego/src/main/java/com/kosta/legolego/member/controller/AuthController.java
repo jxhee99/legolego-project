@@ -1,8 +1,6 @@
 package com.kosta.legolego.member.controller;
 
-import com.kosta.legolego.member.dto.LoginDto;
-import com.kosta.legolego.member.dto.ResponseDto;
-import com.kosta.legolego.member.dto.SignupDto;
+import com.kosta.legolego.member.dto.*;
 import com.kosta.legolego.member.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +22,6 @@ public class AuthController {
 
     // 회원가입
     @PostMapping("/signup")
-//    public ResponseDto signupUser(@Valid @RequestBody SignupDto signupDto,
-//                                  @RequestParam(name = "role") String role) {
-//        return authService.signup(signupDto, role);
-//    }
     public ResponseEntity<?> signupUser(@Valid @RequestBody SignupDto signupDto,
                                         @RequestParam(name = "role") String role) {
         try {
@@ -73,25 +67,44 @@ public class AuthController {
         return ResponseEntity.ok(isAvailable);
     }
 
-    // 아이디 찾기
-    @GetMapping("/find-email")
-    public String findEmail(@RequestParam("name") String name,
-                            @RequestParam("phone") String phone) {
-        return authService.findEmail(name, phone);
+    // 아이디 찾기 - 일반 회원
+    @GetMapping("/find-user-email")
+    public ResponseEntity<String> findUserEmail(@RequestParam(name = "userName") String userName,
+                                                @RequestParam(name = "userPhone") String userPhone) {
+        String email = authService.findUserEmail(userName, userPhone);
+        if (email != null) {
+            return ResponseEntity.ok().body(email);
+        } else {
+            return ResponseEntity.status(404).body("가입된 정보를 찾을 수 없습니다.");
+        }
     }
 
-//    // 비밀번호 재설정 요청
-//    @PostMapping("/reset-password")
-//    public void resetPassword(@RequestParam("email") String email,
-//                              @RequestParam("name") String name,
-//                              @RequestParam("phone") String phone) {
-//        authService.resetPassword(email, name, phone);
-//    }
-//
-//    // 비밀번호 업데이트
-//    @PostMapping("/update-password")
-//    public void updatePassword(@RequestParam("token") String token,
-//                               @RequestParam("newPassword") String newPassword) {
-//        authService.updatePassword(token, newPassword);
-//    }
+    // 아이디 찾기 - 여행사
+    @GetMapping("/find-partner-email")
+    public ResponseEntity<String> findPartnerEmail(@RequestParam(name = "companyName") String companyName,
+                                                   @RequestParam(name = "partnerPhone") String partnerPhone) {
+        String email = authService.findPartnerEmail(companyName, partnerPhone);
+        if (email != null) {
+            return ResponseEntity.ok().body(email);
+        } else {
+            return ResponseEntity.status(404).body("가입된 정보를 찾을 수 없습니다.");
+        }
+    }
+
+    // 비밀번호 찾기
+    @PostMapping("/find-password")
+    public ResponseEntity<String> findPassword(@RequestBody FindPasswordRequestDto findPasswordRequestDto) {
+        return authService.requestPasswordReset(findPasswordRequestDto);
+    }
+
+    @GetMapping("/reset-password")
+    public ResponseEntity<String> validateResetToken(@RequestParam String token) {
+        return authService.validateResetToken(token);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDto resetPasswordRequestDto) {
+        return authService.resetPassword(resetPasswordRequestDto.getToken(), resetPasswordRequestDto);
+    }
 }
+
