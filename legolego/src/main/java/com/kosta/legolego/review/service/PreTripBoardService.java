@@ -1,5 +1,6 @@
 package com.kosta.legolego.review.service;
 
+import com.kosta.legolego.orders.entity.Order;
 import com.kosta.legolego.products.dto.ProductDetailDto;
 import com.kosta.legolego.products.service.ProductService;
 import com.kosta.legolego.review.dto.PreTripBoardDetailDto;
@@ -49,5 +50,19 @@ public class PreTripBoardService {
                 .stream().map(ReviewDto::fromEntity).collect(Collectors.toList());
 
         return PreTripBoardDetailDto.fromEntity(preTripBoard, productDetailDto, reviwes);
+    }
+
+    // only admin - 게시글 삭제
+    public void deletePreTripBoard(Long boardNum) {
+        try {
+            PreTripBoard board = preTripBoardRepository.findById(boardNum)
+                    .orElseThrow( () -> new IllegalArgumentException("일치하는 게시글이 존재하지 않습니다."));
+            log.info("게시글 정보 : {}", boardNum );
+
+            preTripBoardRepository.delete(board);
+        } catch (Exception e) {
+            log.error("리뷰 삭제 오류", e);
+            throw e;
+        }
     }
 }
