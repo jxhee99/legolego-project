@@ -2,9 +2,7 @@ package com.kosta.legolego.member.service;
 
 import com.kosta.legolego.admin.entity.Admin;
 import com.kosta.legolego.admin.repository.AdminRepository;
-import com.kosta.legolego.member.dto.LoginDto;
-import com.kosta.legolego.member.dto.ResponseDto;
-import com.kosta.legolego.member.dto.SignupDto;
+import com.kosta.legolego.member.dto.*;
 import com.kosta.legolego.partner.entity.Partner;
 import com.kosta.legolego.partner.repository.PartnerRepository;
 import com.kosta.legolego.security.CustomUserDetailsService;
@@ -29,6 +27,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 // 로그인 시 이메일과 비밀번호를 확인하고, JWT 토큰을 발급
 @Service
 public class AuthService {
@@ -49,8 +51,8 @@ public class AuthService {
     private UserDetailsService userDetailsService;
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
-//    @Autowired
-//    private MailService mailService;
+    @Autowired
+    private EmailService emailService;
 //    @Autowired
 //    private RedisTemplate<String, Object> redisTemplate;
 
@@ -152,26 +154,92 @@ public class AuthService {
         return !userRepository.existsByUserEmail(email) && !partnerRepository.existsByPartnerEmail(email) && !adminRepository.existsByAdminEmail(email);
     }
 
-    public String findEmail(String name, String phone) {
-        User user = userRepository.findByUserNameAndUserPhone(name, phone);
+    // 아이디 찾기 - 일반 회원
+    public String findUserEmail(String userName, String userPhone) {
+        User user = userRepository.findByUserNameAndUserPhone(userName, userPhone);
         if (user != null) {
             return user.getUserEmail();
         } else {
-            throw new RuntimeException("일치하는 계정이 없습니다.");
+            return null;
         }
     }
 
+    // 아이디 찾기 - 여행사
+    public String findPartnerEmail(String companyName, String partnerPhone) {
+        Partner partner = partnerRepository.findByCompanyNameAndPartnerPhone(companyName, partnerPhone);
+        if (partner != null) {
+            return partner.getPartnerEmail();
+        } else {
+            return null;
+        }
+    }
+
+    // 비밀번호 찾기
+    private Map<String, String> tokenStore = new HashMap<>();  // 토큰 저장소
+
     @Transactional
-//    public void resetPassword(String email, String name, String phone) {
-//        User user = userRepository.findByUserEmailAndUserNameAndUserPhone(email, name, phone);
-//        if (user != null) {
-//            String resetToken = generateResetToken();
-//            String resetLink = "http://localhost:8080/auth/update-password?token=" + resetToken;
-//            user.setResetToken(resetToken);
-//            userRepository.save(user);
-//            mailService.sendMail
-//        }
-//    }
+    public ResponseEntity<String> requestPasswordReset(FindPasswordRequestDto findPasswordRequestDto) {
+        User user = userRepository.findByUserEmailAndUserNameAndUserPhone(
+                findPasswordRequestDto.getEmail(), findPasswordRequestDto.getName(), findPasswordRequestDto.getPhone());
+
+        if (user != null) {
+            String token = generateResetToken(user.getUserEmail());
+            emailService.sendPasswordResetEmail(user.getUserEmail(), token);
+            return ResponseEntity.ok("비밀번호 재설정 이메일이 발송되었습니다.");
+        }
+
+        Partner partner = partnerRepository.findByPartnerEmailAndCompanyNameAndPartnerPhone(
+                findPasswordRequestDto.getEmail(), findPasswordRequestDto.getName(), findPasswordRequestDto.getPhone());
+
+        if (partner != null) {
+            String token = generateResetToken(partner.getPartnerEmail());
+            emailService.sendPasswordResetEmail(partner.getPartnerEmail(), token);
+            return ResponseEntity.ok("비밀번호 재설정 이메일이 발송되었습니다.");
+        }
+
+        return ResponseEntity.status(404).body("계정을 찾을 수 없습니다.");
+    }
+
+    private String generateResetToken(String email) {
+        String token = UUID.randomUUID().toString();
+        tokenStore.put(token, email);  // 토큰과 이메일을 매핑하여 저장
+        return token;
+    }
+
+    @Transactional
+    public ResponseEntity<String> validateResetToken(String token) {
+        if (isValidToken(token)) {
+            return ResponseEntity.ok("유효한 토큰입니다.");
+        }
+        return ResponseEntity.status(400).body("유효하지 않은 토큰입니다.");
+    }
+
+    private boolean isValidToken(String token) {
+        return tokenStore.containsKey(token);  // 토큰이 저장소에 존재하는지 확인
+    }
+
+    @Transactional
+    public ResponseEntity<String> resetPassword(String token, ResetPasswordRequestDto resetPasswordRequestDto) {
+        if (isValidToken(token)) {
+            String email = tokenStore.get(token);
+            User user = userRepository.findByUserEmail(email);
+            if (user != null) {
+                user.setUserPw(passwordEncoder.encode(resetPasswordRequestDto.getNewPassword()));  // 비밀번호 해시 저장
+                userRepository.save(user);
+                tokenStore.remove(token);  // 사용한 토큰 제거
+                return ResponseEntity.ok("비밀번호가 성공적으로 재설정되었습니다.");
+            }
+
+            Partner partner = partnerRepository.findByPartnerEmail(email);
+            if (partner != null) {
+                partner.setPartnerPw(passwordEncoder.encode(resetPasswordRequestDto.getNewPassword()));
+                partnerRepository.save(partner);
+                tokenStore.remove(token);
+                return ResponseEntity.ok("비밀번호가 성공적으로 재설정되었습니다.");
+            }
+        }
+        return ResponseEntity.status(400).body("유효하지 않은 요청입니다.");
+    }
 
     private ResponseDto convertToDto(Object entity, String role) {
         ResponseDto responseDto = new ResponseDto();
