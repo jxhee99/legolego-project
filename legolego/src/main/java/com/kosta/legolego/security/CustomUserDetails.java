@@ -40,6 +40,10 @@ public class CustomUserDetails implements UserDetails {
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_PARTNER"));
     }
 
+    public String getRole() {
+        return authorities.iterator().next().getAuthority();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;

@@ -63,16 +63,24 @@ public class ProductController {
     }
 
     // 사용자의 찜 목록 조회
-    @GetMapping("/user/products/{user_num}/wishlist")
-    private ResponseEntity<List<WishlistDto>> getWishlist(@PathVariable("user_num") Long user_num){
-        List<WishlistDto> wishlist = wishlistService.getWishlistByUser(user_num);
+    @GetMapping("/user/products/wishlist")
+    private ResponseEntity<List<WishlistDto>> getWishlist(@AuthenticationPrincipal CustomUserDetails userDetails){
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Long userNum = userDetails.getId();
+        List<WishlistDto> wishlist = wishlistService.getWishlistByUser(userNum);
         return new ResponseEntity<>(wishlist, HttpStatus.OK);
     }
 
     //  특정 상품 찜 count down & 사용자 찜 목록에서 제거
     @DeleteMapping("/user/products/{product_num}/wishlist")
-    public ResponseEntity<Void> removeFromWishlist(@PathVariable("product_num") Long product_num, @RequestParam("user_num") Long user_num){
-        wishlistService.removeFromWishlist(user_num, product_num);
+    public ResponseEntity<Void> removeFromWishlist(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("product_num") Long product_num){
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Long userNum = userDetails.getId();
+        wishlistService.removeFromWishlist(userNum, product_num);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

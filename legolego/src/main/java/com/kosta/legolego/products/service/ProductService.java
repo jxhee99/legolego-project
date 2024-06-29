@@ -104,13 +104,7 @@ public List<ProductDto> getAllProductsForAdmin(){
 }
 
 //   only admin - 상품 수정
-public ProductDto updateProduct(Long productNum, ProductDto productDto, Long adminNum){
-    // 관리자인지 확인
-    if(!adminRepository.existsById(adminNum)) {
-//        throw new IllegalArgumentException("상품을 수정 할 수 있는 권한이 없습니다.");
-        throw new IllegalArgumentException("상품을 수정 할 수 있는 권한이 없습니다.");
-    }
-
+public ProductDto updateProduct(Long productNum, ProductDto productDto){
     Product product = productRepository.findById(productNum)
             .orElseThrow(()-> new IllegalArgumentException("상품 수정 실패! " + "대상 상품이 없습니다."));
     product.patch(productDto);
@@ -121,11 +115,7 @@ public ProductDto updateProduct(Long productNum, ProductDto productDto, Long adm
 }
 
 //    only admin - 상품 삭제
-    public void deleteProduct(Long productNum, Long adminNum){
-        if(!adminRepository.existsById(adminNum)){
-            throw new IllegalArgumentException("상품을 삭제 할 수 있는 권한이 없습니다.");
-        }
-
+    public void deleteProduct(Long productNum){
       if(!productRepository.existsById(productNum)){
           throw new IllegalArgumentException("상품 삭제 실패! 대상 상품이 없습니다.");
       }

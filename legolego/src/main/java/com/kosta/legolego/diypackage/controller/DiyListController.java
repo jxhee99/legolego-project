@@ -24,7 +24,10 @@ public class DiyListController {
     DiyListService diyListService;
 
     @GetMapping("/admin/diylists")
-    public ResponseEntity<List<DiyList>> getDiyListForAdmin() {
+    public ResponseEntity<List<DiyList>> getDiyListForAdmin(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || !userDetails.getRole().equals("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         List<DiyList> diyLists = diyListService.getAllDiyListsForAdmin();
         return ResponseEntity.ok(diyLists);
     }
@@ -58,15 +61,22 @@ public class DiyListController {
 
     // 가격 제안 수락
     @PostMapping("/user/accept")
-    public ResponseEntity<DiyList> acceptProposal(@RequestParam("list_num") Long listNum, @RequestParam("package_num") Long packageNum) {
+    public ResponseEntity<DiyList> acceptProposal(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam("list_num") Long listNum, @RequestParam("package_num") Long packageNum) {
+        if (userDetails == null || !userDetails.getRole().equals("ROLE_USER")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         DiyList acceptedProposal = diyListService.acceptProposal(listNum, packageNum);
         log.info("list_num : {}, package_num : {}", listNum, packageNum);
         return ResponseEntity.ok(acceptedProposal);
     }
 
     // 상품 등록 승인
-    @PostMapping("/admin/{admin_num}/register")
-    public ResponseEntity<DiyList> registerProduct(@PathVariable("admin_num") Long adminNum, @RequestParam("list_num") Long listNum, @RequestParam("recruitment_dead_line") String recruitmentDeadline){
+    @PostMapping("/admin/register")
+    public ResponseEntity<DiyList> registerProduct(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam("list_num") Long listNum, @RequestParam("recruitment_dead_line") String recruitmentDeadline){
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Long adminNum = userDetails.getId();
         DiyList registeredProduct = diyListService.registerProduct(adminNum, listNum, recruitmentDeadline);
         return ResponseEntity.ok(registeredProduct);
     }
