@@ -6,10 +6,12 @@ import com.kosta.legolego.products.dto.ProductDetailDto;
 import com.kosta.legolego.products.dto.ProductDto;
 import com.kosta.legolego.products.entity.Product;
 import com.kosta.legolego.products.service.ProductService;
+import com.kosta.legolego.security.CustomUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,11 +39,13 @@ public class AdminProductController {
     }
 
 //  정식 상품 수정 (only admin)
-    @PatchMapping("/{product_num}/{admin_num}/edit")
-    public ResponseEntity<ProductDto> updateProductById(@PathVariable("product_num") Long productNum, @PathVariable("admin_num") Long adminNum, @RequestBody ProductDto productDto){
-
+    @PatchMapping("/{product_num}/edit")
+    public ResponseEntity<ProductDto> updateProductById(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("product_num") Long productNum, @RequestBody ProductDto productDto){
+        if (userDetails == null || !userDetails.getRole().equals("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         try {
-            ProductDto updatedProduct = productService.updateProduct(productNum, productDto, adminNum);
+            ProductDto updatedProduct = productService.updateProduct(productNum, productDto);
             return ResponseEntity.status(HttpStatus.OK).body(updatedProduct);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -50,9 +54,13 @@ public class AdminProductController {
     }
 
 //  정식 상품 삭제 (only admin)
-    @DeleteMapping("/{product_num}/{admin_num}/delete")
-    public void deleteProduct(@PathVariable("product_num") Long productNum, @PathVariable("admin_num") Long adminNum){
-        productService.deleteProduct(productNum, adminNum);
+    @DeleteMapping("/{product_num}/delete")
+    public ResponseEntity<Void> deleteProduct(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("product_num") Long productNum){
+        if (userDetails == null || !userDetails.getRole().equals("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        productService.deleteProduct(productNum);
+        return ResponseEntity.noContent().build();
     }
 
 

@@ -121,24 +121,24 @@ public class ReviewService {
 
     // 리뷰 삭제
     @Transactional
-    public void deleteReview(Long reviewNum, Long userNum){
+    public void deleteReview(Long reviewNum){
         try {
             Review review = reviewRepository.findById(reviewNum)
                     .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다."));
             log.info("review 정보 확인 : {}", reviewNum);
 
             Order order = review.getOrder();
-            User user = order.getUser();
+//            User user = order.getUser();
 
             if (!preTripBoardRepository.existsByProduct(order.getProduct())) {
                 throw new IllegalArgumentException("리뷰가 지난 여행 게시판에 존재하지 않습니다.");
             }
             log.info("지난 여행 게시판에 존재하는 리뷰 확인 : {}", review.getPreTripBoard().getBoardNum());
 
-            if (user.getUserNum() != userNum) {
-                throw new SecurityException("자신의 리뷰만 삭제할 수 있습니다.");
-            }
-            log.info("리뷰 작성자 확인 : {}", userNum);
+//            if (user.getUserNum() != userNum) {
+//                throw new SecurityException("자신의 리뷰만 삭제할 수 있습니다.");
+//            }
+//            log.info("리뷰 작성자 확인 : {}", userNum);
 
             // order 엔티티 외래키 제약조건으로 발생하는 에러 -> review 필드를 null로 먼저 설정 후 삭제
             order.setReview(null);
@@ -154,18 +154,18 @@ public class ReviewService {
 
     // only admin - 리뷰 삭제
     @Transactional
-    public void deleteReviewForAdmin(Long reveiwNum, Long adminNum) {
+    public void deleteReviewForAdmin(Long reveiwNum) {
         try {
             Review review = reviewRepository.findById(reveiwNum)
                     .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다."));
             log.info("리뷰 정보 : {}", reveiwNum);
 
-            Admin admin = adminRepository.findByAdminNum(adminNum);
-
-            if(!admin.getAdminNum().equals(adminNum)) {
-                throw new SecurityException("관리자만 삭제할 수 있습니다.");
-            }
-            log.info("관리자 확인 : {}", admin.getAdminNum());
+//            Admin admin = adminRepository.findByAdminNum(adminNum);
+//
+//            if(!admin.getAdminNum().equals(adminNum)) {
+//                throw new SecurityException("관리자만 삭제할 수 있습니다.");
+//            }
+//            log.info("관리자 확인 : {}", admin.getAdminNum());
 
             Order order = review.getOrder();
             order.setReview(null);
