@@ -19,17 +19,28 @@ public class PartnerPackageController {
 
   @Autowired
   PartnerPackageService partnerPackageService;
+
   @GetMapping("/over-liked-packages")
-  public ResponseEntity<List<OverLikedList>> getOverLikedList(@AuthenticationPrincipal CustomUserDetails userDetails)  {
-    List<OverLikedList> overLikedLists = partnerPackageService.getOverLikedList(userDetails.getId());
-    return ResponseEntity.ok(overLikedLists);
+  public ResponseEntity<?> getOverLikedList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    try {
+      List<OverLikedList> overLikedLists = partnerPackageService.getOverLikedList(userDetails.getId());
+      return ResponseEntity.ok(overLikedLists);
+    } catch (Exception e) {
+      return new ResponseEntity<>("Failed to retrieve over-liked packages", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
+
   // 작성자에게 가격 제안하기
   @PostMapping("/over-liked-packages/offer")
-  public ResponseEntity<?>  submitOfferForm(@RequestBody OfferFormDto offerFormDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
-    partnerPackageService.submitOfferForm(offerFormDto, userDetails.getId());
-    return new ResponseEntity<>(HttpStatus.CREATED);
+  public ResponseEntity<?> submitOfferForm(@RequestBody OfferFormDto offerFormDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    try {
+      if (userDetails == null || !userDetails.getRole().equals("ROLE_PARTNER")) {
+        return new ResponseEntity<>("Partner not authenticated", HttpStatus.UNAUTHORIZED);
+      }
+      partnerPackageService.submitOfferForm(offerFormDto, userDetails.getId());
+      return new ResponseEntity<>(HttpStatus.CREATED);
+    } catch (Exception e) {
+      return new ResponseEntity<>("Failed to submit offer form", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
-
-
 }

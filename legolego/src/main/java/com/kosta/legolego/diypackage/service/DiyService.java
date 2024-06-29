@@ -96,11 +96,11 @@ public class DiyService {
     DiyPackage diyPackage = diyRepository.findById(packageNum)
             .orElseThrow(() -> new  IllegalArgumentException("패키지를 찾을 수 없습니다"));
 
-    //로그인한 사용자가 가수요 참여했는 지 검사
-    boolean isLiked = diyLikeRepository.existsByUserNumAndDiy(currentUserNum, diyPackage);
+    // 로그인한 사용자가 가수요 참여했는 지 검사
+    boolean isLiked = (currentUserNum != null) && diyLikeRepository.existsByUserNumAndDiy(currentUserNum, diyPackage);
 
-    //작성자 인지 검사
-    boolean isWriter = diyPackage.getUser().getUserNum() == currentUserNum;
+    // 작성자인지 검사
+    boolean isWriter = (currentUserNum != null) && (diyPackage.getUser().getUserNum() ==currentUserNum);
 
 
     //엔티티를 dto로 변환
