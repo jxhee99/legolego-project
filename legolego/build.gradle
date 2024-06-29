@@ -76,6 +76,8 @@ dependencies {
     // portone 라이브러리
     implementation 'com.github.iamport:iamport-rest-client-java:0.1.6'
 
+    // 비밀번호 재설정 요청을 위한 메일 관련 라이브러리
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 
 }
 
