@@ -1,12 +1,20 @@
 package com.kosta.legolego.admin.service;
 
 import com.kosta.legolego.admin.dto.AdminProfileDto;
+import com.kosta.legolego.admin.dto.MemberDto;
 import com.kosta.legolego.admin.entity.Admin;
 import com.kosta.legolego.admin.repository.AdminRepository;
+import com.kosta.legolego.partner.entity.Partner;
+import com.kosta.legolego.partner.repository.PartnerRepository;
 import com.kosta.legolego.user.dto.UpdatePasswordDto;
+import com.kosta.legolego.user.entity.User;
+import com.kosta.legolego.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class AdminService {
@@ -15,6 +23,10 @@ public class AdminService {
     private AdminRepository adminRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PartnerRepository partnerRepository;
 
     // 프로필 조회
     public AdminProfileDto getProfile(Long adminNum) {
@@ -59,4 +71,34 @@ public class AdminService {
         return true;
     }
 
+    // 전체 회원 조회
+    public List<MemberDto> getAllMembers() {
+        List<MemberDto> members = new ArrayList<>();
+
+        List<User> users = userRepository.findAll();
+        for (User user : users) {
+            members.add(new MemberDto(
+                    user.getUserNum(),
+                    user.getUserEmail(),
+                    user.getUserName(),
+                    user.getUserNickname(),
+                    null,
+                    user.getUserPhone()
+            ));
+        }
+
+        List<Partner> partners = partnerRepository.findAll();
+        for (Partner partner : partners) {
+            members.add(new MemberDto(
+                    partner.getPartnerNum(),
+                    partner.getPartnerEmail(),
+                    null,
+                    null,
+                    partner.getCompanyName(),
+                    partner.getPartnerPhone()
+            ));
+        }
+
+        return members;
+    }
 }

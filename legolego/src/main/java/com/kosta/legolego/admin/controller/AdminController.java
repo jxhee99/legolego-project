@@ -1,6 +1,7 @@
 package com.kosta.legolego.admin.controller;
 
 import com.kosta.legolego.admin.dto.AdminProfileDto;
+import com.kosta.legolego.admin.dto.MemberDto;
 import com.kosta.legolego.admin.service.AdminService;
 import com.kosta.legolego.security.CustomUserDetails;
 import com.kosta.legolego.user.dto.UpdatePasswordDto;
@@ -9,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
@@ -62,5 +65,16 @@ public class AdminController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    // 전체 회원 조회
+    @GetMapping("/members")
+    public ResponseEntity<List<MemberDto>> getAllMembers(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || !"ROLE_ADMIN".equals(userDetails.getRole())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<MemberDto> members = adminService.getAllMembers();
+        return ResponseEntity.ok(members);
     }
 }
