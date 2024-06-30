@@ -42,9 +42,6 @@ public class ProductService {
     DetailCourseRepository detailCourseRepository;
 
     @Autowired
-    AdminRepository adminRepository;
-
-    @Autowired
     PreTripBoardRepository preTripBoardRepository;
 
     @Autowired
