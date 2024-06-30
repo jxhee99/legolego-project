@@ -4,9 +4,14 @@ import com.kosta.legolego.diypackage.entity.DiyLikeEntity;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
 import com.kosta.legolego.diypackage.repository.DiyLikeRepository;
 import com.kosta.legolego.user.dto.MyPageDto;
+import com.kosta.legolego.user.dto.MyProfileDto;
+import com.kosta.legolego.user.dto.UpdatePasswordDto;
+import com.kosta.legolego.user.entity.User;
 import com.kosta.legolego.user.repository.MyPageRepository;
+import com.kosta.legolego.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +25,10 @@ public class MyPageService {
     private MyPageRepository myPageRepository;
     @Autowired
     private DiyLikeRepository diyLikeRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // 내가 쓴 글 리스트 조회
     public List<MyPageDto> getPackagesByUserNum(Long userNum) {
@@ -43,4 +52,65 @@ public class MyPageService {
 //        List<DiyList> diyLists = myPageRepository.findByDiyPackageUserUserNumAndDiyPackagePackageLikedNumGreaterThanEqual(userNum, packageLikedNum);
 //        return diyLists.stream().map(MyPageDto::new).collect(Collectors.toList());
 //    }
+
+    // 프로필 조회
+    public MyProfileDto getProfile(Long userNum) {
+        User user = userRepository.findById(userNum)
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 사용자 ID입니다."));
+
+        return new MyProfileDto(
+                user.getUserNum(),
+                user.getUserNickname(),
+                user.getUserPhone(),
+                user.getUserEmail(),
+                user.getUserName()
+        );
+    }
+
+    // 프로필 변경
+    public boolean updateProfile(Long userNum, MyProfileDto myProfileDto) {
+        User user = userRepository.findById(userNum)
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 사용자 ID입니다."));
+
+        if (myProfileDto.getUserNickname() != null && !myProfileDto.getUserNickname().isEmpty()) {
+            if (userRepository.existsByUserNickname(myProfileDto.getUserNickname())) {
+                return false;  // 닉네임 중복 처리
+            }
+            user.setUserNickname(myProfileDto.getUserNickname());
+        }
+
+        if (myProfileDto.getUserPhone() != null && !myProfileDto.getUserPhone().isEmpty()) {
+            user.setUserPhone(myProfileDto.getUserPhone());
+        }
+
+        userRepository.save(user);
+        return true;
+    }
+
+    // 비밀번호 변경
+    public boolean updatePassword(Long userNum, UpdatePasswordDto updatePasswordDto) {
+        User user = userRepository.findById(userNum)
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 사용자 ID입니다."));
+
+        if (!passwordEncoder.matches(updatePasswordDto.getCurrentPassword(), user.getUserPw())) {
+            return false;
+        }
+
+        if (!updatePasswordDto.getNewPassword().equals(updatePasswordDto.getConfirmPassword())) {
+            throw new IllegalArgumentException("새 비밀번호와 일치하지 않습니다.");
+        }
+
+        user.setUserPw(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
+        userRepository.save(user);
+        return true;
+    }
+
+    // 회원 탈퇴
+    public void deleteUser(Long userNum) {
+        User user = userRepository.findById(userNum)
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 사용자 ID입니다."));
+
+        userRepository.delete(user);
+    }
+
 }
