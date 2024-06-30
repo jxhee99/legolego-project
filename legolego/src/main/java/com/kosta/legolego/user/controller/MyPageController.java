@@ -21,17 +21,25 @@ public class MyPageController {
     private MyPageService myPageService;
 
     // 내가 쓴 글 리스트 조회
-    @GetMapping("/packages/{user_num}")
-    public List<MyPageDto> getMyPackages(@PathVariable("user_num") Long userNum) {
-        // 추후 JWT 토큰에서 인증된 사용자 정보 추출
+    @GetMapping("/packages")
+    public List<MyPageDto> getMyPackages(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) {
+            throw new IllegalArgumentException("사용자 인증이 필요합니다.");
+        }
+        Long userNum = userDetails.getId();
         return myPageService.getPackagesByUserNum(userNum);
     }
 
     // 응원하기 버튼 누른 게시물 리스트 조회
-    @GetMapping("/likes/{user_num}")
-    public List<MyPageDto> getLikedPackages(@PathVariable("user_num") Long userNum) {
+    @GetMapping("/likes")
+    public List<MyPageDto> getLikedPackages(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) {
+            throw new IllegalArgumentException("사용자 인증이 필요합니다.");
+        }
+        Long userNum = userDetails.getId();
         return myPageService.getLikedPackagesByUserNum(userNum);
     }
+
 
     // 내가 쓴 글 목록 중 응원하기 조건 충족한 리스트만 조회
 //    @GetMapping("/liked_packages/{user_num}")
