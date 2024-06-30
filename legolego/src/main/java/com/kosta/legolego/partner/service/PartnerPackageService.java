@@ -2,12 +2,18 @@ package com.kosta.legolego.partner.service;
 
 import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
+import com.kosta.legolego.orders.entity.Order;
 import com.kosta.legolego.partner.dto.OfferFormDto;
+import com.kosta.legolego.partner.dto.PartnerOrderDto;
+import com.kosta.legolego.partner.dto.PartnerProductDto;
 import com.kosta.legolego.partner.entity.Partner;
 import com.kosta.legolego.diypackage.entity.OverLikedList;
 import com.kosta.legolego.diypackage.repository.OverLikedListRepository;
 import com.kosta.legolego.partner.repository.PartnerLikedListRepository;
+import com.kosta.legolego.partner.repository.PartnerOrderRepository;
 import com.kosta.legolego.partner.repository.PartnerRepository;
+import com.kosta.legolego.products.entity.Product;
+import com.kosta.legolego.products.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +29,10 @@ public class PartnerPackageService {
   OverLikedListRepository overLikedListRepository;
   @Autowired
   PartnerLikedListRepository partnerLikedListRepository;
+  @Autowired
+  ProductRepository productRepository;
+  @Autowired
+  PartnerOrderRepository orderRepository;
 
   @Autowired
   private PartnerRepository partnerRepository; // Partner 엔티티를 조회하기 위해 필요
@@ -64,6 +74,25 @@ public class PartnerPackageService {
     diyList.setRegDate(now);
 
     return partnerLikedListRepository.save(diyList);
+    }
+
+    public List<PartnerProductDto> getProductOrders(Long partnerNum){
+      //파트너Num으로 해당 파트너 조회
+      Partner partner = partnerRepository.findById(partnerNum)
+              .orElseThrow(() ->  new IllegalArgumentException("찾을 수 없는 파트너 번호: " + partnerNum));
+      //파트너와 isRegistered true 기준으로 리스트 조회
+      List<DiyList> diyListForPartner = partnerLikedListRepository.findByPartnerAndIsRegisteredTrue(partner);
+      // 각 DiyList의 productNum으로 Product 조회 및 ProductDto 생성
+      return diyListForPartner.stream()
+              .map(diy -> {
+                Long productNum = diy.getProductNum(); // DiyList에서 productNum 가져오기
+                Product product = productRepository.findById(productNum)
+                        .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 제품 번호: " + productNum));
+                List<Order> orderList = orderRepository.findByProduct(product);
+                List<PartnerOrderDto> orderDtoList = PartnerOrderDto.toDtoList(orderList);
+                return PartnerProductDto.toDto(product, orderDtoList);
+              })
+              .collect(Collectors.toList());
     }
 
   // 파트너와 관련된 DiyPackage들 조회

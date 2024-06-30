@@ -1,8 +1,8 @@
 package com.kosta.legolego.partner.controller;
 
-import com.kosta.legolego.diypackage.dto.RequestDTO;
 import com.kosta.legolego.partner.dto.OfferFormDto;
 import com.kosta.legolego.diypackage.entity.OverLikedList;
+import com.kosta.legolego.partner.dto.PartnerProductDto;
 import com.kosta.legolego.partner.service.PartnerPackageService;
 import com.kosta.legolego.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +41,19 @@ public class PartnerPackageController {
       return new ResponseEntity<>(HttpStatus.CREATED);
     } catch (Exception e) {
       return new ResponseEntity<>("Failed to submit offer form", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  //여행상품, 주문내역 조회
+  @GetMapping("/products")
+  public ResponseEntity<?> getProducts(@AuthenticationPrincipal CustomUserDetails userDetails){
+    try {
+      if (userDetails == null || !userDetails.getRole().equals("ROLE_PARTNER")) {
+        return new ResponseEntity<>("Partner not authenticated", HttpStatus.UNAUTHORIZED);
+      }
+      List<PartnerProductDto> products = partnerPackageService.getProductOrders(userDetails.getId());
+      return ResponseEntity.ok(products);
+    } catch (Exception e) {
+      return new ResponseEntity<>("Failed to get products", HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
