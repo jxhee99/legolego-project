@@ -17,7 +17,6 @@ import java.util.List;
 
 @Slf4j
 @RestController
-//@RequestMapping("/products")
 public class ProductController {
 
     @Autowired
@@ -49,10 +48,6 @@ public class ProductController {
 
     //  특정 상품 찜 count up & 사용자 찜 목록에서 추가
     @PostMapping("/user/products/{product_num}/wishlist")
-//    public ResponseEntity<Void> addToWishlist(@PathVariable("product_num") Long product_num, @RequestParam("user_num") Long user_num){
-//        wishlistService.addToWishlist(user_num, product_num);
-//        return ResponseEntity.status(HttpStatus.CREATED).build();
-//    }
     public ResponseEntity<Void> addToWishlist(@PathVariable("product_num") Long productNum, @AuthenticationPrincipal CustomUserDetails userDetails){
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

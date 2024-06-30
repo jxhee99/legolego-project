@@ -69,6 +69,7 @@ public class PaymentService {
     }
 
     //    포트원 api 사용해서 엑세스 토큰 발급 받기
+    @Transactional
     public String getAccessToken(String apiKey, String apiSecret) throws Exception {
         String url = "https://api.iamport.kr/users/getToken"; // portone 토큰 발급 api 엔드포인트
 
@@ -159,6 +160,7 @@ public class PaymentService {
     }
 
     // 환불 처리
+    @Transactional
     public void processRefund(Order order, String reason) throws Exception{
         log.info("환불처리 시작 - 주문 번호 : {}, 이유 : {}", order.getOrderNum(), reason);
         Optional<Payment> paymentOptional = paymentRepository.findByOrder(order);
