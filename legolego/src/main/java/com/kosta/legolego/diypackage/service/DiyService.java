@@ -181,6 +181,14 @@ public class DiyService {
     detailCourseRepository.deleteByRoute(diyPackage.getRoute());
   }
 
+  //해당 패키지의 작성자Num 반환
+  public Long getPackageOwner(Long packageNum){
+    DiyPackage diyPackage = diyRepository.findById(packageNum)
+            .orElseThrow(() -> new  IllegalArgumentException("패키지를 찾을 수 없습니다"));
+    Long userNum = diyPackage.getUser().getUserNum();
+    return userNum;
+  }
+
 
   private void saveDetailCourses(List<DiyDetailCourseDTO> diyDetailCourseDTOS, RouteEntity routeEntity) {
     for (DiyDetailCourseDTO diyDetailCourseDTO : diyDetailCourseDTOS) {
