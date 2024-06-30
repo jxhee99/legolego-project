@@ -53,7 +53,7 @@ public class SecurityConfig {
                                        
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/partner/**").hasRole("PARTNER")
-                        .requestMatchers("/user/**").hasRole("USER")
+                        .requestMatchers("/user/**", "/my/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
