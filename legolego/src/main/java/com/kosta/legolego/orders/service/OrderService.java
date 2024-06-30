@@ -10,6 +10,7 @@ import com.kosta.legolego.user.entity.User;
 import com.kosta.legolego.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,28 +53,34 @@ public class OrderService {
         order.setProduct(product);
         order.setTotalPrice(orderDto.getTotalPrice());
 
-        // 수량 * 가격 = 총 가격 계산 -> 프론트에서 진행
-//        BigDecimal totalPrice = product.getPrice().multiply(BigDecimal.valueOf(orderDto.getAmount()));
-//        order.setTotalPrice(totalPrice);
 
         // 주문 정보 저장
         Order savedOrder = orderRepository.save(order);
         log.info("Order created with orderNum: {}", savedOrder.getOrderNum());
 
-        // 상품 모집인원 확인 및 모집 확정 업데이트
-        updateProductRecruitmentStatus(product);
-
         return OrderDto.fromEntity(savedOrder); // 엔티티 -> DTO 변환
     }
 
+
     // 모집 확정 메서드 (necessaryPeople 보다 많을 경우)
+    @Transactional
     private void updateProductRecruitmentStatus(Product product){
-//        long orderCount = orderRepository.countByProduct(product);
         long paymentCount = orderRepository.countByProductAndPaymentStatus(product, true);
+        log.info("결제 인원 수 : {}", paymentCount);
+        log.info("모집 인원 수 : {}", product.getNecessaryPeople());
 
         if(paymentCount >= product.getNecessaryPeople() ) {
             product.setRecruitmentConfirmed(true);
             productRepository.save(product);
+        }
+    }
+
+    // 배치 작업을 주기적으로 실행하는 스케줄러
+    @Scheduled(fixedRate = 600000) // 10분마다 실행
+    public void updateRecruitmentStatus() {
+        List<Product> products = productRepository.findUnRecruitmentConfirmedProducts();
+        for (Product product : products) {
+            updateProductRecruitmentStatus(product);
         }
     }
 

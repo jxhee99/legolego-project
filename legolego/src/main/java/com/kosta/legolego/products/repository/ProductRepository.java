@@ -14,8 +14,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 //    검색 기능 쿼리 메서드 생성
    List<Product> findByProductNameContaining(String keyword);
 
+   // 지난여행 게시판 이동 위한 메서드
    @Query("select p from Product p " +
            "where p.recruitmentConfirmed = true " +
            "and p.diyList.diyPackage.airline.boardingDate < :currentTimestamp")
    List<Product> findByConfirmedAndBoardingDateBefore(@Param("currentTimestamp") LocalDateTime currentTimestamp);
+
+   @Query("select p from Product p where p.recruitmentConfirmed = false")
+   List<Product> findUnRecruitmentConfirmedProducts();
 }
