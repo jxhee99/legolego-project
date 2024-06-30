@@ -26,4 +26,7 @@ public class Wishlist {
     @ManyToOne
     @JoinColumn(name = "product_num", nullable = false)
     private Product product;
+
+    @Column(name = "wishlist_status")
+    private boolean wishlistStatus = false;
 }

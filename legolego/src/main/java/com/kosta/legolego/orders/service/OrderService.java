@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 @Slf4j
@@ -119,8 +121,25 @@ public class OrderService {
 
         Order order = orderRepository.findById(orderNum)
                 .orElseThrow(()-> new RuntimeException("주문을 찾을 수 없습니다."));
+
+        Product product = order.getProduct();
+        if(product == null) {
+            throw new RuntimeException("주문에 해당하는 상품을 찾을 수 없습니다.");
+        }
+
         try {
+            // 현재 시간 LocalDateTime으로 생성 후 Timestamp로 변환하는 작업
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            Timestamp currentTimestamp = Timestamp.valueOf(currentDateTime);
+            log.info("Current timestamp: {}", currentTimestamp);
+
+            // 주문 취소 기간 설정
+            if(product.getRecruitmentConfirmed() && product.getRecruitmentDeadline().before(currentTimestamp)) {
+                throw new IllegalArgumentException("주문 취소 기간이 지났습니다.");
+            }
+
             paymentService.processRefund(order, "주문 취소에 따른 환불 요청");
+
         } catch (Exception e) {
             log.error("환불 처리 중 오류 발생 : ", e);
 

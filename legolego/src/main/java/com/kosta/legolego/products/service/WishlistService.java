@@ -45,6 +45,7 @@ public class WishlistService {
         Wishlist wishlist = new Wishlist();
         wishlist.setUser(user);
         wishlist.setProduct(product);
+        wishlist.setWishlistStatus(true);
         wishlistRepository.save(wishlist);
 
         // 4. 상품 테이블의 wishlist count 필드 업데이트
@@ -66,6 +67,8 @@ public class WishlistService {
         Wishlist wishlist = wishlistRepository.findByUser_userNumAndProduct_productNum(userNum, productNum)
                 .orElseThrow(() -> new ResolutionException("찜 목록에서 상품을 찾을 수 없습니다."));
         wishlistRepository.delete(wishlist);
+        wishlist.setWishlistStatus(false);
+        wishlistRepository.save(wishlist);
 
         // 상품 테이블의 wishlist count 필드 업데이트
         Product product = productRepository.findById(productNum)

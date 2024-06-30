@@ -59,12 +59,19 @@ public class ProductService {
     }
 
     //   상품 상세 조회
+    @Transactional
     public ProductDetailDto getProductByDetailId(Long productNum){
+
         Product product = productRepository.findById(productNum)
                 .orElseThrow(()->new RuntimeException("상품을 찾을 수 없습니다."));
 
         DiyList diyList = diyListRepository.findByProductNum(productNum)
                 .orElseThrow(()->new RuntimeException("Diy 리스트를 찾을 수 없습니다."));
+
+        // 조회수 증가
+        product.setProductViewNum(product.getProductViewNum() + 1);
+        productRepository.save(product);
+        log.info("누적 조회수 : {}", product.getProductViewNum());
 
         // DIY 패키지의 항공사 정보를 DTO로 변환
         DiyAirlineDTO diyAirlineDTO = DiyAirlineDTO.toAirlineDTO(diyList.getDiyPackage().getAirline());
