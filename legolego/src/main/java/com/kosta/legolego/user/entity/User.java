@@ -38,6 +38,9 @@ public class User {
     @Column(name = "user_phone", nullable = false, length = 15)
     private String userPhone;
 
+    @Column(name = "profile_image", length = 1000)
+    private String profileImage;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "user_status")
     private User.UserStatus userStatus = UserStatus.registered;

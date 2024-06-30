@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -106,4 +107,30 @@ public class MyPageController {
         return ResponseEntity.ok("탈퇴가 완료되었습니다.");
     }
 
+    // 프로필 이미지 업데이트
+    @PatchMapping("/profile/image")
+    public ResponseEntity<String> updateProfileImage(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                     @RequestParam("image") MultipartFile image) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            myPageService.updateProfileImage(userDetails.getId(), image);
+            return ResponseEntity.ok("프로필 이미지 변경이 완료되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("이미지 업로드 중 오류가 발생했습니다.");
+        }
+    }
+
+    // 프로필 이미지 조회 (기본 이미지 처리)
+    @GetMapping("/profile/image")
+    public ResponseEntity<String> getProfileImage(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String profileImage = myPageService.getProfileImage(userDetails.getId());
+        return ResponseEntity.ok(profileImage);
+    }
 }
