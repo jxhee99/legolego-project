@@ -1,67 +1,44 @@
-package com.kosta.legolego.user.controller;
+package com.kosta.legolego.partner.controller;
 
+import com.kosta.legolego.partner.dto.PartnerProfileDto;
+import com.kosta.legolego.partner.service.PartnerService;
 import com.kosta.legolego.security.CustomUserDetails;
-import com.kosta.legolego.user.dto.MyPageDto;
-import com.kosta.legolego.user.dto.MyProfileDto;
 import com.kosta.legolego.user.dto.UpdatePasswordDto;
-import com.kosta.legolego.user.service.MyPageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/my")
-public class MyPageController {
+@RequestMapping("/partner")
+public class PartnerController {
 
     @Autowired
-    private MyPageService myPageService;
-
-    // 내가 쓴 글 리스트 조회
-    @GetMapping("/packages/{user_num}")
-    public List<MyPageDto> getMyPackages(@PathVariable("user_num") Long userNum) {
-        // 추후 JWT 토큰에서 인증된 사용자 정보 추출
-        return myPageService.getPackagesByUserNum(userNum);
-    }
-
-    // 응원하기 버튼 누른 게시물 리스트 조회
-    @GetMapping("/likes/{user_num}")
-    public List<MyPageDto> getLikedPackages(@PathVariable("user_num") Long userNum) {
-        return myPageService.getLikedPackagesByUserNum(userNum);
-    }
-
-    // 내가 쓴 글 목록 중 응원하기 조건 충족한 리스트만 조회
-//    @GetMapping("/liked_packages/{user_num}")
-//    public List<MyPageDto> getUserLikedPackages(@PathVariable("user_num") Long userNum,
-//                                                @RequestParam(value = "package_liked_num", defaultValue = "25") Integer packageLikedNum) {
-//        return myPageService.getUserLikedPackages(userNum, packageLikedNum);
-//    }
+    private PartnerService partnerService;
 
     // 프로필 조회
     @GetMapping("/profile")
-    public ResponseEntity<MyProfileDto> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) {
+    public ResponseEntity<PartnerProfileDto> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || !"ROLE_PARTNER".equals(userDetails.getRole())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        MyProfileDto profile = myPageService.getProfile(userDetails.getId());
+        PartnerProfileDto profile = partnerService.getProfile(userDetails.getId());
         return ResponseEntity.ok(profile);
     }
 
     // 프로필 변경
     @PatchMapping("/profile")
     public ResponseEntity<String> updateProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                @RequestBody MyProfileDto request) {
-        if (userDetails == null) {
+                                                @RequestBody PartnerProfileDto request) {
+        if (userDetails == null || !"ROLE_PARTNER".equals(userDetails.getRole())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        boolean isUpdated = myPageService.updateProfile(userDetails.getId(), request);
+        boolean isUpdated = partnerService.updateProfile(userDetails.getId(), request);
         if (isUpdated) {
-            return ResponseEntity.ok("프로필이 성공적으로 변경되었습니다.");
+            return ResponseEntity.ok("전화번호가 성공적으로 변경되었습니다.");
         } else {
             return ResponseEntity.badRequest().body("업데이트 중 오류가 발생했습니다.");
         }
@@ -71,12 +48,12 @@ public class MyPageController {
     @PatchMapping("/profile/password")
     public ResponseEntity<String> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                  @RequestBody UpdatePasswordDto request) {
-        if (userDetails == null) {
+        if (userDetails == null || !"ROLE_PARTNER".equals(userDetails.getRole())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         try {
-            boolean isUpdated = myPageService.updatePassword(userDetails.getId(), request);
+            boolean isUpdated = partnerService.updatePassword(userDetails.getId(), request);
             if (isUpdated) {
                 return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
             } else {
@@ -87,14 +64,14 @@ public class MyPageController {
         }
     }
 
-    // 회원 탈퇴
+    // 탈퇴
     @DeleteMapping("/profile/delete")
     public ResponseEntity<String> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) {
+        if (userDetails == null || !"ROLE_PARTNER".equals(userDetails.getRole())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        myPageService.deleteUser(userDetails.getId());
+        partnerService.deleteUser(userDetails.getId());
         return ResponseEntity.ok("탈퇴가 완료되었습니다.");
     }
 
