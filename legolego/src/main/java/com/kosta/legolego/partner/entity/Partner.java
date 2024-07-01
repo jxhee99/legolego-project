@@ -37,6 +37,9 @@ public class Partner {
     @Column(name = "partner_phone", nullable = false, length = 15)
     private String partnerPhone;
 
+    @Column(name = "profile_image", length = 1000)
+    private String profileImage;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "partner_status")
     private Partner.PartnerStatus partnerStatus = Partner.PartnerStatus.registered;
