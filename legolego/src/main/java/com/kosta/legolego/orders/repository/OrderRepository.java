@@ -19,9 +19,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     boolean existsById(Long userNum);
 
     Optional<Order> findByMerchantUid(String merchantUid);
-//    long countByProduct(Product product);
 
+    // 모집 확정 업데이트 위한 메서드
     long countByProductAndPaymentStatus(Product product, Boolean PaymentStatus);
-//    List<Order> findByUser_userNumAndProduct_productNum(Long userNum, Long productNum);
 
+    // 자동 환불 처리 되어야 하는 상품
+    List<Order> findByProductAndPaymentStatus(Product product, Boolean paymentStatus);
 }

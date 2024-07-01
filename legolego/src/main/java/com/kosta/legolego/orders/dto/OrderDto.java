@@ -23,6 +23,7 @@ public class OrderDto {
     private int quantity; // 수량
     private BigDecimal totalPrice; // 가격과 수량을 곱한 값
     private String merchantUid;
+    private boolean refundStatus; // 환불 상태
 
 
 
@@ -37,7 +38,8 @@ public class OrderDto {
                 order.getProduct().getPrice(),
                 order.getQuantity(),
                 order.getTotalPrice(),
-                order.getMerchantUid()
+                order.getMerchantUid(),
+                order.isRefundStatus()
         );
     }
 

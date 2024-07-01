@@ -58,4 +58,7 @@ public class Order {
     @JoinColumn(name = "review_num")
     private Review review; // 주문에 대한 리뷰 작성 여부 : boolean 타입으로 체크
 
+    @Column(name = "refund_status", nullable = false)
+    private boolean refundStatus;
+
 }
