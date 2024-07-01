@@ -26,6 +26,9 @@ public class Admin {
         @Column(name = "admin_name", nullable = false, length = 50)
         private String adminName;
 
+        @Column(name = "profile_image", length = 1000)
+        private String profileImage;
+
         @Column(name = "admin_approval", nullable = false)
         private Boolean adminApproval = false;
     

@@ -24,7 +24,7 @@ public class MyPageController {
     // 내가 쓴 글 리스트 조회
     @GetMapping("/packages")
     public List<MyPageDto> getMyPackages(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) {
+        if (userDetails == null || !"ROLE_USER".equals(userDetails.getRole())) {
             throw new IllegalArgumentException("사용자 인증이 필요합니다.");
         }
         Long userNum = userDetails.getId();
@@ -34,7 +34,7 @@ public class MyPageController {
     // 응원하기 버튼 누른 게시물 리스트 조회
     @GetMapping("/likes")
     public List<MyPageDto> getLikedPackages(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) {
+        if (userDetails == null || !"ROLE_USER".equals(userDetails.getRole())) {
             throw new IllegalArgumentException("사용자 인증이 필요합니다.");
         }
         Long userNum = userDetails.getId();
@@ -52,7 +52,7 @@ public class MyPageController {
     // 프로필 조회
     @GetMapping("/profile")
     public ResponseEntity<MyProfileDto> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) {
+        if (userDetails == null || !"ROLE_USER".equals(userDetails.getRole())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -64,7 +64,7 @@ public class MyPageController {
     @PatchMapping("/profile")
     public ResponseEntity<String> updateProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                 @RequestBody MyProfileDto request) {
-        if (userDetails == null) {
+        if (userDetails == null || !"ROLE_USER".equals(userDetails.getRole())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -80,7 +80,7 @@ public class MyPageController {
     @PatchMapping("/profile/password")
     public ResponseEntity<String> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                  @RequestBody UpdatePasswordDto request) {
-        if (userDetails == null) {
+        if (userDetails == null || !"ROLE_USER".equals(userDetails.getRole())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -99,7 +99,7 @@ public class MyPageController {
     // 회원 탈퇴
     @DeleteMapping("/profile/delete")
     public ResponseEntity<String> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) {
+        if (userDetails == null || !"ROLE_USER".equals(userDetails.getRole())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -111,7 +111,7 @@ public class MyPageController {
     @PatchMapping("/profile/image")
     public ResponseEntity<String> updateProfileImage(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                      @RequestParam("image") MultipartFile image) {
-        if (userDetails == null) {
+        if (userDetails == null || !"ROLE_USER".equals(userDetails.getRole())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -126,7 +126,7 @@ public class MyPageController {
     // 프로필 이미지 조회 (기본 이미지 처리)
     @GetMapping("/profile/image")
     public ResponseEntity<String> getProfileImage(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) {
+        if (userDetails == null || !"ROLE_USER".equals(userDetails.getRole())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 

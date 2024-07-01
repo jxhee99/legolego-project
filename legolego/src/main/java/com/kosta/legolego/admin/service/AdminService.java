@@ -12,9 +12,15 @@ import com.kosta.legolego.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AdminService {
@@ -101,4 +107,33 @@ public class AdminService {
 
         return members;
     }
+
+    // 프로필 이미지 업데이트 - 로컬에 저장
+    public void updateProfileImage(Long adminNum, MultipartFile image) throws IOException {
+        Admin admin = adminRepository.findById(adminNum)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자입니다."));
+
+        // 이미지 저장 로직
+        String imagePath = saveImageLocally(image);
+
+        admin.setProfileImage(imagePath);
+        adminRepository.save(admin);
+    }
+
+    private String saveImageLocally(MultipartFile image) throws IOException {
+        String fileName = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
+        Path path = Paths.get("local_images/" + fileName);
+        Files.createDirectories(path.getParent());
+        Files.write(path, image.getBytes());
+        return path.toString();
+    }
+
+    // 프로필 이미지 조회 (기본 이미지)
+    public String getProfileImage(Long adminNum) {
+        Admin admin = adminRepository.findById(adminNum)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자입니다."));
+
+        return admin.getProfileImage() != null ? admin.getProfileImage() : "/path/to/default/image.jpg";
+    }
+
 }
