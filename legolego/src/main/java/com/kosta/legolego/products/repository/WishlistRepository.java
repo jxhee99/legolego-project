@@ -9,6 +9,9 @@ import java.util.Optional;
 
 @Repository
 public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
-    List<Wishlist> findByUser_userNum(Long userNum);
+    List<Wishlist> findByUser_userNumAndWishlistStatus(Long userNum, boolean wishlistStatus);
     Optional<Wishlist> findByUser_userNumAndProduct_productNum(Long userNum, Long productNum);
+
+    // 특정 상품 찜 목록 확인
+    Optional<Wishlist> findByUser_userNumAndProduct_productNumAndWishlistStatus(Long userNum, Long productNum, boolean wishlistStatus);
 }

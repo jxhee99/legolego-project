@@ -67,7 +67,7 @@ public class WishlistService {
     // 찜 목록 조회
     public List<WishlistDto> getWishlistByUser(Long userNum){
         // 사용자 별로 찜 목록을 반환
-        return wishlistRepository.findByUser_userNum(userNum)
+        return wishlistRepository.findByUser_userNumAndWishlistStatus(userNum, true)
                 .stream()
                 .map(WishlistDto::new) // wishlist 엔티티 -> wishlist DTO로 변환
                 .collect(Collectors.toList());
@@ -87,4 +87,9 @@ public class WishlistService {
         productRepository.save(product);
     }
 
+    // 상품 찜 상태 확인
+    public boolean isProductInWishlist(Long userNum, Long productNum) {
+        return  wishlistRepository.findByUser_userNumAndProduct_productNumAndWishlistStatus(userNum, productNum, true)
+                .isPresent();
+    }
 }
