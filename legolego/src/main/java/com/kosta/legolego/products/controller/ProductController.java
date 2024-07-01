@@ -79,5 +79,14 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-
+    // 페이지가 로드될 때 특정 상품이 찜 상태 확인
+    @GetMapping("/user/products/{product_num}/wishlist/status")
+    public ResponseEntity<Boolean> isProductInWishlist(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("product_num") Long productNum){
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Long userNum = userDetails.getId();
+        boolean isWishlist = wishlistService.isProductInWishlist(userNum, productNum);
+        return ResponseEntity.ok(isWishlist);
+    }
 }
