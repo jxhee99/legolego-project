@@ -35,7 +35,7 @@ public class OrderService {
     @Autowired
     PaymentService paymentService;
 
-    //    새로운 주문 정보 생성
+    // 새로운 주문 정보 생성
     @Transactional
     public OrderDto createOrder(OrderDto orderDto){
         log.info("Creating order for userNum: {} and productNum: {}",
@@ -97,7 +97,7 @@ public class OrderService {
     }
 
 
-    //    orderNum으로 특정 주문 조회
+    // orderNum으로 특정 주문 조회
     public OrderDto getOrderById(Long orderNum){
         Order order = orderRepository.findById(orderNum)
                 .orElseThrow(() -> new RuntimeException("주문을 찾을 수 없습니다."));
@@ -105,7 +105,7 @@ public class OrderService {
 
     }
 
-    //    관리자 모든 주문 조회
+    // 관리자 모든 주문 조회
     public List<OrderDto> getAllOrders(){
         List<Order> orders = orderRepository.findAll();
         return orders.stream()
@@ -113,7 +113,7 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    //    사용자 주문 조회
+    // 사용자 주문 조회
     public List<OrderDto> getUserOrders(@RequestParam("user_num") Long userNum){
         List<Order> orders = orderRepository.findByUser_userNum(userNum);
         return orders.stream()
@@ -122,7 +122,7 @@ public class OrderService {
     }
 
 
-    //    특정 주문 취소
+    // 특정 주문 취소
     @Transactional
     public void deleteOrder(Long orderNum){
 
@@ -152,7 +152,40 @@ public class OrderService {
 
             throw new RuntimeException("환불 처리 중 오류 발생");
         }
-        orderRepository.deleteById(orderNum);
+        order.setRefundStatus(true);
+//        orderRepository.deleteById(orderNum);
+    }
+
+    // 자동 환불
+    @Transactional
+    public void refundOrder(Order order) {
+        Order orders = orderRepository.findById(order.getOrderNum())
+                        .orElseThrow(()-> new RuntimeException("일치하는 주문번호가 없습니다"));
+        try {
+            paymentService.processRefund(orders, "모집인원 미달로 인한 자동 환불 요청");
+        } catch (Exception e) {
+            log.error("환불 처리 중 오류 발생 :", e);
+            throw new RuntimeException("환불 처리 중 오류 발생");
+        }
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void autoRefund() {
+
+        LocalDateTime currentTimestamp = LocalDateTime.now();
+        log.info("Current timestamp: {}", currentTimestamp);
+
+        // 모집 기간이 지난 상품
+        List<Product> products = productRepository.findUnConfirmedProductPastDeadlineBefore(currentTimestamp);
+        for(Product product : products) {
+            // 결제 완료 된 상품에 대한 주문들
+            List<Order> orders = orderRepository.findByProductAndPaymentStatus(product, true);
+            for(Order order : orders) {
+                refundOrder(order);
+                order.setRefundStatus(true);
+                orderRepository.save(order);
+            }
+        }
     }
 
 }
