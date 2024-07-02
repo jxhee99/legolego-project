@@ -135,17 +135,21 @@ public class DiyService {
 //put 수정
   public DiyPackage updateDiy(Long packageNum, RequestDTO requestDTO) {
     DiyPackage diyPackage = diyRepository.findById(packageNum)
+
             .orElseThrow(() -> new  IllegalArgumentException("패키지를 찾을 수 없습니다"));
+    // DetailCourseEntity 리스트 가져오기
+    List<DetailCourseEntity> detailCourses = detailCourseRepository.findByRoute(diyPackage.getRoute());
 
-    updateAirline(diyPackage.getAirline(), requestDTO.getAirline());
-    updateRoute(diyPackage.getRoute(), requestDTO.getRoute());
-
+    // 각 DetailCourseEntity에 연결된 Image 삭제
+    for (DetailCourseEntity detailCourse : detailCourses) {
+      imageRepository.deleteByDetailCourse(detailCourse);
+    }
     detailCourseRepository.deleteByRoute(diyPackage.getRoute());
     saveDetailCourses(requestDTO.getDetailCourses(), diyPackage.getRoute());
-
     updateDiyEntity(diyPackage, requestDTO.getPackageForm());
     return diyRepository.save(diyPackage);
   }
+
 //patch 수정
   public DiyPackage updateDiyPatch(Long packageNum, RequestDTO requestDTO) {
     DiyPackage diyPackage = diyRepository.findById(packageNum)
