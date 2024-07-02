@@ -9,7 +9,10 @@ import java.util.Optional;
 
 @Repository
 public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
+
+    // 찜 상태 true 목록만 필터링
     List<Wishlist> findByUser_userNumAndWishlistStatus(Long userNum, boolean wishlistStatus);
+
     Optional<Wishlist> findByUser_userNumAndProduct_productNum(Long userNum, Long productNum);
 
     // 특정 상품 찜 목록 확인

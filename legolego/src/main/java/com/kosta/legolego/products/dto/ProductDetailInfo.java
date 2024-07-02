@@ -5,6 +5,7 @@ import com.kosta.legolego.diypackage.dto.DiyDetailCourseDTO;
 import com.kosta.legolego.diypackage.dto.DiyRouteDTO;
 import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.image.entity.Image;
+import com.kosta.legolego.orders.entity.Order;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -17,5 +18,4 @@ public class ProductDetailInfo {
     private DiyAirlineDTO diyAirlineDTO;
     private DiyRouteDTO diyRouteDTO;
     private List<DiyDetailCourseDTO> diyDetailCourseDTOList;
-//    private List<Image> courseImage;
 }

@@ -9,6 +9,8 @@ import com.kosta.legolego.diypackage.repository.DetailCourseRepository;
 import com.kosta.legolego.diypackage.repository.DiyListRepository;
 import com.kosta.legolego.image.repository.ImageRepository;
 import com.kosta.legolego.image.service.ImageService;
+import com.kosta.legolego.orders.entity.Order;
+import com.kosta.legolego.orders.repository.OrderRepository;
 import com.kosta.legolego.products.dto.ProductDetailDto;
 import com.kosta.legolego.products.dto.ProductDetailInfo;
 import com.kosta.legolego.products.dto.ProductDto;
@@ -37,6 +39,9 @@ public class ProductService {
 
     @Autowired
     DiyListRepository diyListRepository;
+
+    @Autowired
+    OrderRepository orderRepository;
 
     @Autowired
     DetailCourseRepository detailCourseRepository;
@@ -86,10 +91,12 @@ public class ProductService {
             diyDetailCourseDTO.setFileUrls(imageUrls);
         }
 
+        // 상품 구매 인원수
+        long orderCount = orderRepository.countByProductAndPaymentStatus(product, true);
 
         ProductDetailInfo info = new ProductDetailInfo(diyList, diyAirlineDTO, diyRouteDTO, diyDetailCourseDTOList);
 
-        return ProductDetailDto.fromInfo(product, info);
+        return ProductDetailDto.fromInfo(product, info, (int)orderCount);
 
     }
 

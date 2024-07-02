@@ -76,7 +76,7 @@ public class OrderService {
     }
 
     // 배치 작업을 주기적으로 실행하는 스케줄러
-    @Scheduled(fixedRate = 600000) // 10분마다 실행
+    @Scheduled(fixedRate = 3600000) // 10분마다 실행
     public void updateRecruitmentStatus() {
         List<Product> products = productRepository.findUnRecruitmentConfirmedProducts();
         for (Product product : products) {
