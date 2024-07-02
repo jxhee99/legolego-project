@@ -46,6 +46,7 @@ public class OrderController {
         response.put("orderNumber", newOrder.getMerchantUid());
         response.put("userEmail", newOrder.getUserEmail());
         response.put("userName", newOrder.getUserName());
+        response.put("orderNum", String.valueOf(newOrder.getOrderNum()));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

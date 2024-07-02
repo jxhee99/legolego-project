@@ -4,11 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kosta.legolego.diypackage.dto.DiyAirlineDTO;
 import com.kosta.legolego.diypackage.dto.DiyDetailCourseDTO;
 import com.kosta.legolego.diypackage.dto.DiyRouteDTO;
-import com.kosta.legolego.diypackage.entity.AirlineEntity;
-import com.kosta.legolego.diypackage.entity.DiyList;
-import com.kosta.legolego.diypackage.entity.DiyPackage;
-import com.kosta.legolego.diypackage.entity.RouteEntity;
-import com.kosta.legolego.image.entity.Image;
 import com.kosta.legolego.products.entity.Product;
 import lombok.*;
 
@@ -68,10 +63,13 @@ public class ProductDetailDto {
     @JsonProperty("detailCourse")
     private List<DiyDetailCourseDTO> detailCourse; // 상세 일정
 
+    @JsonProperty("orderCount")
+    private int orderCount; // 추가
+
 
 
     // 파라미터가 많아 가독성이 떨어짐 -> builder() 사용하여 가독성 높임
-    public static ProductDetailDto fromInfo(Product product, ProductDetailInfo info) {
+    public static ProductDetailDto fromInfo(Product product, ProductDetailInfo info, int orderCount) {
 
         return ProductDetailDto.builder()
                 .productNum(product.getProductNum())
@@ -89,6 +87,7 @@ public class ProductDetailDto {
                 .airline(info.getDiyAirlineDTO())
                 .route(info.getDiyRouteDTO())
                 .detailCourse(info.getDiyDetailCourseDTOList())
+                .orderCount(orderCount)
                 .build();
     }
 }
