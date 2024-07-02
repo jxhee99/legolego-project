@@ -19,6 +19,17 @@ public class ReviewController {
     @Autowired
     ReviewService reviewService;
 
+    // 리뷰 조회
+    @GetMapping("/user/reviews/{review_num}/orders/{order_num}")
+    public ResponseEntity<ReviewDto> getReview(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("review_num") Long reviewNum, @PathVariable("order_num") Long orderNum){
+        if(userDetails == null || !userDetails.getRole().equals("ROLE_USER")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        ReviewDto reviewDto = reviewService.getReview(reviewNum, orderNum);
+        return ResponseEntity.status(HttpStatus.OK).body(reviewDto);
+    }
+
     // 리뷰 생성
     @PostMapping("/user/reviews/{order_num}")
     public ResponseEntity<ReviewDto> createReview(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("order_num") Long orderNum, @RequestBody ReviewDto reviewDto){

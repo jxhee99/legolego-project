@@ -31,8 +31,26 @@ public class ReviewService {
     @Autowired
     PreTripBoardRepository preTripBoardRepository;
 
-    @Autowired
-    AdminRepository adminRepository;
+
+    // 리뷰 조회
+    public ReviewDto getReview(Long reviewNum, Long orderNum) {
+        try {
+            Order order = orderRepository.findById(orderNum)
+                    .orElseThrow(() -> new RuntimeException("주문번호를 찾을 수 없습니다."));
+
+            Review review = order.getReview();
+
+            if (!review.getReviewNum().equals(reviewNum)) {
+                throw new IllegalArgumentException("작성한 리뷰 존재하지 않습니다.");
+            }
+
+            return ReviewDto.fromEntity(review);
+
+        } catch (Exception e) {
+            log.error("리뷰 조회 오류", e);
+            throw e;
+        }
+    }
 
     // 리뷰 생성
     @Transactional
