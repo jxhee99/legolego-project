@@ -137,6 +137,7 @@ public class DiyService {
     DiyPackage diyPackage = diyRepository.findById(packageNum)
 
             .orElseThrow(() -> new  IllegalArgumentException("패키지를 찾을 수 없습니다"));
+
     // DetailCourseEntity 리스트 가져오기
     List<DetailCourseEntity> detailCourses = detailCourseRepository.findByRoute(diyPackage.getRoute());
 
@@ -144,9 +145,23 @@ public class DiyService {
     for (DetailCourseEntity detailCourse : detailCourses) {
       imageRepository.deleteByDetailCourse(detailCourse);
     }
+    //디테일 코스 삭제 후 새로 저장
     detailCourseRepository.deleteByRoute(diyPackage.getRoute());
     saveDetailCourses(requestDTO.getDetailCourses(), diyPackage.getRoute());
-    updateDiyEntity(diyPackage, requestDTO.getPackageForm());
+
+    //썸네일 이미지 설정
+    String firstUrl = requestDTO.getDetailCourses().stream()
+            .map(detailCourse -> detailCourse.getFileUrls().stream()
+                    .filter(url -> url != null && !url.isEmpty())
+                    .findFirst())
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("이미지 최소 한개 필요"));
+    diyPackage.setProfileImg(firstUrl);
+
+    diyPackage.setPackageName(requestDTO.getPackageForm().getPackageName());
+    diyPackage.setShortDescription(requestDTO.getPackageForm().getShortDescription());
     return diyRepository.save(diyPackage);
   }
 
@@ -207,24 +222,7 @@ public class DiyService {
       }
     }
   }
-
-
-
-  //put update관련 메서드
-  private void updateAirline(AirlineEntity airlineEntity, DiyAirlineDTO diyAirlineDTO) {
-    BeanUtils.copyProperties(diyAirlineDTO, airlineEntity);
-    airlineRepository.save(airlineEntity);
-  }
-
-  private void updateRoute(RouteEntity routeEntity, DiyRouteDTO diyRouteDTO) {
-    BeanUtils.copyProperties(diyRouteDTO, routeEntity);
-    routeRepository.save(routeEntity);
-  }
-  private void updateDiyEntity(DiyPackage diyPackage, DiyDTO diyDTO) {
-    BeanUtils.copyProperties(diyDTO, diyPackage);
-    diyRepository.save(diyPackage);
-  }
-
+  
   //patch update 관련 메서드
   private void updatePartialAirline(AirlineEntity airlineEntity, DiyAirlineDTO diyAirlineDTO) {
     if (diyAirlineDTO != null) {
