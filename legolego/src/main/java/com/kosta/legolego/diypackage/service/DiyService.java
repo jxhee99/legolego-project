@@ -165,18 +165,6 @@ public class DiyService {
     return diyRepository.save(diyPackage);
   }
 
-//patch 수정
-  public DiyPackage updateDiyPatch(Long packageNum, RequestDTO requestDTO) {
-    DiyPackage diyPackage = diyRepository.findById(packageNum)
-            .orElseThrow(() -> new  IllegalArgumentException("패키지를 찾을 수 없습니다"));
-
-    updatePartialAirline(diyPackage.getAirline(), requestDTO.getAirline());
-    updatePartialRoute(diyPackage.getRoute(), requestDTO.getRoute());
-    updatePartialCourse(diyPackage.getRoute(), requestDTO.getDetailCourses());
-    updatePartialDiyEntity(diyPackage, requestDTO.getPackageForm());
-
-    return diyRepository.save(diyPackage);
-  }
 //삭제
   public void deleteDiy(Long packageNum){
     DiyPackage diyPackage = diyRepository.findById(packageNum)
@@ -207,7 +195,13 @@ public class DiyService {
     Long userNum = diyPackage.getUser().getUserNum();
     return userNum;
   }
-
+  //해당 패키지의 likeNum 반환
+  public int getLikeNum(Long packageNum){
+    DiyPackage diyPackage = diyRepository.findById(packageNum)
+            .orElseThrow(() -> new  IllegalArgumentException("패키지를 찾을 수 없습니다"));
+    int likeNum = diyPackage.getPackageLikedNum();
+    return likeNum;
+  }
 
   private void saveDetailCourses(List<DiyDetailCourseDTO> diyDetailCourseDTOS, RouteEntity routeEntity) {
     for (DiyDetailCourseDTO diyDetailCourseDTO : diyDetailCourseDTOS) {
@@ -221,6 +215,19 @@ public class DiyService {
         log.warn("No Image URLs to save for DetailCourseEntity ID: {}", detailCourseEntity.getDetailCourseNum());
       }
     }
+  }
+
+  //patch 수정
+  public DiyPackage updateDiyPatch(Long packageNum, RequestDTO requestDTO) {
+    DiyPackage diyPackage = diyRepository.findById(packageNum)
+            .orElseThrow(() -> new  IllegalArgumentException("패키지를 찾을 수 없습니다"));
+
+    updatePartialAirline(diyPackage.getAirline(), requestDTO.getAirline());
+    updatePartialRoute(diyPackage.getRoute(), requestDTO.getRoute());
+    updatePartialCourse(diyPackage.getRoute(), requestDTO.getDetailCourses());
+    updatePartialDiyEntity(diyPackage, requestDTO.getPackageForm());
+
+    return diyRepository.save(diyPackage);
   }
   
   //patch update 관련 메서드
