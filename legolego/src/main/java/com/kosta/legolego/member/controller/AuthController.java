@@ -2,6 +2,8 @@ package com.kosta.legolego.member.controller;
 
 import com.kosta.legolego.member.dto.*;
 import com.kosta.legolego.member.service.AuthService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,13 +35,36 @@ public class AuthController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody LoginDto loginDto, HttpServletResponse response) {
         try {
-            String token = authService.login(loginDto);
-            String role = authService.getRole(loginDto.getEmail());
-            Map<String, Object> response = new HashMap<>();
-            response.put("token", token);
-            response.put("role", role);
+            Map<String, String> tokens = authService.login(loginDto);
+            String refreshToken = tokens.get("refreshToken");
+
+            // HTTPOnly 쿠키에 리프레시 토큰 저장
+            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(false);  // HTTPS에서만 사용하도록 설정. 개발 중에는 false로 설정
+            refreshTokenCookie.setPath("/");  // 전체 도메인에서 사용
+            refreshTokenCookie.setMaxAge((int) (authService.getRefreshTokenValidity() / 1000));
+            response.addCookie(refreshTokenCookie);
+
+            // 응답에 Access Token 추가
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("accessToken", tokens.get("accessToken"));
+            responseBody.put("role", authService.getRole(loginDto.getEmail()));
+            return ResponseEntity.ok(responseBody);
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("message", e.getMessage()));
+        }
+    }
+
+    // 토큰 갱신 엔드포인트
+    @PostMapping("/refresh-token")
+    public ResponseEntity<Map<String, String>> refreshToken(@CookieValue("refreshToken") String refreshToken) {
+        try {
+            String newAccessToken = authService.refreshAccessToken(refreshToken);
+            Map<String, String> response = new HashMap<>();
+            response.put("accessToken", newAccessToken);
             return ResponseEntity.ok(response);
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("message", e.getMessage()));
@@ -48,9 +73,18 @@ public class AuthController {
 
     // 로그아웃
     @PostMapping("/logout")
-    public String logoutUser() {
-        // 클라이언트 측에서 JWT 토큰 삭제
-        return "로그아웃 되었습니다!";  // 이거 수정 확인 return authService.logout();
+    public ResponseEntity<String> logoutUser(@CookieValue("refreshToken") String refreshToken, HttpServletResponse response) {
+        authService.logout(refreshToken);
+
+        // HTTPOnly 쿠키에서 리프레시 토큰 삭제
+        Cookie refreshTokenCookie = new Cookie("refreshToken", null);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(false);  // HTTPS에서만 사용하도록 설정. 개발 중에는 false 설정
+        refreshTokenCookie.setPath("/");  // 전체 도메인에서 사용
+        refreshTokenCookie.setMaxAge(0);  // 쿠키 삭제
+        response.addCookie(refreshTokenCookie);
+
+        return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
     // 유효성 검사 - 닉네임 중복
