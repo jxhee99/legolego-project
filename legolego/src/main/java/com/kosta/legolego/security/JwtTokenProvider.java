@@ -9,14 +9,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class JwtTokenProvider {
-
-//    private final String SECRET_KEY = "mySecretKey";
-//     private final long VALIDITY_IN_MS = 3600000;  // 1시간
 
     @Value("${jwt.secret_key}")
     private String secretKey;
@@ -24,9 +19,10 @@ public class JwtTokenProvider {
     @Value("${jwt.issuer}")
     private String issuer; // 토큰의 발행자 정보 설정
 
-    private final long ACCESS_TOKEN_VALIDITY = 3600000;  // 엑세스 토큰 유효 시간 : 1시간
+    private final long ACCESS_TOKEN_VALIDITY = 30 * 60 * 1000;  // 엑세스 토큰 유효 시간 : 30분
+    private final long REFRESH_TOKEN_VALIDITY = 7 * 24 * 60 * 60 * 1000;  // 리프레시 토큰 유효 시간 : 7일
 
-    // 주어진 역할(사용자) 정보를 기반으로 Jwt 토큰 생성
+    // Access Token 생성
     public String createToken(UserDetails userDetails) {
         Claims claims = Jwts.claims().setSubject(userDetails.getUsername());
         claims.put("roles", userDetails.getAuthorities());
@@ -41,6 +37,26 @@ public class JwtTokenProvider {
                 .setExpiration(validity)
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
+    }
+
+    // Refresh Token 생성
+    public String createRefreshToken(UserDetails userDetails) {
+        Claims claims = Jwts.claims().setSubject(userDetails.getUsername());
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + REFRESH_TOKEN_VALIDITY);
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuer(issuer)
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
+    }
+
+    // 리프레시 토큰 유효기간 반환
+    public long getRefreshTokenValidity() {
+        return REFRESH_TOKEN_VALIDITY;
     }
 
     // JWT 토큰 유효성 검증

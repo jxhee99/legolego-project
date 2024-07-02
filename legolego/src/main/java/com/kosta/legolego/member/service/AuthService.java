@@ -11,7 +11,7 @@ import com.kosta.legolego.user.entity.User;
 import com.kosta.legolego.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -25,11 +25,11 @@ import org.springframework.stereotype.Service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 // 로그인 시 이메일과 비밀번호를 확인하고, JWT 토큰을 발급
 @Service
@@ -53,11 +53,12 @@ public class AuthService {
     private CustomUserDetailsService customUserDetailsService;
     @Autowired
     private EmailService emailService;
-//    @Autowired
-//    private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
+    // 회원가입
     public ResponseDto signup(SignupDto signupDto, String role) {
         if (!isNicknameAvailable(signupDto.getNickname())) {
             throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
@@ -102,28 +103,62 @@ public class AuthService {
         }
     }
 
-    public String login(LoginDto loginDto) throws AuthenticationException {
+    // 로그인
+    public Map<String, String> login(LoginDto loginDto) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
             );
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(loginDto.getEmail());
-            String token = jwtTokenProvider.createToken(userDetails);
+            String accessToken = jwtTokenProvider.createToken(userDetails);
 
-            String role = getRole(loginDto.getEmail());
-            logger.info("Login successful for user: {} with role: {}", loginDto.getEmail(), role);
+            // 기존 리프레시 토큰 존재 여부 확인
+            String userIdentifier = userDetails.getUsername();
+            String existingRefreshToken = (String) redisTemplate.opsForValue().get(userIdentifier);
 
-            return token;
-        } catch (UsernameNotFoundException e) {
-            logger.error("User not found: {}", loginDto.getEmail());
-            throw new BadCredentialsException("가입되지 않은 정보입니다.");
-        } catch (BadCredentialsException e) {
-            logger.error("Authentication failed for user: {}", loginDto.getEmail());
-            throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
+            // 리프레시 토큰이 없으면 새로 생성
+            if (existingRefreshToken == null) {
+                String refreshToken = jwtTokenProvider.createRefreshToken(userDetails);
+                storeRefreshToken(userIdentifier, refreshToken);
+                existingRefreshToken = refreshToken;
+            }
+
+            logger.info("Access Token: " + accessToken);
+            logger.info("Refresh Token: " + existingRefreshToken);
+
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("accessToken", accessToken);
+            tokens.put("refreshToken", existingRefreshToken);
+            return tokens;
+        } catch (AuthenticationException e) {
+            throw new BadCredentialsException("유효하지 않은 이메일 또는 비밀번호입니다.");
         }
     }
 
+    // 리프레시 토큰 저장
+    public void storeRefreshToken(String userIdentifier, String refreshToken) {
+        redisTemplate.opsForValue().set(userIdentifier, refreshToken, jwtTokenProvider.getRefreshTokenValidity(), TimeUnit.MILLISECONDS);
+    }
+
+    // 리프레시 토큰 검증 및 갱신
+    public String refreshAccessToken(String refreshToken) {
+        if (jwtTokenProvider.validateToken(refreshToken)) {
+            String userIdentifier = jwtTokenProvider.getUsername(refreshToken);
+            String storedRefreshToken = (String) redisTemplate.opsForValue().get(userIdentifier);
+
+            if (refreshToken.equals(storedRefreshToken)) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(userIdentifier);
+                return jwtTokenProvider.createToken(userDetails);
+            }
+        }
+        throw new BadCredentialsException("유효하지 않은 리프레시 토큰입니다.");
+    }
+
+    // 리프레시 토큰 유효기간 반환
+    public long getRefreshTokenValidity() {
+        return jwtTokenProvider.getRefreshTokenValidity();
+    }
 
     public String getRole(String email) {
         if (adminRepository.existsByAdminEmail(email)) {
@@ -141,8 +176,12 @@ public class AuthService {
         }
     }
 
-    public String logout() {
-        return "로그아웃 되었습니다!";
+    // 로그아웃
+    public void logout(String refreshToken) {
+        if (jwtTokenProvider.validateToken(refreshToken)) {
+            String userIdentifier = jwtTokenProvider.getUsername(refreshToken);
+            redisTemplate.delete(userIdentifier);
+        }
     }
 
     // 유효성 검사

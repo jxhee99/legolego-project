@@ -79,6 +79,12 @@ dependencies {
     // 비밀번호 재설정 요청을 위한 메일 관련 라이브러리
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'io.lettuce.core:lettuce-core'
+
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
 }
 
 tasks.withType(JavaCompile) {
