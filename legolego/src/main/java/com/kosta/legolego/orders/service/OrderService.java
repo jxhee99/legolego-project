@@ -52,7 +52,7 @@ public class OrderService {
         order.setUser(user);
         order.setProduct(product);
         order.setTotalPrice(orderDto.getTotalPrice());
-
+        order.setPaymentStatus(true);
 
         // 주문 정보 저장
         Order savedOrder = orderRepository.save(order);
