@@ -1,5 +1,6 @@
 package com.kosta.legolego.products.repository;
 
+import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.orders.entity.Order;
 import com.kosta.legolego.products.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,4 +31,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "where p.recruitmentConfirmed = false " +
            "and p.recruitmentDeadline < :currentTimestamp")
    List<Product> findUnConfirmedProductPastDeadlineBefore(@Param("currentTimestamp") LocalDateTime currentTimestamp);
+
+   //추천 상품을 위한 메서드
+   List<Product> findByDiyList(DiyList diyList);
 }
