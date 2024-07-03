@@ -18,8 +18,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
    // 지난여행 게시판 이동 위한 메서드
    @Query("select p from Product p " +
            "where p.recruitmentConfirmed = true " +
+           "and p.reviewAble = false " +
            "and p.diyList.diyPackage.airline.boardingDate < :currentTimestamp")
-   List<Product> findByConfirmedAndBoardingDateBefore(@Param("currentTimestamp") LocalDateTime currentTimestamp);
+   List<Product> findByConfirmedAndReviewUnableAndBoardingDateBefore(@Param("currentTimestamp") LocalDateTime currentTimestamp);
 
    // 상품의 모집 확정 여부를 검사하기 위한 메서드
    @Query("select p from Product p where p.recruitmentConfirmed = false")

@@ -141,7 +141,7 @@ public ProductDto updateProduct(Long productNum, ProductDto productDto){
         LocalDateTime currentTimestamp = LocalDateTime.now();
         log.info("Current timestamp: {}", currentTimestamp);
 
-        List<Product> products = productRepository.findByConfirmedAndBoardingDateBefore(currentTimestamp);
+        List<Product> products = productRepository.findByConfirmedAndReviewUnableAndBoardingDateBefore(currentTimestamp);
         log.info("Found {} products to move to pre-trip board", products.size());
 
         for(Product product : products) {
