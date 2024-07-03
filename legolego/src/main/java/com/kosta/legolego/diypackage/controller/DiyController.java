@@ -57,11 +57,27 @@ public class DiyController {
     }
   }
 
-  //put방식 (이미지 추가 후 고장남)
+  //put방식
   @PutMapping("/user/packages/{package_num}")
-  //추후 수정 권한 검사 추가
-  public ResponseEntity<?> updateDiy(@PathVariable("package_num") Long package_num, @RequestBody RequestDTO requestDTO) {
+  public ResponseEntity<?> updateDiy(@PathVariable("package_num") Long package_num,@AuthenticationPrincipal CustomUserDetails userDetails ,@RequestBody RequestDTO requestDTO) {
     try{
+      if (userDetails == null || !userDetails.getRole().equals("ROLE_USER")) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+      }
+      Long userNum = userDetails.getId();
+      //요청된 package_num에 해당하는 DIY 패키지의 작성자 확인
+      Long packageOwner = diyService.getPackageOwner(package_num);
+
+      //가수요 만족되면 수정 못 함
+      int likeNum = diyService.getLikeNum(package_num);
+      if(likeNum >=2){
+        return ResponseEntity.badRequest().body("응원 달성 패키지는 수정할 수 없습니다.");
+      }
+
+      //작성자와 인증된 사용자 ID 비교
+      if (!userNum.equals(packageOwner)) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 작성자가 아닌 경우 403 Forbidden 반환
+      }
       DiyPackage diyPackage = diyService.updateDiy(package_num, requestDTO);
       return new ResponseEntity<>(HttpStatus.OK);
     }catch (RuntimeException e){
@@ -93,6 +109,12 @@ public class DiyController {
       //작성자와 인증된 사용자 ID 비교
       if (!userNum.equals(packageOwner)) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 작성자가 아닌 경우 403 Forbidden 반환
+      }
+
+      //가수요 만족되면 삭제 못 함
+      int likeNum = diyService.getLikeNum(package_num);
+      if(likeNum >=2){
+        return ResponseEntity.badRequest().body("응원 달성 패키지는 삭제할 수 없습니다.");
       }
 
       diyService.deleteDiy(package_num);
