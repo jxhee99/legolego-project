@@ -52,7 +52,7 @@ public class OrderService {
         order.setUser(user);
         order.setProduct(product);
         order.setTotalPrice(orderDto.getTotalPrice());
-        order.setPaymentStatus(true);
+//        order.setPaymentStatus(true);
 
         // 주문 정보 저장
         Order savedOrder = orderRepository.save(order);
@@ -76,7 +76,7 @@ public class OrderService {
     }
 
     // 배치 작업을 주기적으로 실행하는 스케줄러
-    @Scheduled(fixedRate = 3600000) // 10분마다 실행
+    @Scheduled(fixedRate = 6000) // 1분마다 실행
     public void updateRecruitmentStatus() {
         List<Product> products = productRepository.findUnRecruitmentConfirmedProducts();
         for (Product product : products) {
@@ -146,6 +146,10 @@ public class OrderService {
             }
 
             paymentService.processRefund(order, "주문 취소에 따른 환불 요청");
+
+        } catch (IllegalArgumentException e) {
+            log.error("환불 실패 : {}", e.getMessage());
+            throw e;
 
         } catch (Exception e) {
             log.error("환불 처리 중 오류 발생 : ", e);
