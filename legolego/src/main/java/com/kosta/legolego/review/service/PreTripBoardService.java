@@ -59,6 +59,7 @@ public class PreTripBoardService {
                     .orElseThrow( () -> new IllegalArgumentException("일치하는 게시글이 존재하지 않습니다."));
             log.info("게시글 정보 : {}", boardNum );
 
+            board.setProduct(null);
             preTripBoardRepository.delete(board);
         } catch (Exception e) {
             log.error("리뷰 삭제 오류", e);

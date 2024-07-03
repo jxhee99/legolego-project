@@ -135,7 +135,8 @@ public ProductDto updateProduct(Long productNum, ProductDto productDto){
 
     // 지난 여행 게시판으로 이동
     @Transactional
-    @Scheduled(cron = "0 0 0 * * ?") // 자정마다 실행 -> 추후 변경 예정
+//    @Scheduled(cron = "0 0 0 * * ?") // 자정마다 실행 -> 추후 변경 예정
+    @Scheduled(fixedRate = 600000)
     public void moveConfirmedProductsToPreTripBoard() {
 //        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         LocalDateTime currentTimestamp = LocalDateTime.now();
