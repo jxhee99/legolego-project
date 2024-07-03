@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 //@RequestMapping("/reviews")
@@ -18,6 +20,15 @@ public class ReviewController {
 
     @Autowired
     ReviewService reviewService;
+
+    @GetMapping("/admin/reviews")
+    public ResponseEntity<List<ReviewDto>> getAllReview(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || !userDetails.getRole().equals("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<ReviewDto> reviewDtos = reviewService.getAllReview();
+        return ResponseEntity.status(HttpStatus.OK).body(reviewDtos);
+    }
 
     // 리뷰 조회
     @GetMapping("/user/reviews/{review_num}/orders/{order_num}")

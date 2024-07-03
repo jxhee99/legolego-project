@@ -21,7 +21,7 @@ public class PreTripBoard {
     @Column(name = "board_num")
     private Long boardNum;
 
-    @OneToMany(mappedBy = "preTripBoard")
+    @OneToMany(mappedBy = "preTripBoard", cascade = CascadeType.REMOVE)
     private List<Review> reviews; // 특정 상품에 대한 모든 리뷰 조회 기능 구현
 
     @OneToOne
