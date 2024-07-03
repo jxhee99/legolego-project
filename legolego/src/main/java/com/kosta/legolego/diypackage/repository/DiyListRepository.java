@@ -4,6 +4,7 @@ import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,4 +24,6 @@ public interface DiyListRepository extends JpaRepository<DiyList, Long> {
 
     Optional<DiyList> findByProductNum(Long productNum);
 
+    //추천 상품을 위한 메서드
+    List<DiyList> findByDiyPackage(DiyPackage diyPackage);
 }

@@ -1,5 +1,6 @@
 package com.kosta.legolego.diypackage.repository;
 
+import com.kosta.legolego.diypackage.entity.AirlineEntity;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,4 +18,6 @@ public interface DiyRepository extends JpaRepository<DiyPackage, Long> {
 
   //최신등록순 정렬
   List<DiyPackage> findAllByOrderByPackageNumDesc();
+
+  List<DiyPackage> findByAirline(AirlineEntity airlines);
 }
