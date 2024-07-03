@@ -38,8 +38,14 @@ public class ReviewService {
             Order order = orderRepository.findById(orderNum)
                     .orElseThrow(() -> new RuntimeException("주문번호를 찾을 수 없습니다."));
 
-            Review review = order.getReview();
+          Review review = order.getReview();
 
+            // 리뷰가 없는 경우
+            if (review == null) {
+                throw new RuntimeException("주문내역과 일치하는 리뷰가 없습니다.");
+            }
+
+            // 리뷰 번호가 일치하지 않는 경우
             if (!review.getReviewNum().equals(reviewNum)) {
                 throw new IllegalArgumentException("작성한 리뷰 존재하지 않습니다.");
             }
@@ -51,6 +57,7 @@ public class ReviewService {
             throw e;
         }
     }
+
 
     // 리뷰 생성
     @Transactional
@@ -100,7 +107,7 @@ public class ReviewService {
             log.error("리뷰 생성 오류", e);
             throw e;
         }
-}
+    }
 
     // 리뷰 수정
     @Transactional

@@ -25,6 +25,7 @@ public class OrderDto {
     private String merchantUid;
     private boolean refundStatus; // 환불 상태
     private boolean paymentStatus;
+    private Long reviewNum;
 
 
 
@@ -41,7 +42,8 @@ public class OrderDto {
                 order.getTotalPrice(),
                 order.getMerchantUid(),
                 order.isRefundStatus(),
-                order.getPaymentStatus()
+                order.getPaymentStatus(),
+                order.getReview() != null ? order.getReview().getReviewNum() : null
         );
     }
 
