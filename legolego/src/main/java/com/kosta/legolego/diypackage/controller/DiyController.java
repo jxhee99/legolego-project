@@ -111,6 +111,12 @@ public class DiyController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 작성자가 아닌 경우 403 Forbidden 반환
       }
 
+      //가수요 만족되면 삭제 못 함
+      int likeNum = diyService.getLikeNum(package_num);
+      if(likeNum >=2){
+        return ResponseEntity.badRequest().body("응원 달성 패키지는 삭제할 수 없습니다.");
+      }
+
       diyService.deleteDiy(package_num);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }catch (RuntimeException e){
