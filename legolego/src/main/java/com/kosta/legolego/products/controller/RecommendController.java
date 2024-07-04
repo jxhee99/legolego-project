@@ -23,7 +23,8 @@ public class RecommendController {
       ProductDto recommendedProduct = recommendationService.recommendProducts(productNum, destination);
       return ResponseEntity.ok(recommendedProduct);
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body("추천 상품이 없습니다.");
+      // 추천 상품이 없을 때 204 No Content 반환
+      return ResponseEntity.noContent().build();
     } catch (Exception e) {
       log.error("Error occurred while recommending product", e);
       return ResponseEntity.status(500).body("서버 오류");
