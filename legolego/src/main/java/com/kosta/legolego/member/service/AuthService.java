@@ -9,6 +9,7 @@ import com.kosta.legolego.security.CustomUserDetailsService;
 import com.kosta.legolego.security.JwtTokenProvider;
 import com.kosta.legolego.user.entity.User;
 import com.kosta.legolego.user.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -55,6 +56,8 @@ public class AuthService {
     private EmailService emailService;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private HttpSession httpSession;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
@@ -78,6 +81,7 @@ public class AuthService {
                 user.setUserName(signupDto.getName());
                 user.setUserNickname(signupDto.getNickname());
                 user.setUserPhone(signupDto.getPhone());
+                user.setEnabled(false);
                 User savedUser = userRepository.save(user);
                 return convertToDto(savedUser, role);
 
@@ -95,11 +99,27 @@ public class AuthService {
                 partner.setPartnerPw(passwordEncoder.encode(signupDto.getPassword()));
                 partner.setCompanyName(signupDto.getCompanyName());
                 partner.setPartnerPhone(signupDto.getPhone());
+                partner.setEnabled(false);  // 이메일 인증을 위해 비활성화 상태로 저장
                 Partner savedPartner = partnerRepository.save(partner);
                 return convertToDto(savedPartner, role);
             default:
                 throw new IllegalArgumentException("Invalid role");
 
+        }
+    }
+
+    // 회원가입 - 이메일 인증 (사용자 활성화)
+    public void enableUser(String email) {
+        User user = userRepository.findByUserEmail(email);
+        if (user != null) {
+            user.setEnabled(true);
+            userRepository.save(user);
+        }
+
+        Partner partner = partnerRepository.findByPartnerEmail(email);
+        if (partner != null) {
+            partner.setEnabled(true);
+            partnerRepository.save(partner);
         }
     }
 

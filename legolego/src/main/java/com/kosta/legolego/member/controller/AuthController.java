@@ -2,9 +2,12 @@ package com.kosta.legolego.member.controller;
 
 import com.kosta.legolego.member.dto.*;
 import com.kosta.legolego.member.service.AuthService;
+import com.kosta.legolego.member.service.EmailService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,24 +17,71 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
     private AuthService authService;
+    @Autowired
+    private HttpSession httpSession;
+    @Autowired
+    private EmailService emailService;
 
     // 회원가입
+//    @PostMapping("/signup")
+//    public ResponseEntity<?> signupUser(@Valid @RequestBody SignupDto signupDto,
+//                                        @RequestParam(name = "role") String role) {
+//        try {
+//            return ResponseEntity.ok(authService.signup(signupDto, role));
+//        } catch (IllegalArgumentException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
+//
+    // 회원가입 - 이메일 인증
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(@Valid @RequestBody SignupDto signupDto,
                                         @RequestParam(name = "role") String role) {
         try {
-            return ResponseEntity.ok(authService.signup(signupDto, role));
+            ResponseDto savedUserDto = authService.signup(signupDto, role);
+
+            // 이메일 인증 토큰 생성 및 세션에 저장
+            String token = UUID.randomUUID().toString();
+            httpSession.setAttribute("emailVerificationToken", token);
+            httpSession.setAttribute("emailVerificationUser", savedUserDto.getEmail());
+
+            // 이메일 인증 메일 전송
+            emailService.sendEmailVerificationEmail(savedUserDto.getEmail(), token);
+
+            return ResponseEntity.ok(savedUserDto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    // 이메일 인증 처리
+    @GetMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) {
+        String sessionToken = (String) httpSession.getAttribute("emailVerificationToken");
+        String email = (String) httpSession.getAttribute("emailVerificationUser");
+
+        log.info("Received token: {}", token);
+        log.info("Session token: {}", sessionToken);
+
+        if (sessionToken != null && sessionToken.equals(token)) {
+            authService.enableUser(email);
+            httpSession.removeAttribute("emailVerificationToken");
+            httpSession.removeAttribute("emailVerificationUser");
+            return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
+        } else {
+            return ResponseEntity.badRequest().body("유효하지 않은 토큰입니다.");
+        }
+    }
+
 
     // 로그인
     @PostMapping("/login")

@@ -97,7 +97,7 @@ public class MyPageController {
     }
 
     // 회원 탈퇴
-    @DeleteMapping("/profile/delete")
+    @PatchMapping("/profile/delete")
     public ResponseEntity<String> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         if (userDetails == null || !"ROLE_USER".equals(userDetails.getRole())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
