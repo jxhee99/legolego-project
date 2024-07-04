@@ -18,15 +18,15 @@ public class RecommendController {
   RecommendationService recommendationService;
 
   @GetMapping("/recommend/{product_num}")
-  public ResponseEntity<ProductDto> getRecommend(@PathVariable("product_num") Long productNum, @RequestParam("destination") String destination) {
+  public ResponseEntity<?> getRecommend(@PathVariable("product_num") Long productNum, @RequestParam("destination") String destination) {
     try {
       ProductDto recommendedProduct = recommendationService.recommendProducts(productNum, destination);
       return ResponseEntity.ok(recommendedProduct);
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body(null);
+      return ResponseEntity.badRequest().body("추천 상품이 없습니다.");
     } catch (Exception e) {
       log.error("Error occurred while recommending product", e);
-      return ResponseEntity.status(500).body(null);
+      return ResponseEntity.status(500).body("서버 오류");
     }
   }
 }

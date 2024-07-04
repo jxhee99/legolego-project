@@ -34,5 +34,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
    List<Product> findUnConfirmedProductPastDeadlineBefore(@Param("currentTimestamp") LocalDateTime currentTimestamp);
 
    //추천 상품을 위한 메서드
-   List<Product> findByDiyList(DiyList diyList);
+   @Query("SELECT p FROM Product p WHERE p.destination = :destination AND p.productNum <> :productNum AND p.recruitmentDeadline > :now")
+   List<Product> findRecommendedProducts(@Param("destination") String destination, @Param("productNum") Long productNum, @Param("now") LocalDateTime now);
 }
