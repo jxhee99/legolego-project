@@ -42,8 +42,56 @@ public class DiyService {
   private ImageRepository imageRepository;
 
   //diy 생성
+//  public Long createDiy(RequestDTO requestDTO) {
+//    //airline, route, detailcourse dto를 엔티티로 변환 후 레파지토리에 저장
+//    AirlineEntity airlineEntity = requestDTO.getAirline().toEntity();
+//    airlineRepository.save(airlineEntity);
+//
+//    RouteEntity routeEntity = requestDTO.getRoute().toEntity();
+//    routeRepository.save(routeEntity);
+//
+//    saveDetailCourses(requestDTO.getDetailCourses(), routeEntity);
+//
+//    // requestDTO의 detailCourses 리스트를 순회하면서 fileUrls에서 처음 만나는 null이 아닌 값을 찾기
+//    String firstUrl = requestDTO.getDetailCourses().stream()
+//            .map(detailCourse -> detailCourse.getFileUrls().stream()
+//                    .filter(url -> url != null && !url.isEmpty())
+//                    .findFirst())
+//            .filter(Optional::isPresent)
+//            .map(Optional::get)
+//            .findFirst()
+//            .orElseThrow(() -> new IllegalArgumentException("이미지 최소 한개 필요"));
+//
+//
+//    User user = userRepository.findById(requestDTO.getUserNum())
+//            .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다"));
+//
+//    //diyEntity 생성 후 저장
+//    DiyPackage diyPackage = DiyPackage.builder()
+//            .packageName(requestDTO.getPackageForm().getPackageName())
+//            .profileImg(firstUrl)
+//            .shortDescription(requestDTO.getPackageForm().getShortDescription())
+//            .regDate(LocalDate.now())
+//            .airline(airlineEntity)
+//            .route(routeEntity)
+//            .user(user)
+//            .packageApproval(false)
+//            .build();
+//
+//    DiyPackage savedDiyPackage = diyRepository.save(diyPackage);
+//    return savedDiyPackage.getPackageNum(); // 저장된 패키지 번호 반환
+//  }
+
+  // Diy 생성 - 임시 저장 기능 추가
+  public Long saveDraft(RequestDTO requestDTO) {
+    return saveDiy(requestDTO, true);
+  }
+
   public Long createDiy(RequestDTO requestDTO) {
-    //airline, route, detailcourse dto를 엔티티로 변환 후 레파지토리에 저장
+    return saveDiy(requestDTO, false);
+  }
+
+  private Long saveDiy(RequestDTO requestDTO, boolean isDraft) {
     AirlineEntity airlineEntity = requestDTO.getAirline().toEntity();
     airlineRepository.save(airlineEntity);
 
@@ -52,7 +100,6 @@ public class DiyService {
 
     saveDetailCourses(requestDTO.getDetailCourses(), routeEntity);
 
-    // requestDTO의 detailCourses 리스트를 순회하면서 fileUrls에서 처음 만나는 null이 아닌 값을 찾기
     String firstUrl = requestDTO.getDetailCourses().stream()
             .map(detailCourse -> detailCourse.getFileUrls().stream()
                     .filter(url -> url != null && !url.isEmpty())
@@ -60,31 +107,75 @@ public class DiyService {
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("이미지 최소 한개 필요"));
-
+            .orElse(null);
 
     User user = userRepository.findById(requestDTO.getUserNum())
-            .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다"));
+            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-    //diyEntity 생성 후 저장
-    DiyPackage diyPackage = DiyPackage.builder()
-            .packageName(requestDTO.getPackageForm().getPackageName())
-            .profileImg(firstUrl)
-            .shortDescription(requestDTO.getPackageForm().getShortDescription())
-            .regDate(LocalDate.now())
-            .airline(airlineEntity)
-            .route(routeEntity)
-            .user(user)
-            .packageApproval(false)
-            .build();
+    DiyPackage diyPackage;
+      if (isDraft) {
+        // 임시 저장
+        diyPackage = DiyPackage.builder()
+                .packageName(requestDTO.getPackageForm().getPackageName())
+                .profileImg(firstUrl)
+                .shortDescription(requestDTO.getPackageForm().getShortDescription())
+                .regDate(LocalDate.now())
+                .modDate(LocalDate.now())
+                .airline(airlineEntity)
+                .route(routeEntity)
+                .user(user)
+                .packageDraft(true)  // 임시 저장 상태 설정
+                .build();
+      } else {
+        // 최종 저장 : 기존 임시 저장된 패키지 찾기
+        diyPackage = diyRepository.findByUserUserNumAndPackageDraftTrue(requestDTO.getUserNum());
+        if (diyPackage != null) {
+          // 기존 임시 저장된 패키지 업데이트
+          diyPackage.setPackageName(requestDTO.getPackageForm().getPackageName());
+          diyPackage.setProfileImg(firstUrl);
+          diyPackage.setShortDescription(requestDTO.getPackageForm().getShortDescription());
+          diyPackage.setModDate(LocalDate.now());
+          diyPackage.setAirline(airlineEntity);
+          diyPackage.setRoute(routeEntity);
+          diyPackage.setPackageDraft(false);  // 최종 저장 상태로 변경
+        } else {
+          // 새 패키지 생성
+          diyPackage = DiyPackage.builder()
+                  .packageName(requestDTO.getPackageForm().getPackageName())
+                  .profileImg(firstUrl)
+                  .shortDescription(requestDTO.getPackageForm().getShortDescription())
+                  .regDate(LocalDate.now())
+                  .modDate(LocalDate.now())
+                  .airline(airlineEntity)
+                  .route(routeEntity)
+                  .user(user)
+                  .packageDraft(false)
+                  .build();
+        }
+      }
 
     DiyPackage savedDiyPackage = diyRepository.save(diyPackage);
-    return savedDiyPackage.getPackageNum(); // 저장된 패키지 번호 반환
+    return savedDiyPackage.getPackageNum();
   }
+
+  public Long finalizeDiy(Long packageNum, Long userNum, RequestDTO requestDTO) {
+    DiyPackage diyPackage = diyRepository.findById(packageNum)
+            .orElseThrow(() -> new IllegalArgumentException("해당 패키지를 찾을 수 없습니다."));
+
+    diyPackage.setPackageName(requestDTO.getPackageForm().getPackageName());
+    diyPackage.setProfileImg(requestDTO.getPackageForm().getProfileImg());
+    diyPackage.setShortDescription(requestDTO.getPackageForm().getShortDescription());
+    diyPackage.setModDate(LocalDate.now());
+    diyPackage.setPackageDraft(false);  // 최종 저장 상태로 변경
+
+    DiyPackage savedDiyPackage = diyRepository.save(diyPackage);
+    return savedDiyPackage.getPackageNum();
+  }
+
   //전체조회
   public List<DiyPackage> getDiyPackages(){
     //최신등록순으로 반환(등록일에 날짜만 받고 있어서...packageNum으로 내림차순)
-    return diyRepository.findAllByOrderByPackageNumDesc();
+    return diyRepository.findAllByPackageDraftFalseOrderByPackageNumDesc();
   }
 
   //상세조회

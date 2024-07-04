@@ -17,7 +17,15 @@ public interface DiyRepository extends JpaRepository<DiyPackage, Long> {
   void incrementViewNum(@Param("packageNum") Long packageNum);
 
   //최신등록순 정렬
-  List<DiyPackage> findAllByOrderByPackageNumDesc();
+//  List<DiyPackage> findAllByOrderByPackageNumDesc();
 
   List<DiyPackage> findByAirline(AirlineEntity airlines);
+
+  // 임시 저장된 패키지 조회
+  DiyPackage findFirstByUserUserNumAndPackageDraftTrue(Long userNum);
+  DiyPackage findByUserUserNumAndPackageDraftTrue(Long userNum);
+
+  // 최종 저장 처리된 패키지만 최신 등록 순으로 조회
+//  List<DiyPackage> findAllByPackageDraftFalse();
+  List<DiyPackage> findAllByPackageDraftFalseOrderByPackageNumDesc();
 }

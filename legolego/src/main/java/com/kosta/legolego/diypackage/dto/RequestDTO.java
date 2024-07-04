@@ -12,4 +12,5 @@ public class RequestDTO {
   private List<DiyDetailCourseDTO> detailCourses;
   private DiyDTO packageForm;
   private Long userNum;
+  private Boolean packageDraft;
 }
