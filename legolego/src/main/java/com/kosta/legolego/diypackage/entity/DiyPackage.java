@@ -45,9 +45,10 @@ public class DiyPackage {
 
   @Column(name = "short_description", nullable = false)
   private String shortDescription;
-  
-  @Column(name = "package_approval", nullable = false)
-  private Boolean packageApproval = false;
+
+  // 임시 저장
+  @Column(name = "package_draft", nullable = false)
+  private Boolean packageDraft = false;
 
 //  @OneToMany(mappedBy = "diyPackage", cascade = CascadeType.ALL)
 //  private List<DiyList> diyLists = new ArrayList<>();

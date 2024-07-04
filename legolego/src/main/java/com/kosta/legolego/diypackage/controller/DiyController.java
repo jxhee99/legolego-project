@@ -1,7 +1,9 @@
 package com.kosta.legolego.diypackage.controller;
 
 import com.kosta.legolego.diypackage.dto.*;
+import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
+import com.kosta.legolego.diypackage.repository.DiyRepository;
 import com.kosta.legolego.diypackage.service.DiyService;
 import com.kosta.legolego.diypackage.service.DiyLikeService;
 import com.kosta.legolego.security.CustomUserDetails;
@@ -22,6 +24,8 @@ public class DiyController {
   DiyService diyService;
   @Autowired
   DiyLikeService diyLikeService;
+  @Autowired
+  private DiyRepository diyRepository;
 
   @PostMapping("/user/packages")
   public ResponseEntity<Long> createDiy(@RequestBody RequestDTO requestDTO, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -35,6 +39,55 @@ public class DiyController {
       return ResponseEntity.status(HttpStatus.CREATED).body(packageNum);
     } catch (RuntimeException e) {
       return ResponseEntity.badRequest().body(null); // 예외 처리
+    }
+  }
+
+  // 패키지 생성 - 임시 저장 기능 추가
+  @PostMapping("/user/packages/draft")
+  public ResponseEntity<Long> saveDraft(@RequestBody RequestDTO requestDTO,
+                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+    if (userDetails == null || !userDetails.getRole().equals("ROLE_USER")) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    Long userNum = userDetails.getId();
+    try {
+      requestDTO.setUserNum(userNum);
+      Long packageNum = diyService.saveDraft(requestDTO);
+      return ResponseEntity.status(HttpStatus.CREATED).body(packageNum);
+    } catch (RuntimeException e) {
+      return ResponseEntity.badRequest().body(null);
+    }
+  }
+
+  // 최종 저장 처리
+  @PatchMapping("/user/packages/finalize/{packageNum}")
+  public ResponseEntity<Long> finalizeDiy(@PathVariable("packageNum") Long packageNum,
+                                          @RequestBody RequestDTO requestDTO,
+                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+    if (userDetails == null || !userDetails.getRole().equals("ROLE_USER")) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    try {
+      Long userNum = userDetails.getId();
+      Long finalizedPackageNum = diyService.finalizeDiy(packageNum, userNum, requestDTO);
+      return ResponseEntity.status(HttpStatus.OK).body(finalizedPackageNum);
+    } catch (RuntimeException e) {
+      return ResponseEntity.badRequest().body(null);
+    }
+  }
+
+  // 임시 저장된 게시글 불러오기
+  @GetMapping("/user/packages/drafts")
+  public ResponseEntity<DiyPackage> getDraftPackage(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    if (userDetails == null || !userDetails.getRole().equals("ROLE_USER")) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    Long userNum = userDetails.getId();
+    DiyPackage draftPackage = diyRepository.findFirstByUserUserNumAndPackageDraftTrue(userNum);
+    if (draftPackage != null) {
+      return ResponseEntity.ok(draftPackage);
+    } else {
+      return ResponseEntity.noContent().build();
     }
   }
 
