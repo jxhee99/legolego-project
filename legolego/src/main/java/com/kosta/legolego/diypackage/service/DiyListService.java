@@ -102,6 +102,7 @@ public class DiyListService {
             product.setNecessaryPeople(diyList.getNecessaryPeople());
             product.setProductName(diyList.getDiyPackage().getPackageName());
             product.setProductImage(diyList.getDiyPackage().getProfileImg());
+            product.setDestination(diyList.getDiyPackage().getAirline().getDestination());
             product.setAdmin(admin);
 
             productRepository.save(product);

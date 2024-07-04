@@ -1,81 +1,66 @@
 package com.kosta.legolego.products.service;
 
-import com.kosta.legolego.diypackage.entity.AirlineEntity;
-import com.kosta.legolego.diypackage.entity.DiyList;
-import com.kosta.legolego.diypackage.entity.DiyPackage;
-import com.kosta.legolego.diypackage.repository.AirlineRepository;
-import com.kosta.legolego.diypackage.repository.DiyListRepository;
-import com.kosta.legolego.diypackage.repository.DiyRepository;
 import com.kosta.legolego.products.dto.ProductDto;
 import com.kosta.legolego.products.entity.Product;
 import com.kosta.legolego.products.repository.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import java.util.Random;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class RecommendationService {
   @Autowired
-  ProductRepository productRepository;
-  @Autowired
-  DiyListRepository diyListRepository;
-  @Autowired
-  DiyRepository diyRepository;
-  @Autowired
-  AirlineRepository airlineRepository;
+  private ProductRepository productRepository;
 
-  public ProductDto recommendProducts(Long productNum , String destination){
-    // 1. 비행기 테이블에서 해당 정보를 조회
-    List<AirlineEntity> airlines = airlineRepository.findByDestination(destination);
-    if (airlines == null || airlines.isEmpty()) {
-      throw new IllegalArgumentException("비행스케줄을 찾을 수 없습니다");
-    }
+  public ProductDto recommendProducts(Long productNum, String destination) {
+    log.debug("추천 요청: productNum={}, destination={}", productNum, destination);
 
-    // 2. Diy 패키지 가져오기
-    List<DiyPackage> diyPackages = airlines.stream()
-            .flatMap(airline -> diyRepository.findByAirline(airline).stream())
-            .collect(Collectors.toList());
-
-    if (diyPackages.isEmpty()) {
-      throw new IllegalArgumentException("DIY 패키지를 찾을 수 없습니다");
-    }
-
-    //3. Diy Package로 DIY리스트 가져오기
-    List<DiyList> diyLists = diyPackages.stream()
-            .flatMap(diyPackage -> diyListRepository.findByDiyPackage(diyPackage).stream())
-            .collect(Collectors.toList());
-    if(diyLists.isEmpty()){
-      throw new IllegalArgumentException("DIY 리스트를 찾을 수 없습니다.");
-    }
-
-    //4. Diy ListNum으로 제품 테이블 조회
-    List<Product> products = diyLists.stream()
-            .flatMap(diyList -> productRepository.findByDiyList(diyList).stream())
-            .collect(Collectors.toList());
-    if(products.isEmpty()){
-      throw new IllegalArgumentException("상품을 찾을 수 없습니다.");
-    }
-
-    //5.자기 자신(상품) 제외
-    products = products.stream()
-            .filter(product -> !(product.getProductNum() == productNum ))
-            .collect(Collectors.toList());
-    //6. 모집 마감기한 지난 것 제외
     LocalDateTime now = LocalDateTime.now();
-    products = products.stream()
-            .filter(product -> product.getRecruitmentDeadline().toLocalDateTime().isAfter(now))
-            .collect(Collectors.toList());
-    if(products.isEmpty()){
-      throw new IllegalArgumentException("적합한 추천 상품이 없습니다.");
+
+    // 필요한 조건을 모두 만족하는 상품 조회(목적지가 일치하고, 자기 자신(상품) 제외, 모집 마감기한이 지나지 않은 것)
+    List<Product> products = productRepository.findRecommendedProducts(destination, productNum, now);
+    log.debug("조건을 만족하는 상품 조회 결과: {}", products);
+
+    if (products.isEmpty()) {
+      // 조건에 맞는 상품이 없으면 랜덤으로 한 개 반환
+      log.debug("조건에 맞는 상품이 없음, 랜덤 상품 반환");
+      return randcomProducts(productNum, now);
     }
-    // 7. 랜덤으로 한 개 반환
+
+    // 조건을 만족하는 상품 중 랜덤으로 한 개 반환
     Random random = new Random();
     ProductDto productDto = ProductDto.fromEntity(products.get(random.nextInt(products.size())));
+    log.debug("조건을 만족하는 상품 중 랜덤으로 한 개 반환: {}", productDto);
     return productDto;
   }
 
+  private ProductDto randcomProducts(Long productNum, LocalDateTime now) {
+    log.debug("랜덤 상품 반환 시작: productNum={}", productNum);
+
+    List<Product> products = productRepository.findAll();
+    log.debug("모든 상품 조회 결과: {}", products);
+
+    // 자기 자신 제외 및 모집 마감 기한 지난 것 제외
+    products = products.stream()
+            .filter(product -> !(product.getProductNum().equals(productNum)) && product.getRecruitmentDeadline().toLocalDateTime().isAfter(now))
+            .collect(Collectors.toList());
+    log.debug("필터링 후 결과: {}", products);
+
+    if (products.isEmpty()) {
+      log.error("추천 상품이 없습니다.");
+      throw new IllegalArgumentException("추천 상품이 없습니다.");
+    }
+
+    // 랜덤으로 한 개 반환
+    Random random = new Random();
+    ProductDto productDto = ProductDto.fromEntity(products.get(random.nextInt(products.size())));
+    log.debug("랜덤으로 한 개 반환: {}", productDto);
+    return productDto;
+  }
 }

@@ -41,6 +41,9 @@ public class Product {
     private DiyList diyList; // 가 참조하고 있는 DiyPackage가 참조하고 있는 User의 닉네임 가져오기
 
     // 상품 정보 필드
+    @Column(name = "destination", nullable = false)
+    private String destination;
+
     @Column(name = "product_name", nullable = false, length = 255)
     private String productName;
 
