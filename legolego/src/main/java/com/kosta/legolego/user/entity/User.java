@@ -45,6 +45,8 @@ public class User {
     @Column(name = "user_status")
     private User.UserStatus userStatus = UserStatus.registered;
 
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled = false;  // 이메일 인증 여부 (회원가입 할 때)
 
 
     @Builder
@@ -54,10 +56,8 @@ public class User {
         this.userName = userName;
         this.userNickname = userNickname;
         this.userPhone = userPhone;
+        this.enabled = false;  // 회원가입 시 기본값 false , 이메일 인증 성공 시 true
 
     }
 
 }
-
-
-

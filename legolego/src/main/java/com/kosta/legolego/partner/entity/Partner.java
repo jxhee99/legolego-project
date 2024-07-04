@@ -40,6 +40,9 @@ public class Partner {
     @Column(name = "profile_image", length = 1000)
     private String profileImage;
 
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled = false;  // 이메일 인증 여부 (회원가입 할 때)
+
     @Enumerated(EnumType.STRING)
     @Column(name = "partner_status")
     private Partner.PartnerStatus partnerStatus = Partner.PartnerStatus.registered;

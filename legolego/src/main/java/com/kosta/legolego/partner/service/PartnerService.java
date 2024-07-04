@@ -5,6 +5,7 @@ import com.kosta.legolego.user.dto.UpdatePasswordDto;
 import com.kosta.legolego.partner.entity.Partner;
 import com.kosta.legolego.partner.repository.PartnerRepository;
 import com.kosta.legolego.user.entity.User;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -69,11 +70,13 @@ public class PartnerService {
     }
 
     // 탈퇴
+    @Transactional
     public void deleteUser(Long partnerNum) {
         Partner partner = partnerRepository.findById(partnerNum)
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 파트너 ID입니다."));
 
-        partnerRepository.delete(partner);
+        partner.setPartnerStatus(Partner.PartnerStatus.withdrawal);
+        partnerRepository.save(partner);
     }
 
     // 프로필 이미지 업데이트 - 로컬에 저장

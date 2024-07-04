@@ -9,6 +9,7 @@ import com.kosta.legolego.user.dto.UpdatePasswordDto;
 import com.kosta.legolego.user.entity.User;
 import com.kosta.legolego.user.repository.MyPageRepository;
 import com.kosta.legolego.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -112,11 +113,13 @@ public class MyPageService {
     }
 
     // 회원 탈퇴
+    @Transactional
     public void deleteUser(Long userNum) {
         User user = userRepository.findById(userNum)
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 사용자 ID입니다."));
 
-        userRepository.delete(user);
+        user.setUserStatus(User.UserStatus.withdrawal);
+        userRepository.save(user);
     }
 
 
