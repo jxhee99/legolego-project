@@ -1,5 +1,6 @@
 package com.kosta.legolego.partner.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.user.entity.User;
 import jakarta.persistence.*;
@@ -27,7 +28,7 @@ public class Partner {
 
     @Column(name = "partner_email", nullable = false, unique = true, length = 100)
     private String partnerEmail;
-
+    @JsonIgnore
     @Column(name = "partner_pw", nullable = false, length = 255)
     private String partnerPw;
 

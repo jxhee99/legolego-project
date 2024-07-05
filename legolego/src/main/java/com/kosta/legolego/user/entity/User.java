@@ -1,5 +1,6 @@
 package com.kosta.legolego.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,6 +27,7 @@ public class User {
     @Column(name = "user_email", nullable = false, unique = true, length = 100)
     private String userEmail;
 
+    @JsonIgnore
     @Column(name = "user_pw", nullable = false, length = 255)
     private String userPw;
 
