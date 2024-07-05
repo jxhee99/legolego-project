@@ -42,61 +42,40 @@ public class DiyService {
   private ImageRepository imageRepository;
 
   //diy 생성
-//  public Long createDiy(RequestDTO requestDTO) {
-//    //airline, route, detailcourse dto를 엔티티로 변환 후 레파지토리에 저장
-//    AirlineEntity airlineEntity = requestDTO.getAirline().toEntity();
-//    airlineRepository.save(airlineEntity);
-//
-//    RouteEntity routeEntity = requestDTO.getRoute().toEntity();
-//    routeRepository.save(routeEntity);
-//
-//    saveDetailCourses(requestDTO.getDetailCourses(), routeEntity);
-//
-//    // requestDTO의 detailCourses 리스트를 순회하면서 fileUrls에서 처음 만나는 null이 아닌 값을 찾기
-//    String firstUrl = requestDTO.getDetailCourses().stream()
-//            .map(detailCourse -> detailCourse.getFileUrls().stream()
-//                    .filter(url -> url != null && !url.isEmpty())
-//                    .findFirst())
-//            .filter(Optional::isPresent)
-//            .map(Optional::get)
-//            .findFirst()
-//            .orElseThrow(() -> new IllegalArgumentException("이미지 최소 한개 필요"));
-//
-//
-//    User user = userRepository.findById(requestDTO.getUserNum())
-//            .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다"));
-//
-//    //diyEntity 생성 후 저장
-//    DiyPackage diyPackage = DiyPackage.builder()
-//            .packageName(requestDTO.getPackageForm().getPackageName())
-//            .profileImg(firstUrl)
-//            .shortDescription(requestDTO.getPackageForm().getShortDescription())
-//            .regDate(LocalDate.now())
-//            .airline(airlineEntity)
-//            .route(routeEntity)
-//            .user(user)
-//            .packageApproval(false)
-//            .build();
-//
-//    DiyPackage savedDiyPackage = diyRepository.save(diyPackage);
-//    return savedDiyPackage.getPackageNum(); // 저장된 패키지 번호 반환
-//  }
-
-  // Diy 생성 - 임시 저장 기능 추가
   public Long saveDraft(RequestDTO requestDTO) {
-    return saveDiy(requestDTO, true);
+    return saveOrUpdateDiy(requestDTO, true);
   }
 
   public Long createDiy(RequestDTO requestDTO) {
-    return saveDiy(requestDTO, false);
+    return saveOrUpdateDiy(requestDTO, false);
   }
 
-  private Long saveDiy(RequestDTO requestDTO, boolean isDraft) {
-    AirlineEntity airlineEntity = requestDTO.getAirline().toEntity();
-    airlineRepository.save(airlineEntity);
+  private Long saveOrUpdateDiy(RequestDTO requestDTO, boolean isDraft) {
+    User user = userRepository.findById(requestDTO.getUserNum())
+            .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다"));
 
-    RouteEntity routeEntity = requestDTO.getRoute().toEntity();
-    routeRepository.save(routeEntity);
+    DiyPackage diyPackage = diyRepository.findFirstByUserUserNumAndPackageDraftTrue(requestDTO.getUserNum());
+
+    AirlineEntity airlineEntity;
+    RouteEntity routeEntity;
+
+    if (diyPackage != null && isDraft) {
+      // 기존 임시 저장된 패키지가 있을 경우 해당 패키지의 airline과 route를 업데이트
+      airlineEntity = diyPackage.getAirline();
+      updateAirlineEntity(airlineEntity, requestDTO.getAirline());
+      airlineRepository.save(airlineEntity);
+
+      routeEntity = diyPackage.getRoute();
+      updateRouteEntity(routeEntity, requestDTO.getRoute());
+      routeRepository.save(routeEntity);
+    } else {
+      // 새로운 airline과 route 생성
+      airlineEntity = requestDTO.getAirline().toEntity();
+      airlineRepository.save(airlineEntity);
+
+      routeEntity = requestDTO.getRoute().toEntity();
+      routeRepository.save(routeEntity);
+    }
 
     saveDetailCourses(requestDTO.getDetailCourses(), routeEntity);
 
@@ -109,12 +88,45 @@ public class DiyService {
             .findFirst()
             .orElse(null);
 
-    User user = userRepository.findById(requestDTO.getUserNum())
-            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+    if (diyPackage != null && isDraft) {
+      // 기존 임시 저장된 패키지를 업데이트
+      diyPackage.setPackageName(requestDTO.getPackageForm() != null ? requestDTO.getPackageForm().getPackageName() : null);
+      diyPackage.setProfileImg(firstUrl);
+      diyPackage.setShortDescription(requestDTO.getPackageForm() != null ? requestDTO.getPackageForm().getShortDescription() : null);
+      diyPackage.setModDate(LocalDate.now());
+      diyPackage.setAirline(airlineEntity);
+      diyPackage.setRoute(routeEntity);
+      diyPackage.setPackageDraft(true); // 임시 저장 상태 유지
+    } else if (isDraft) {
+      // 새 임시 저장 패키지 생성
+      diyPackage = DiyPackage.builder()
+              .packageName(requestDTO.getPackageForm() != null ? requestDTO.getPackageForm().getPackageName() : null)
+              .profileImg(firstUrl)
+              .shortDescription(requestDTO.getPackageForm() != null ? requestDTO.getPackageForm().getShortDescription() : null)
+              .regDate(LocalDate.now())
+              .modDate(LocalDate.now())
+              .airline(airlineEntity)
+              .route(routeEntity)
+              .user(user)
+              .packageDraft(true) // 임시 저장 상태 설정
+              .build();
+    } else {
+      // 최종 저장 시: 모든 필드가 채워져 있는지 확인
+      if (requestDTO.getPackageForm() == null || requestDTO.getPackageForm().getPackageName() == null || requestDTO.getPackageForm().getShortDescription() == null || firstUrl == null) {
+        throw new IllegalArgumentException("패키지 이름, 짧은 설명이필요합니다.");
+      }
 
-    DiyPackage diyPackage;
-      if (isDraft) {
-        // 임시 저장
+      if (diyPackage != null) {
+        // 기존 임시 저장된 패키지를 최종 저장으로 업데이트
+        diyPackage.setPackageName(requestDTO.getPackageForm().getPackageName());
+        diyPackage.setProfileImg(firstUrl);
+        diyPackage.setShortDescription(requestDTO.getPackageForm().getShortDescription());
+        diyPackage.setModDate(LocalDate.now());
+        diyPackage.setAirline(airlineEntity);
+        diyPackage.setRoute(routeEntity);
+        diyPackage.setPackageDraft(false); // 최종 저장 상태로 변경
+      } else {
+        // 새 패키지 생성
         diyPackage = DiyPackage.builder()
                 .packageName(requestDTO.getPackageForm().getPackageName())
                 .profileImg(firstUrl)
@@ -124,49 +136,49 @@ public class DiyService {
                 .airline(airlineEntity)
                 .route(routeEntity)
                 .user(user)
-                .packageDraft(true)  // 임시 저장 상태 설정
+                .packageDraft(false) // 최종 저장 상태 설정
                 .build();
-      } else {
-        // 최종 저장 : 기존 임시 저장된 패키지 찾기
-        diyPackage = diyRepository.findByUserUserNumAndPackageDraftTrue(requestDTO.getUserNum());
-        if (diyPackage != null) {
-          // 기존 임시 저장된 패키지 업데이트
-          diyPackage.setPackageName(requestDTO.getPackageForm().getPackageName());
-          diyPackage.setProfileImg(firstUrl);
-          diyPackage.setShortDescription(requestDTO.getPackageForm().getShortDescription());
-          diyPackage.setModDate(LocalDate.now());
-          diyPackage.setAirline(airlineEntity);
-          diyPackage.setRoute(routeEntity);
-          diyPackage.setPackageDraft(false);  // 최종 저장 상태로 변경
-        } else {
-          // 새 패키지 생성
-          diyPackage = DiyPackage.builder()
-                  .packageName(requestDTO.getPackageForm().getPackageName())
-                  .profileImg(firstUrl)
-                  .shortDescription(requestDTO.getPackageForm().getShortDescription())
-                  .regDate(LocalDate.now())
-                  .modDate(LocalDate.now())
-                  .airline(airlineEntity)
-                  .route(routeEntity)
-                  .user(user)
-                  .packageDraft(false)
-                  .build();
-        }
       }
+    }
 
     DiyPackage savedDiyPackage = diyRepository.save(diyPackage);
     return savedDiyPackage.getPackageNum();
   }
 
+  private void updateAirlineEntity(AirlineEntity airlineEntity, DiyAirlineDTO airlineDTO) {
+    airlineEntity.setStartAirlineName(airlineDTO.getStartAirlineName());
+    airlineEntity.setStartingPoint(airlineDTO.getStartingPoint());
+    airlineEntity.setDestination(airlineDTO.getDestination());
+    airlineEntity.setStartFlightNum(airlineDTO.getStartFlightNum());
+    airlineEntity.setBoardingDate(airlineDTO.getBoardingDate());
+    airlineEntity.setComeAirlineName(airlineDTO.getComeAirlineName());
+    airlineEntity.setComeFlightNum(airlineDTO.getComeFlightNum());
+    airlineEntity.setComingDate(airlineDTO.getComingDate());
+  }
+
+  private void updateRouteEntity(RouteEntity routeEntity, DiyRouteDTO routeDTO) {
+    routeEntity.setStartDate(routeDTO.getStartDate());
+    routeEntity.setLastDate(routeDTO.getLastDate());
+  }
+
   public Long finalizeDiy(Long packageNum, Long userNum, RequestDTO requestDTO) {
     DiyPackage diyPackage = diyRepository.findById(packageNum)
-            .orElseThrow(() -> new IllegalArgumentException("해당 패키지를 찾을 수 없습니다."));
+            .orElseThrow(() -> new IllegalArgumentException("해당 패키지를 찾을 수 없습니다"));
+
+    // 업데이트 로직 추가
+    if (requestDTO.getPackageForm() == null || requestDTO.getPackageForm().getPackageName() == null || requestDTO.getPackageForm().getShortDescription() == null || requestDTO.getPackageForm().getProfileImg() == null) {
+      throw new IllegalArgumentException("패키지 이름, 짧은 설명이필요합니다.");
+    }
 
     diyPackage.setPackageName(requestDTO.getPackageForm().getPackageName());
     diyPackage.setProfileImg(requestDTO.getPackageForm().getProfileImg());
     diyPackage.setShortDescription(requestDTO.getPackageForm().getShortDescription());
     diyPackage.setModDate(LocalDate.now());
-    diyPackage.setPackageDraft(false);  // 최종 저장 상태로 변경
+    diyPackage.setPackageDraft(false); // 최종 저장 상태로 변경
+
+    RouteEntity routeEntity = requestDTO.getRoute().toEntity();
+    routeRepository.save(routeEntity);
+    diyPackage.setRoute(routeEntity);
 
     DiyPackage savedDiyPackage = diyRepository.save(diyPackage);
     return savedDiyPackage.getPackageNum();
