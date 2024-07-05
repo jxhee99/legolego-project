@@ -26,6 +26,5 @@ public interface DiyRepository extends JpaRepository<DiyPackage, Long> {
   DiyPackage findByUserUserNumAndPackageDraftTrue(Long userNum);
 
   // 최종 저장 처리된 패키지만 최신 등록 순으로 조회
-//  List<DiyPackage> findAllByPackageDraftFalse();
   List<DiyPackage> findAllByPackageDraftFalseOrderByPackageNumDesc();
 }

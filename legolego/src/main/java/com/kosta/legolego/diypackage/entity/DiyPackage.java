@@ -23,10 +23,10 @@ public class DiyPackage {
   @Column(name = "package_num")
   private Long packageNum;
 
-  @Column(name = "package_name", nullable = false, length = 255)
+  @Column(name = "package_name", length = 255)
   private String packageName;
 
-  @Column(name = "profile_img", nullable = false, length = 1000)
+  @Column(name = "profile_img", length = 1000)
   private String profileImg;
 
   @Column(name = "reg_date", nullable = false)
@@ -43,7 +43,7 @@ public class DiyPackage {
   @Column(name = "package_view_num", nullable = false)
   private int packageViewNum = 0;
 
-  @Column(name = "short_description", nullable = false)
+  @Column(name = "short_description")
   private String shortDescription;
 
   // 임시 저장
