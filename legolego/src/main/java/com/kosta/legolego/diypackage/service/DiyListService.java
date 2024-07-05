@@ -2,6 +2,7 @@ package com.kosta.legolego.diypackage.service;
 
 import com.kosta.legolego.admin.entity.Admin;
 import com.kosta.legolego.admin.repository.AdminRepository;
+import com.kosta.legolego.alarm.service.AlarmService;
 import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
 import com.kosta.legolego.diypackage.repository.DiyListRepository;
@@ -9,6 +10,7 @@ import com.kosta.legolego.diypackage.repository.DiyRepository;
 import com.kosta.legolego.partner.repository.PartnerRepository;
 import com.kosta.legolego.products.entity.Product;
 import com.kosta.legolego.products.repository.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class DiyListService {
 
@@ -35,6 +38,9 @@ public class DiyListService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private AlarmService alarmService;
 
 
     // 관리자가 모든 diylist를 볼 수 있도록 구현한 로직
@@ -60,6 +66,10 @@ public class DiyListService {
 
             diyList.setIsSelected(true);
             diyListRepository.save(diyList);
+
+            // WebSocket 통한 실시간 알림 전달
+            alarmService.sendAlarmToPartner(diyList.getPartner().getPartnerNum(), "작성자가 '" + diyList.getDiyPackage().getPackageName() + "' 패키지 제안을 수락했습니다.");
+            alarmService.sendAlarmToAdmin("'" + diyList.getDiyPackage().getPackageName() + "' 패키지 제안 수락 완료, 등록을 검토해주세요");
 
             // 같은 패키지에 대한 다른 제안받기 비활성화
             List<DiyList> otherProposals = diyListRepository.findAllByDiyPackage_packageNumAndIsSelected_Null(packageNum);
@@ -111,6 +121,9 @@ public class DiyListService {
             diyList.setProductNum(product.getProductNum());
             diyList.setIsRegistered(true);
             diyListRepository.save(diyList);
+
+            alarmService.sendAlarmToPartner(diyList.getPartner().getPartnerNum(), "제안을 요청한 '" + diyList.getDiyPackage().getPackageName() + "' 패키지가 상품으로 등록되었습니다.");
+            alarmService.sendAlarmToUser(diyList.getDiyPackage().getUser().getUserNum(), "제작하신 '" + diyList.getDiyPackage().getPackageName() + "' 패키지가 상품으로 등록되었습니다.");
 
             return diyList;
         }

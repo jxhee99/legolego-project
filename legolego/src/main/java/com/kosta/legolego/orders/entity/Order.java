@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.checkerframework.checker.units.qual.C;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -60,5 +61,8 @@ public class Order {
 
     @Column(name = "refund_status", nullable = false)
     private boolean refundStatus;
+
+    @Column(name = "auto_refund", nullable = false)
+    private boolean  autoRefund;
 
 }
