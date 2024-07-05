@@ -1,7 +1,10 @@
 package com.kosta.legolego.partner.service;
 
+import com.kosta.legolego.alarm.service.AlarmService;
 import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
+import com.kosta.legolego.diypackage.repository.DiyListRepository;
+import com.kosta.legolego.diypackage.repository.DiyRepository;
 import com.kosta.legolego.orders.entity.Order;
 import com.kosta.legolego.partner.dto.OfferFormDto;
 import com.kosta.legolego.partner.dto.PartnerOrderDto;
@@ -14,8 +17,10 @@ import com.kosta.legolego.partner.repository.PartnerOrderRepository;
 import com.kosta.legolego.partner.repository.PartnerRepository;
 import com.kosta.legolego.products.entity.Product;
 import com.kosta.legolego.products.repository.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -23,6 +28,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
+@Transactional
 @Service
 public class PartnerPackageService {
   @Autowired
@@ -33,9 +40,14 @@ public class PartnerPackageService {
   ProductRepository productRepository;
   @Autowired
   PartnerOrderRepository orderRepository;
+  @Autowired
+  DiyRepository diyRepository;
 
   @Autowired
   private PartnerRepository partnerRepository; // Partner 엔티티를 조회하기 위해 필요
+
+  @Autowired
+  private AlarmService alarmService; // 제안요청 알림을 위해 필요
 
   //좋아요 25개 넘은 리스트 조회(이미 가격 제안한 패키지는 제외시켜야 함)
   public List<OverLikedList> getOverLikedList(Long partnerNum){
@@ -58,6 +70,7 @@ public class PartnerPackageService {
     return filteredOverLikedList;
 
   }
+
   public DiyList submitOfferForm(OfferFormDto offerFormDto, Long partnerNum) {
     //파트너Num으로 해당 파트너 조회
     Partner partner = partnerRepository.findById(partnerNum)
@@ -73,8 +86,20 @@ public class PartnerPackageService {
     Timestamp now = Timestamp.from(Instant.now());
     diyList.setRegDate(now);
 
-    return partnerLikedListRepository.save(diyList);
+    DiyList savedDiyList = partnerLikedListRepository.save(diyList);
+    log.info("DiyList saved: {}", savedDiyList);
+
+    // DiyPackage 설정
+    DiyPackage diyPackage = diyRepository.findById(offerFormDto.getPackageNum())
+            .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 패키지 번호: " + offerFormDto.getPackageNum()));
+    offerFormDto.setPackageNum(diyPackage.getPackageNum());
+
+    // 제안 요청 알림 보내기
+    alarmService.sendAlarmList(savedDiyList, diyPackage); // 비동기 처리
+
+    return savedDiyList;
     }
+
 
     public List<PartnerProductDto> getProductOrders(Long partnerNum){
       //파트너Num으로 해당 파트너 조회

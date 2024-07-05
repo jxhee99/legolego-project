@@ -1,5 +1,6 @@
 package com.kosta.legolego.orders.service;
 
+import com.kosta.legolego.alarm.service.AlarmService;
 import com.kosta.legolego.orders.dto.OrderDto;
 import com.kosta.legolego.orders.entity.Order;
 import com.kosta.legolego.orders.repository.OrderRepository;
@@ -9,7 +10,9 @@ import com.kosta.legolego.products.repository.ProductRepository;
 import com.kosta.legolego.user.entity.User;
 import com.kosta.legolego.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +37,9 @@ public class OrderService {
 
     @Autowired
     PaymentService paymentService;
+
+    @Autowired
+    AlarmService alarmService;
 
     // 새로운 주문 정보 생성
     @Transactional
@@ -72,6 +78,16 @@ public class OrderService {
         if(paymentCount >= product.getNecessaryPeople() ) {
             product.setRecruitmentConfirmed(true);
             productRepository.save(product);
+
+            // 상품을 결제한 유저들에게만 알림 전송
+            List<Order> paidOrders = orderRepository.findByProductAndPaymentStatus(product, true);
+            for(Order order : paidOrders) {
+                Long userNum = order.getUser().getUserNum();
+                alarmService.sendAlarmToUser(userNum, "상품 '" + product.getProductName() + "' 여행이 확정되었습니다!");
+            }
+
+            // 상품 제작 여행사에게만 알림 전송
+            alarmService.sendAlarmToPartner(product.getDiyList().getPartner().getPartnerNum(), "상품 '" + product.getProductName() + "' 여행이 확정되었습니다!");
         }
     }
 
@@ -83,6 +99,14 @@ public class OrderService {
             updateProductRecruitmentStatus(product);
         }
     }
+
+//    @Async
+//    public void updateRecruitmentStatus() {
+//        List<Product> products = productRepository.findUnRecruitmentConfirmedProducts();
+//        for (Product product : products) {
+//            updateProductRecruitmentStatus(product);
+//        }
+//    }
 
     // merchantUid로 주문 정보 조회
     public OrderDto getOrderByMerchantUid(String merchantUid) {
@@ -145,7 +169,15 @@ public class OrderService {
                 throw new IllegalArgumentException("주문 취소 기간이 지났습니다.");
             }
 
+            long paymentCount = orderRepository.countByProductAndPaymentStatus(product, true);
+
             paymentService.processRefund(order, "주문 취소에 따른 환불 요청");
+
+            // 취소 후 주문인원 재검사 후 필수 인원보다 적으면 모집 확정 false
+            if(paymentCount <= product.getNecessaryPeople() ) {
+                product.setRecruitmentConfirmed(false);
+                productRepository.save(product);
+            }
 
         } catch (IllegalArgumentException e) {
             log.error("환불 실패 : {}", e.getMessage());
@@ -157,7 +189,7 @@ public class OrderService {
             throw new RuntimeException("환불 처리 중 오류 발생");
         }
         order.setRefundStatus(true);
-//        orderRepository.deleteById(orderNum);
+        order.setPaymentStatus(false);
     }
 
     // 자동 환불
@@ -167,6 +199,7 @@ public class OrderService {
                         .orElseThrow(()-> new RuntimeException("일치하는 주문번호가 없습니다"));
         try {
             paymentService.processRefund(orders, "모집인원 미달로 인한 자동 환불 요청");
+
         } catch (Exception e) {
             log.error("환불 처리 중 오류 발생 :", e);
             throw new RuntimeException("환불 처리 중 오류 발생");
@@ -185,10 +218,20 @@ public class OrderService {
             // 결제 완료 된 상품에 대한 주문들
             List<Order> orders = orderRepository.findByProductAndPaymentStatus(product, true);
             for(Order order : orders) {
-                refundOrder(order);
-                order.setRefundStatus(true);
-                orderRepository.save(order);
+                if(!order.isAutoRefund()){
+                    log.info("order_num : {}", order);
+                    refundOrder(order);
+                    order.setPaymentStatus(false);
+                    order.setRefundStatus(true);
+                    order.setAutoRefund(true);
+                    orderRepository.save(order);
+
+                    Long userNum = order.getUser().getUserNum();
+                    alarmService.sendAlarmToUser(userNum, "상품 '" + product.getProductName() + "' 모집인원을 충족하지 못해 환불을 진행합니다");
+                }
             }
+            // 상품 제작 여행사에게만 알림 전송
+            alarmService.sendAlarmToPartner(product.getDiyList().getPartner().getPartnerNum(), "상품 '" + product.getProductName() + "' 모집인원을 충족하지 못했습니다.");
         }
     }
 
