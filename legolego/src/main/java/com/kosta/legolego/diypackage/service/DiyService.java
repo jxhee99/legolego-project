@@ -265,6 +265,7 @@ public class DiyService {
 
     diyPackage.setPackageName(requestDTO.getPackageForm().getPackageName());
     diyPackage.setShortDescription(requestDTO.getPackageForm().getShortDescription());
+    diyPackage.setPackageDraft(false);
     return diyRepository.save(diyPackage);
   }
 
