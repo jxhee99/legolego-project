@@ -102,6 +102,8 @@ public class AuthController {
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("accessToken", tokens.get("accessToken"));
             responseBody.put("role", authService.getRole(loginDto.getEmail()));
+            responseBody.put("memberId", tokens.get("memberId")); // 반환값 memberId 추가
+
             return ResponseEntity.ok(responseBody);
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("message", e.getMessage()));

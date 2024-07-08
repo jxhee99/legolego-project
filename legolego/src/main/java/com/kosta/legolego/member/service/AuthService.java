@@ -5,6 +5,7 @@ import com.kosta.legolego.admin.repository.AdminRepository;
 import com.kosta.legolego.member.dto.*;
 import com.kosta.legolego.partner.entity.Partner;
 import com.kosta.legolego.partner.repository.PartnerRepository;
+import com.kosta.legolego.security.CustomUserDetails;
 import com.kosta.legolego.security.CustomUserDetailsService;
 import com.kosta.legolego.security.JwtTokenProvider;
 import com.kosta.legolego.user.entity.User;
@@ -144,13 +145,21 @@ public class AuthService {
                 existingRefreshToken = refreshToken;
             }
 
+            // 로그인 시 id 반환 때문에 추가
+            CustomUserDetails userDetail = (CustomUserDetails) authentication.getPrincipal();
+            Long memberId = userDetail.getId(); // 사용자 id 가져오기
+            logger.info("로그인된 사용자의 memberId: {}", memberId); // 로그 추가
+
             logger.info("Access Token: " + accessToken);
             logger.info("Refresh Token: " + existingRefreshToken);
 
             Map<String, String> tokens = new HashMap<>();
             tokens.put("accessToken", accessToken);
             tokens.put("refreshToken", existingRefreshToken);
+            tokens.put("memberId", String.valueOf(memberId)); // 추가
+
             return tokens;
+
         } catch (AuthenticationException e) {
             throw new BadCredentialsException("유효하지 않은 이메일 또는 비밀번호입니다.");
         }
