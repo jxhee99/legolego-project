@@ -19,7 +19,8 @@ public class JwtTokenProvider {
     @Value("${jwt.issuer}")
     private String issuer; // 토큰의 발행자 정보 설정
 
-    private final long ACCESS_TOKEN_VALIDITY = 30 * 60 * 1000;  // 엑세스 토큰 유효 시간 : 30분
+//    private final long ACCESS_TOKEN_VALIDITY = 30 * 60 * 1000;  // 엑세스 토큰 유효 시간 : 30분
+    private final long ACCESS_TOKEN_VALIDITY = 30 * 1000;  // 테스트용 엑세스 토큰 : 30초
     private final long REFRESH_TOKEN_VALIDITY = 7 * 24 * 60 * 60 * 1000;  // 리프레시 토큰 유효 시간 : 7일
 
     // Access Token 생성

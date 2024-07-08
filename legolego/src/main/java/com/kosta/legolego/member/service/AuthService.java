@@ -162,16 +162,28 @@ public class AuthService {
     }
 
     // 리프레시 토큰 검증 및 갱신
-    public String refreshAccessToken(String refreshToken) {
+    public TokenDto refreshTokens(String refreshToken) {
+        logger.info("Received refresh token: {}", refreshToken);
         if (jwtTokenProvider.validateToken(refreshToken)) {
             String userIdentifier = jwtTokenProvider.getUsername(refreshToken);
+            logger.info("Extracted user identifier: {}", userIdentifier);
             String storedRefreshToken = (String) redisTemplate.opsForValue().get(userIdentifier);
+            logger.info("Stored refresh token: {}", storedRefreshToken);
 
             if (refreshToken.equals(storedRefreshToken)) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userIdentifier);
-                return jwtTokenProvider.createToken(userDetails);
+                String newAccessToken = jwtTokenProvider.createToken(userDetails);
+                String newRefreshToken = jwtTokenProvider.createRefreshToken(userDetails);
+
+                redisTemplate.opsForValue().set(userIdentifier, newRefreshToken);
+
+                TokenDto tokenDto = new TokenDto();
+                tokenDto.setAccessToken(newAccessToken);
+                tokenDto.setRefreshToken(newRefreshToken);
+                return tokenDto;
             }
         }
+        logger.error("Invalid refresh token: {}", refreshToken);
         throw new BadCredentialsException("유효하지 않은 리프레시 토큰입니다.");
     }
 
