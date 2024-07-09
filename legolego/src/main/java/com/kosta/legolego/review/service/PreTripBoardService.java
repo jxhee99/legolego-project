@@ -39,6 +39,14 @@ public class PreTripBoardService {
                 .collect(Collectors.toList());
     }
 
+    // 리뷰 평점 높은 게시글 조회
+    public List<PreTripBoardDto> getHighRatingPreTripBoard() {
+        List<PreTripBoard> preTripBoards = preTripBoardRepository.findHighRating();
+        return preTripBoards.stream().map(PreTripBoardDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+
     // 게시글 상세 조회
     public PreTripBoardDetailDto getPreTripBoardDetails(Long boardNum) {
         PreTripBoard preTripBoard = preTripBoardRepository.findById(boardNum)

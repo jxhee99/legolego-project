@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.module.ResolutionException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -67,7 +68,15 @@ public class WishlistService {
     // 찜 목록 조회
     public List<WishlistDto> getWishlistByUser(Long userNum){
         // 사용자 별로 찜 목록을 반환
-        return wishlistRepository.findByUser_userNumAndWishlistStatus(userNum, true)
+        LocalDateTime currentTimestamp = LocalDateTime.now();
+        List<Product> products = productRepository.findBeforeBoardingDate(currentTimestamp);
+
+        List<Wishlist> wishlists = wishlistRepository.findByUser_userNumAndWishlistStatus(userNum, true);
+
+        List<Wishlist> filterWishlists = wishlists.stream()
+                .filter(wishlist -> products.contains(wishlist.getProduct())).collect(Collectors.toList());
+
+        return filterWishlists
                 .stream()
                 .map(WishlistDto::new) // wishlist 엔티티 -> wishlist DTO로 변환
                 .collect(Collectors.toList());

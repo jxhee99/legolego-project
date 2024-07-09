@@ -2,6 +2,7 @@ package com.kosta.legolego.products.repository;
 
 import com.kosta.legolego.products.entity.Wishlist;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

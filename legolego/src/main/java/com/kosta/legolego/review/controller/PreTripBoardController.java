@@ -28,6 +28,13 @@ public class PreTripBoardController {
         return ResponseEntity.status(HttpStatus.OK).body(preTripBoards);
     }
 
+    // 리뷰 높은 게시판 조회
+    @GetMapping("/pre-trip/rating")
+    public ResponseEntity<List<PreTripBoardDto>> getHighRatingPreTripBoard() {
+        List<PreTripBoardDto> preTripBoards = preTripBoardService.getHighRatingPreTripBoard();
+        return ResponseEntity.status(HttpStatus.OK).body(preTripBoards);
+    }
+
     // 게시판 상세 조회
     @GetMapping("/pre-trip/{board_num}")
     public ResponseEntity<PreTripBoardDetailDto> getPreTripBoardDetail(@PathVariable("board_num") Long boardNum){
