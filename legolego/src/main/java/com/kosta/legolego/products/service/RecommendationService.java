@@ -1,13 +1,17 @@
 package com.kosta.legolego.products.service;
 
+import com.kosta.legolego.diypackage.entity.AirlineEntity;
+import com.kosta.legolego.diypackage.entity.DiyPackage;
 import com.kosta.legolego.products.dto.ProductDto;
 import com.kosta.legolego.products.entity.Product;
 import com.kosta.legolego.products.repository.ProductRepository;
+import com.kosta.legolego.products.repository.ProductSearchRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -17,6 +21,8 @@ import java.util.stream.Collectors;
 public class RecommendationService {
   @Autowired
   private ProductRepository productRepository;
+  @Autowired
+  ProductSearchRepository productSearchRepository;
 
   public ProductDto recommendProducts(Long productNum, String destination) {
     log.debug("추천 요청: productNum={}, destination={}", productNum, destination);
@@ -62,5 +68,55 @@ public class RecommendationService {
     ProductDto productDto = ProductDto.fromEntity(products.get(random.nextInt(products.size())));
     log.debug("랜덤으로 한 개 반환: {}", productDto);
     return productDto;
+  }
+
+  //상품 목적지 별검색
+  public List<ProductDto> searchDestination(String destination){
+
+    LocalDateTime now = LocalDateTime.now();
+
+    List<Product> products = productSearchRepository.findBYDestinationProducts(destination, now);
+    log.debug("조건을 만족하는 상품 조회 결과: {}", products);
+
+    if (products.isEmpty()) {
+      log.error("검색 상품이 없습니다.");
+      throw new IllegalArgumentException("검색 상품이 없습니다.");
+    }
+    List<ProductDto> dtos = new ArrayList<>();
+    for (Product product : products) {
+      dtos.add(ProductDto.fromEntity(product));
+    }
+
+    return dtos;
+  }
+
+  //상품 월별 검색
+  public List<ProductDto> searchMonth(int month){
+    LocalDateTime now = LocalDateTime.now();
+    List<Product> products = productSearchRepository.findByMonthProducts(month, now);
+    if (products.isEmpty()) {
+      log.error("검색 상품이 없습니다.");
+      throw new IllegalArgumentException("검색 상품이 없습니다.");
+    }
+    List<ProductDto> dtos = new ArrayList<>();
+    for (Product product : products) {
+      dtos.add(ProductDto.fromEntity(product));
+    }
+    return dtos;
+  }
+
+  //상품 통합 검색
+  public List<ProductDto> searchDestinationAndMonth(String destination, int month){
+    LocalDateTime now = LocalDateTime.now();
+    List<Product> products = productSearchRepository.findByDestinationAndMonth(destination,month,now);
+    if(products.isEmpty()){
+      log.error("검색 상품이 없습니다.");
+      throw new IllegalArgumentException("검색 상품이 없습니다.");
+    }
+    List<ProductDto> dtos = new ArrayList<>();
+    for (Product product : products) {
+      dtos.add(ProductDto.fromEntity(product));
+    }
+    return dtos;
   }
 }
