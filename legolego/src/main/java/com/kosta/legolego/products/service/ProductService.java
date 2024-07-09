@@ -27,7 +27,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static io.lettuce.core.GeoArgs.Sort.desc;
 
 
 @Slf4j
@@ -53,12 +57,81 @@ public class ProductService {
     ImageService imageService;
 
 
-//  상품 전체 조회
-    public List<ProductDto> getAllProducts(){
-        return productRepository.findAll().stream()
+//  상품 전체 조회 : 출발 날짜 지난 상품 제외 및 다양한 필터링 옵션 추가
+    public List<ProductDto> getAllProducts(
+            Optional<Boolean> isRecruitmentClose,
+            Optional<Boolean> isRecruitmentConfirmed,
+            Optional<Boolean> sortByDeadlineDesc,
+            Optional<Boolean> sortByRegDateDesc,
+            Optional<Boolean> sortByPoplar,
+            Optional<Boolean> sortByPriceDesc,
+            Optional<Boolean> sortByPriceAsc){
+
+
+        LocalDateTime currentTimestamp = LocalDateTime.now();
+        log.info("Current timestamp: {}", currentTimestamp);
+
+        // 공통 필터링 : 여행 출발 날짜 지나지 않은 상품들
+        List<Product> products = productRepository.findBeforeBoardingDate(currentTimestamp);
+
+        // 추가 필터링 및 정렬 조건이 없는 경우 공통 필터링된 상품 목록 반환
+        if (!isRecruitmentClose.isPresent() && !isRecruitmentConfirmed.isPresent() &&
+                !sortByDeadlineDesc.isPresent() && !sortByRegDateDesc.isPresent() &&
+                !sortByPoplar.isPresent() && !sortByPriceDesc.isPresent() && !sortByPriceAsc.isPresent()) {
+            return products.stream()
+                    .map(ProductDto::fromEntity)
+                    .collect(Collectors.toList());
+        }
+
+        // 모집 임박 상품들
+        if(isRecruitmentClose.isPresent() && isRecruitmentClose.get()) {
+            products = products.stream().filter(product -> {long paymentCount = orderRepository.countByProductAndPaymentStatus(product, true);
+                                                            double recruitmentRate = (double) product.getNecessaryPeople() * 0.8;
+                                                            return paymentCount >= recruitmentRate;
+            }).collect(Collectors.toList());
+        }
+
+        // 마감 임박 상품들(recruitment_deadline 내림차순)
+        if(sortByDeadlineDesc.isPresent() && sortByDeadlineDesc.get()){
+            products = productRepository.findRecruitmentDeadlineDesc().stream()
+                    .filter(products::contains).collect(Collectors.toList());
+        }
+
+        // 모집 확정 상품들(recruitment_confirmed = true)
+        if(isRecruitmentConfirmed.isPresent() && isRecruitmentConfirmed.get()) {
+           products = productRepository.findRecruitmentConfirmed().stream()
+                   .filter(products::contains).collect(Collectors.toList());
+
+        }
+
+        // 최신 등록 상품들(reg_date 내림차순)
+        if(sortByRegDateDesc.isPresent() && sortByRegDateDesc.get()) {
+            products =  productRepository.findLatestProducts().stream()
+                    .filter(products::contains).collect(Collectors.toList());
+        }
+
+        // 주문 내역 많은 상품들(인기순 : count(payment_status = true) 내림차순)
+        if(sortByPoplar.isPresent() && sortByPoplar.get()) {
+            products = productRepository.findPopularProducts().stream()
+                    .filter(products::contains).collect(Collectors.toList());
+        }
+
+        // 가격 높은 상품 순서(price 내림차순)
+        if(sortByPriceDesc.isPresent() && sortByPriceDesc.get()){
+            products = productRepository.findPriceDesc().stream()
+                    .filter(products::contains).collect(Collectors.toList());
+        }
+        // 가격 낮은 상품 순서(price 오름차순)
+        if( sortByPriceAsc.isPresent() && sortByPriceAsc.get()){
+            products = productRepository.findPriceAsc().stream()
+                    .filter(products::contains).collect(Collectors.toList());
+        }
+
+        return products.stream()
                 .map(ProductDto::fromEntity)
                 .collect(Collectors.toList());
     }
+
 
     //   상품 상세 조회
     @Transactional

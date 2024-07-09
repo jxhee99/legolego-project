@@ -36,4 +36,34 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
    //추천 상품을 위한 메서드
    @Query("SELECT p FROM Product p WHERE p.destination = :destination AND p.productNum <> :productNum AND p.recruitmentDeadline > :now")
    List<Product> findRecommendedProducts(@Param("destination") String destination, @Param("productNum") Long productNum, @Param("now") LocalDateTime now);
+
+   // 모집 기간 지난 상품 처리 메서드
+   @Query("select p from Product p " +
+           "where p.diyList.diyPackage.airline.boardingDate > :currentTimestamp")
+   List<Product> findBeforeBoardingDate(@Param("currentTimestamp") LocalDateTime currentTimestamp);
+
+   // 모집 확정된 상품 필터링
+   @Query("select p from Product p where p.recruitmentConfirmed = true")
+   List<Product> findRecruitmentConfirmed();
+
+   // 마감 임박 상품 필터링
+   @Query("select p from Product p order by p.recruitmentDeadline desc")
+   List<Product> findRecruitmentDeadlineDesc();
+
+   // 최신 등록 상품 필터링
+   @Query("select p from Product p order by p.regDate desc")
+   List<Product> findLatestProducts();
+
+   // 가격 높은 순
+   @Query("select p from Product p order by p.price desc")
+   List<Product> findPriceDesc();
+
+   // 가격 낮은 순
+   @Query("select p from Product p order by p.price asc")
+   List<Product> findPriceAsc();
+
+   // 인기순 필터링
+   @Query("select p from Product p order by (select count(o) from Order o where o.product = p and o.paymentStatus = true) desc ")
+   List<Product> findPopularProducts();
+
 }
