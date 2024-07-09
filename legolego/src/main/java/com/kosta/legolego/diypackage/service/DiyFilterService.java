@@ -1,19 +1,14 @@
 package com.kosta.legolego.diypackage.service;
 
-import com.kosta.legolego.diypackage.entity.AirlineEntity;
-import com.kosta.legolego.diypackage.entity.DiyPackage;
-import com.kosta.legolego.diypackage.entity.OverLikedList;
-import com.kosta.legolego.diypackage.entity.RouteEntity;
-import com.kosta.legolego.diypackage.repository.AirlineRepository;
-import com.kosta.legolego.diypackage.repository.DiyRepository;
-import com.kosta.legolego.diypackage.repository.OverLikedListRepository;
-import com.kosta.legolego.diypackage.repository.RouteRepository;
+import com.kosta.legolego.diypackage.entity.*;
+import com.kosta.legolego.diypackage.repository.*;
 import com.kosta.legolego.products.dto.ProductDto;
 import com.kosta.legolego.products.entity.Product;
 import com.kosta.legolego.products.repository.ProductSearchRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -36,6 +31,10 @@ public class DiyFilterService {
 
   @Autowired
   ProductSearchRepository productSearchRepository;
+
+  @Autowired
+  DiyListRepository diyListRepository;
+
 
 
   public List<OverLikedList> getFilteredOverLikedPackages(){
@@ -110,6 +109,38 @@ public class DiyFilterService {
     ProductDto productDto = ProductDto.fromEntity(products.get(random.nextInt(products.size())));
     log.debug("랜덤으로 한 개 반환: {}", productDto);
     return productDto;
+  }
+
+  //여행 출발일 지났는데 상품 되지 않은 diy를 overliked, diyList에서 삭제
+  @Scheduled(cron = "0 33 * * * *") //매 시간 30분에
+  public void deleteOverLiked(){
+    LocalDateTime now = LocalDateTime.now();
+
+    // 1. diyListPackage를 순회하여, is_registered가 false인 패키지를 찾는다.
+    List<DiyPackage> diyPackages = diyListRepository.findDiyPackagesNotRegistered();
+    log.info("Found {} diyPackages not registered.", diyPackages.size());
+
+    // 2. 해당 패키지들 중에서 여행 기간이 지난 패키지를 찾는다.
+    List<DiyPackage> diysOverDeadline = new ArrayList<>();
+    for (DiyPackage diyPackage : diyPackages) {
+      LocalDateTime boardingDate = diyPackage.getAirline().getBoardingDate();
+      if (boardingDate.isBefore(now)) {
+        diysOverDeadline.add(diyPackage);
+      }
+    }
+    log.info("Found {} diys over deadline.", diysOverDeadline.size());
+
+    // 3. over_liked 테이블에서 삭제
+    for (DiyPackage diyPackage : diysOverDeadline) {
+      overLikedListRepository.deleteByDiyPackage(diyPackage);
+      log.info("Deleted from overLikedList: {}", diyPackage.getPackageNum());
+    }
+
+    // 4. diyList에서도 삭제
+    for (DiyPackage diyPackage : diysOverDeadline) {
+      diyListRepository.deleteByDiyPackage(diyPackage);
+      log.info("Deleted from diyList: {}", diyPackage.getPackageNum());
+    }
   }
 
 }

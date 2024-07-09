@@ -2,8 +2,12 @@ package com.kosta.legolego.diypackage.repository;
 
 import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -26,4 +30,11 @@ public interface DiyListRepository extends JpaRepository<DiyList, Long> {
 
     //추천 상품을 위한 메서드
     List<DiyList> findByDiyPackage(DiyPackage diyPackage);
+
+    //여행기간 지난 용: isRegistered가 false인 리스트의 DiyPackage 반환
+    @Query("SELECT dl.diyPackage FROM DiyList dl WHERE dl.isRegistered = false")
+    List<DiyPackage> findDiyPackagesNotRegistered();
+
+    //여행기간 지난 용 : 해당 DiyPackage 참조 하는 리스트 삭제
+    void deleteByDiyPackage(DiyPackage diyPackage);
 }

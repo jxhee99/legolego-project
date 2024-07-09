@@ -18,4 +18,5 @@ public interface AirlineRepository extends JpaRepository<AirlineEntity, Long> {
   // 목적지와 월별 조회에 필요한 쿼리
   @Query("SELECT a FROM AirlineEntity a WHERE a.destination LIKE %:destination% AND FUNCTION('MONTH', a.boardingDate) = :month ORDER BY a.airlineNum DESC")
   List<AirlineEntity> findByDestinationAndMonth(@Param("destination") String destination, @Param("month") int month);
+
 }
