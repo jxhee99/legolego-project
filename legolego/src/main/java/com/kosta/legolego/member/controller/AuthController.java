@@ -112,14 +112,15 @@ public class AuthController {
 
     // 토큰 갱신 엔드포인트
     @PostMapping("/refresh-token")
-    public ResponseEntity<Map<String, String>> refreshToken(@CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<TokenDto> refreshToken(@CookieValue("refreshToken") String refreshToken) {
         try {
-            String newAccessToken = authService.refreshAccessToken(refreshToken);
-            Map<String, String> response = new HashMap<>();
-            response.put("accessToken", newAccessToken);
-            return ResponseEntity.ok(response);
+            log.info("Received refresh token for renewal: {}", refreshToken);
+            TokenDto tokenDto = authService.refreshTokens(refreshToken);
+            log.info("Generated new access token and refresh token");
+            return ResponseEntity.ok(tokenDto);
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("message", e.getMessage()));
+            log.error("유효하지 않은 리프레시 토큰입니다: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
