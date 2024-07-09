@@ -28,17 +28,8 @@ public class ProductController {
 
 //  상품 전체 조회 : 모집 기간 지난 상품 중 출발 기간 지난 상품들 제외
     @GetMapping("/products")
-    public ResponseEntity<List<ProductDto>> getAllProducts(
-            @RequestParam(name = "isRecruitmentClose") Optional<Boolean> isRecruitmentClose,    // 모집 임박 상품 조회
-            @RequestParam(name = "isRecruitmentConfirmed") Optional<Boolean> isRecruitmentConfirmed, // 마감 임박 상품들
-            @RequestParam(name = "sortByDeadlineDesc") Optional<Boolean> sortByDeadlineDesc, // 모집 확정 상품 조회
-            @RequestParam(name = "sortByRegDateDesc" ) Optional<Boolean> sortByRegDateDesc, // 최신 등록 상품들
-            @RequestParam(name = "sortByPoplar") Optional<Boolean> sortByPoplar, // 주문 내역 많은 상품들(인기순)
-            @RequestParam(name ="sortByPriceDesc" ) Optional<Boolean> sortByPriceDesc, // 가격 높은 상품 순서
-            @RequestParam(name = "sortByPriceAsc") Optional<Boolean> sortByPriceAsc // 가격 낮은 상품 순서
-    ){
-        List<ProductDto> products = productService.getAllProducts(isRecruitmentClose,isRecruitmentConfirmed, sortByDeadlineDesc
-        , sortByRegDateDesc, sortByPoplar, sortByPriceDesc, sortByPriceAsc);
+    public ResponseEntity<List<ProductDto>> getAllProducts(){
+        List<ProductDto> products = productService.getAllProducts();
         return ResponseEntity.status(HttpStatus.OK).body(products);
     }
 
