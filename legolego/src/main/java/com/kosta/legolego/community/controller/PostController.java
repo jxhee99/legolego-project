@@ -1,6 +1,7 @@
 package com.kosta.legolego.community.controller;
 
 import com.kosta.legolego.community.dto.PostDto;
+import com.kosta.legolego.community.entity.Post.PostCategory;
 import com.kosta.legolego.community.service.PostService;
 import com.kosta.legolego.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +20,19 @@ public class PostController {
     @Autowired
     private PostService postService;
 
-    // 전체 게시글 리스트 조회
+    // 모든 게시글 최신순 정렬 (기본 정렬)
     @GetMapping("/all")
-    public List<PostDto> getAllPosts() {
-        return postService.getAllPosts();
+    public List<PostDto> getAllPostsByLatest() {
+        return postService.getAllPostsByLatest();
     }
 
-    // 상세 조회
+    // 모든 게시글 오래된 순으로 정렬
+    @GetMapping("/oldest")
+    public List<PostDto> getAllPostsByOldest() {
+        return postService.getAllPostsByOldest();
+    }
+
+    // 상세 조회 및 조회수 증가
     @GetMapping("/{post_num}")
     public ResponseEntity<?> getPostByPostNum(@PathVariable("post_num") Long postNum,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -34,9 +41,9 @@ public class PostController {
         }
         Optional<PostDto> postDto = postService.getPostById(postNum);
         if (postDto.isPresent()) {
-            return ResponseEntity.ok(postDto);
+            return ResponseEntity.ok(postDto.get());
         } else {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
@@ -107,7 +114,7 @@ public class PostController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
@@ -129,6 +136,7 @@ public class PostController {
                 isOwner = true;
             } else if (userDetails.getRole().equals("ROLE_PARTNER") && existing.getPartnerNum() != null && existing.getPartnerNum().equals(userDetails.getId())) {
                 isOwner = true;
+
             } else if (userDetails.getRole().equals("ROLE_ADMIN") && existing.getAdminNum() != null && existing.getAdminNum().equals(userDetails.getId())) {
                 isOwner = true;
             }
@@ -143,5 +151,34 @@ public class PostController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    // 검색
+    @GetMapping("/search")
+    public ResponseEntity<List<PostDto>> searchPostsByKeyword(@RequestParam("keyword") String keyword) {
+        List<PostDto> posts = postService.searchPostsByKeyword(keyword);
+        return ResponseEntity.ok(posts);
+    }
+
+    // 카테고리별 키워드 검색
+    @GetMapping("/category/{category}/search")
+    public ResponseEntity<List<PostDto>> searchPostsByCategoryAndKeyword(@PathVariable("category") PostCategory category,
+                                                                         @RequestParam("keyword") String keyword) {
+        List<PostDto> posts = postService.searchPostsByCategoryAndKeyword(category, keyword);
+        return ResponseEntity.ok(posts);
+    }
+
+    // 카테고리별 게시글 최신순 정렬 (기본)
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<PostDto>> getPostsByCategoryLatest(@PathVariable("category") PostCategory category) {
+        List<PostDto> posts = postService.getPostsByCategoryLatest(category);
+        return ResponseEntity.ok(posts);
+    }
+
+    // 카테고리별 게시글 오래된 순으로 정렬
+    @GetMapping("/category/{category}/oldest")
+    public ResponseEntity<List<PostDto>> getPostsByCategoryOldest(@PathVariable("category") PostCategory category) {
+        List<PostDto> posts = postService.getPostsByCategoryOldest(category);
+        return ResponseEntity.ok(posts);
     }
 }

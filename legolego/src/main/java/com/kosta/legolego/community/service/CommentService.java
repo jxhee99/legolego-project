@@ -37,7 +37,7 @@ public class CommentService {
     public List<CommentDto> getCommentsByPost(Long postNum) {
         Post post = postRepository.findById(postNum)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
-        List<Comment> topLevelComments = commentRepository.findByPostAndParentCommentIsNull(post);
+        List<Comment> topLevelComments = commentRepository. findByPostAndParentCommentIsNull(post);
         return topLevelComments.stream()
                 .map(this::convertToDtoWithReplies)
                 .filter(commentDto -> !(commentDto.getDeleted() && commentDto.getReplies().isEmpty()))  // 대댓글이 없는 삭제된 댓글은 제외
@@ -49,7 +49,14 @@ public class CommentService {
         Comment comment = convertToEntity(commentDto);
         comment.setRegDate(LocalDate.now());
         comment.setDeleted(false);
-        return convertToDto(commentRepository.save(comment));
+        Comment savedComment = commentRepository.save(comment);
+
+        // 댓글 수 증가
+        Post post = savedComment.getPost();
+        post.incrementCommentCount();
+        postRepository.save(post);
+
+        return convertToDto(savedComment);
     }
 
     // 댓글 수정
@@ -65,8 +72,20 @@ public class CommentService {
     public void deleteComment(Long commentNum) {
         Comment comment = commentRepository.findById(commentNum)
                 .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
-        comment.setDeleted(true);
-        commentRepository.save(comment);
+
+        if (comment.getReplies().isEmpty()) {
+            // 대댓글이 없는 경우 실제 삭제
+            commentRepository.delete(comment);
+        } else {
+            // 대댓글이 있는 경우 논리적 삭제
+            comment.setDeleted(true);
+            commentRepository.save(comment);
+        }
+
+        // 댓글 수 감소
+        Post post = comment.getPost();
+        post.decrementCommentCount();
+        postRepository.save(post);
     }
 
     private CommentDto convertToDtoWithReplies(Comment comment) {

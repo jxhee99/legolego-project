@@ -23,4 +23,6 @@ public class PostDto {
     private LocalDate regDate;
     private LocalDate modDate;
     private PostCategory category;
+    private int viewCount;
+    private int commentCount;
 }

@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -59,6 +60,24 @@ public class Post {
     @Column(name = "category", nullable = false)
     private PostCategory postCategory;
 
+    @Column(name = "view_count", nullable = false)
+    private int viewCount = 0;
+
+    @Column(name = "comment_count", nullable = false)
+    private int commentCount = 0;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
+
+    public void incrementViewCount() {
+        this.viewCount++;
+    }
+
+    public void incrementCommentCount() {
+        this.commentCount++;
+    }
+
+    public void decrementCommentCount() {
+        this.commentCount--;
+    }
 }
