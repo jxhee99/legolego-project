@@ -44,7 +44,8 @@ public class CommentController {
             commentDto.setAdminNum(userDetails.getId());
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(commentService.createComment(commentDto));
+        CommentDto createdComment = commentService.createComment(commentDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdComment);
     }
 
     // 댓글 수정
