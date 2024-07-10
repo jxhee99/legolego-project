@@ -1,6 +1,7 @@
 package com.kosta.legolego.diypackage.controller;
 
 import com.kosta.legolego.diypackage.service.AirlineService;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
@@ -9,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+@Slf4j
 @RestController
 public class AirlineController {
   @Value("${service.api.key}")
@@ -22,11 +23,13 @@ public class AirlineController {
                                   @RequestParam("returnDate") String returnDate,
                                   @RequestParam("schDeptCityCode") String schDeptCityCode,
                                   @RequestParam("schArrvCityCode") String schArrvCityCode) {
+
     // 가는 날 스케줄 데이터 가져오기
     String scheduleData = service.fetchFlightData(schDate, schDeptCityCode, schArrvCityCode);
     JSONArray startDataArray;
     if (scheduleData == null) {
-      startDataArray = new JSONArray();
+      log.warn("No schedule data found for departure date: {}. Generating random data.", schDate);
+      startDataArray = service.getRandomFlightData(schDeptCityCode, schArrvCityCode);
     } else {
       startDataArray = service.parseAndExtractFlightData(scheduleData);
     }
@@ -35,11 +38,11 @@ public class AirlineController {
     String returnScheduleData = service.fetchFlightData(returnDate, schArrvCityCode, schDeptCityCode);
     JSONArray returnDataArray;
     if (returnScheduleData == null) {
-      returnDataArray = new JSONArray();
+      log.warn("No schedule data found for return date: {}. Generating random data.", returnDate);
+      returnDataArray = service.getRandomFlightData(schArrvCityCode, schDeptCityCode);
     } else {
       returnDataArray = service.parseAndExtractFlightData(returnScheduleData);
     }
-
 
     // 두 array 합쳐서 하나의 JSON 객체로 반환
     JSONObject result = new JSONObject();
