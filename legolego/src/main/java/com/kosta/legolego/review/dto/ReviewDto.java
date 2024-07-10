@@ -19,13 +19,25 @@ public class ReviewDto {
     private Long boardNum;
     private Long userNum;
     private String userNickname;
+    private String productName;
+    private String productImage;
+    private String destination;
 
     public static ReviewDto fromEntity(Review review){
         Long userNum = null;
         String userNickname = null;
+        String productNum = null;
+        String productName = null;
+        String productImage = null;
+        String destination = null;
         if (review.getOrder() != null && review.getOrder().getUser() != null) {
             userNum = review.getOrder().getUser().getUserNum();
             userNickname = review.getOrder().getUser().getUserNickname();
+        }
+        if(review.getPreTripBoard() != null && review.getPreTripBoard().getProduct() != null) {
+            productImage = review.getPreTripBoard().getProduct().getProductImage();
+            productName = review.getPreTripBoard().getProduct().getProductName();
+            destination = review.getPreTripBoard().getProduct().getDiyList().getDiyPackage().getAirline().getDestination();
         }
 
         return new ReviewDto(
@@ -35,7 +47,10 @@ public class ReviewDto {
                 review.getRating(),
                 review.getPreTripBoard() != null ? review.getPreTripBoard().getBoardNum() : null,
                 userNum,
-                userNickname
+                userNickname,
+                productName,
+                productImage,
+                destination
         );
     }
 

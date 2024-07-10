@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.OptionalDouble;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,6 +24,17 @@ public class PreTripBoard {
 
     @OneToMany(mappedBy = "preTripBoard", cascade = CascadeType.REMOVE)
     private List<Review> reviews; // 특정 상품에 대한 모든 리뷰 조회 기능 구현
+
+    // 평균 별점을 계산하는 메서드
+    public double getAverageRating() {
+        if (reviews == null || reviews.isEmpty()) {
+            return 0;
+        }
+        OptionalDouble averageRating = reviews.stream()
+                .mapToInt(Review::getRating)
+                .average();
+        return averageRating.isPresent() ? averageRating.getAsDouble() : 0;
+    }
 
     @OneToOne
     @JoinColumn(name = "product_num", nullable = false)

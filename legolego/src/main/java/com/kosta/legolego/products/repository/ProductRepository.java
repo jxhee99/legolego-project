@@ -46,9 +46,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
    @Query("select p from Product p where p.recruitmentConfirmed = true")
    List<Product> findRecruitmentConfirmed();
 
-   // 마감 임박 상품 필터링
-   @Query("select p from Product p order by p.recruitmentDeadline desc")
-   List<Product> findRecruitmentDeadlineDesc();
+   // 마감 임박 상품 필터링(모집 확정 제외)
+   @Query("select p from Product p " +
+           "where p.recruitmentConfirmed = false " +
+           "order by p.recruitmentDeadline asc")
+   List<Product> findRecruitmentDeadlineAsc();
 
    // 최신 등록 상품 필터링
    @Query("select p from Product p order by p.regDate desc")
@@ -62,8 +64,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
    @Query("select p from Product p order by p.price asc")
    List<Product> findPriceAsc();
 
-   // 인기순 필터링
-   @Query("select p from Product p order by (select count(o) from Order o where o.product = p and o.paymentStatus = true) desc ")
+   // 인기순 필터링(모집 확정 제외)
+   @Query("select p from Product p " +
+           "where p.recruitmentConfirmed = false " +
+           "order by (select count(o) from Order o where o.product = p and o.paymentStatus = true) desc ")
    List<Product> findPopularProducts();
 
 }

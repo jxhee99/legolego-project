@@ -21,6 +21,9 @@ public class PreTripBoardDto {
     private LocalDateTime boardingDate;
     private LocalDateTime comingDate;
     private String userNickname;
+    private String destination;
+    private Integer countRating;
+    private Double avgRating;
 
     public static PreTripBoardDto fromEntity(PreTripBoard preTripBoard) {
         return new PreTripBoardDto(
@@ -30,7 +33,10 @@ public class PreTripBoardDto {
                 preTripBoard.getProduct().getPrice(),
                 preTripBoard.getProduct().getDiyList().getDiyPackage().getAirline().getBoardingDate(),
                 preTripBoard.getProduct().getDiyList().getDiyPackage().getAirline().getComingDate(),
-                preTripBoard.getProduct().getDiyList().getDiyPackage().getUser().getUserNickname()
+                preTripBoard.getProduct().getDiyList().getDiyPackage().getUser().getUserNickname(),
+                preTripBoard.getProduct().getDiyList().getDiyPackage().getAirline().getDestination(),
+                preTripBoard.getReviews().size(),
+                preTripBoard.getAverageRating()
         );
     }
 }

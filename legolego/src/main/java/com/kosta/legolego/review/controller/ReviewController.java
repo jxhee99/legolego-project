@@ -21,11 +21,20 @@ public class ReviewController {
     @Autowired
     ReviewService reviewService;
 
+    // 관리자용 리뷰 전체 조회
     @GetMapping("/admin/reviews")
     public ResponseEntity<List<ReviewDto>> getAllReview(@AuthenticationPrincipal CustomUserDetails userDetails) {
         if (userDetails == null || !userDetails.getRole().equals("ROLE_ADMIN")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        List<ReviewDto> reviewDtos = reviewService.getAllReview();
+        return ResponseEntity.status(HttpStatus.OK).body(reviewDtos);
+    }
+
+    // 사용자용 리뷰 전체 조회
+    @GetMapping("/reviews")
+    public ResponseEntity<List<ReviewDto>> getAllReviewForUser() {
+
         List<ReviewDto> reviewDtos = reviewService.getAllReview();
         return ResponseEntity.status(HttpStatus.OK).body(reviewDtos);
     }

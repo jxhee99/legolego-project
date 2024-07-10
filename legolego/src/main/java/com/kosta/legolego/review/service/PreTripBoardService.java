@@ -46,7 +46,6 @@ public class PreTripBoardService {
                 .collect(Collectors.toList());
     }
 
-
     // 게시글 상세 조회
     public PreTripBoardDetailDto getPreTripBoardDetails(Long boardNum) {
         PreTripBoard preTripBoard = preTripBoardRepository.findById(boardNum)
