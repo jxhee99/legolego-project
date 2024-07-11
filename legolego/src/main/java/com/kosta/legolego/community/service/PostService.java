@@ -3,10 +3,12 @@ package com.kosta.legolego.community.service;
 import com.kosta.legolego.admin.entity.Admin;
 import com.kosta.legolego.community.dto.PostDto;
 import com.kosta.legolego.community.entity.Post;
+import com.kosta.legolego.community.entity.Post.PostCategory;
 import com.kosta.legolego.community.repository.PostRepository;
 import com.kosta.legolego.partner.entity.Partner;
 import com.kosta.legolego.security.CustomUserDetails;
 import com.kosta.legolego.user.entity.User;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,14 +23,26 @@ public class PostService {
     @Autowired
     private PostRepository postRepository;
 
-    // 전체 게시글 리스트 조회
-    public List<PostDto> getAllPosts() {
-        return postRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
+    // 모든 게시글 최신순 정렬
+    public List<PostDto> getAllPostsByLatest() {
+        return postRepository.findAllByOrderByRegDateDesc().stream()
+                .map(this::convertToDto).collect(Collectors.toList());
     }
 
-    // 상세 조회
+    // 모든 게시글 오래된 순으로 정렬
+    public List<PostDto> getAllPostsByOldest() {
+        return postRepository.findAllByOrderByRegDateAsc().stream()
+                .map(this::convertToDto).collect(Collectors.toList());
+    }
+
+    // 상세 조회 및 조회수 증가
+    @Transactional
     public Optional<PostDto> getPostById(Long postNum) {
-        return postRepository.findById(postNum).map(this::convertToDto);
+        return postRepository.findById(postNum).map(post -> {
+            post.incrementViewCount();
+            postRepository.save(post);
+            return convertToDto(post);
+        });
     }
 
     // 내가 쓴 글 목록 조회
@@ -100,12 +114,41 @@ public class PostService {
         postRepository.deleteById(postNum);
     }
 
+    // 검색
+    public List<PostDto> searchPostsByKeyword(String keyword) {
+        return postRepository.searchPostsByKeyword(keyword).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    // 카테고리별 키워드 검색
+    public List<PostDto> searchPostsByCategoryAndKeyword(PostCategory category, String keyword) {
+        return postRepository.findByPostCategoryAndKeyword(category, keyword).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    // 카테고리별 게시글 최신순 정렬 (기본)
+    public List<PostDto> getPostsByCategoryLatest(PostCategory category) {
+        return postRepository.findByPostCategoryOrderByRegDateDesc(category).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    // 카테고리별 게시글 오래된 순으로 정렬
+    public List<PostDto> getPostsByCategoryOldest(PostCategory category) {
+        return postRepository.findByPostCategoryOrderByRegDateAsc(category).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
     private PostDto convertToDto(Post post) {
         return new PostDto(post.getPostNum(), post.getTitle(), post.getContent(),
                             post.getUser() != null ? post.getUser().getUserNum() : null,
                             post.getPartner() != null ? post.getPartner().getPartnerNum() : null,
                             post.getAdmin() != null ? post.getAdmin().getAdminNum() : null,
-                            post.getRegDate(), post.getModDate(), post.getPostCategory());
+                            post.getRegDate(), post.getModDate(), post.getPostCategory(),
+                            post.getViewCount(), post.getComments().size());
     }
 
     private Post convertToEntity(PostDto postDto) {
@@ -129,6 +172,8 @@ public class PostService {
         post.setRegDate(postDto.getRegDate());
         post.setModDate(postDto.getModDate());
         post.setPostCategory(postDto.getCategory());
+        post.setViewCount(postDto.getViewCount());
+        post.setCommentCount(postDto.getCommentCount());
         return post;
     }
 }

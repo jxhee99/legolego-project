@@ -43,6 +43,13 @@ public class AirlineService {
       if (totalCount == 0) {
         return null;
       }
+
+      JSONObject items = body.getJSONObject("items");
+      if (items.has("item")) {
+        if (items.get("item") instanceof JSONObject) {
+          return null; // item이 JSONObject일 경우 null 반환
+        }
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -114,4 +121,98 @@ public class AirlineService {
     }
     return result.toString();
   }
+
+  //랜덤 정보 반환
+  public JSONArray getRandomFlightData(String schDeptCityCode, String schArrvCityCode) {
+    // 배열 생성
+    JSONArray randomDataArray = new JSONArray();
+
+    // 공항코드에 맞는 이름 가져옴
+    String airportName = compareCityCode(schDeptCityCode);
+    String cityName = compareCityCode(schArrvCityCode);
+
+    // Json 객체 생성
+    JSONObject extractedData1 = new JSONObject();
+    extractedData1.put("airlineKorean", "대한항공");
+    extractedData1.put("airport", airportName);
+    extractedData1.put("city", cityName);
+    extractedData1.put("internationalNum", "KE902");
+    extractedData1.put("internationalTime", "1555");
+    randomDataArray.put(extractedData1);
+
+    JSONObject extractedData2 = new JSONObject();
+    extractedData2.put("airlineKorean", "아시아나");
+    extractedData2.put("airport", airportName);
+    extractedData2.put("city", cityName);
+    extractedData2.put("internationalNum", "OZ111");
+    extractedData2.put("internationalTime", "1855");
+    randomDataArray.put(extractedData2);
+
+    JSONObject extractedData3 = new JSONObject();
+    extractedData3.put("airlineKorean", "대한항공");
+    extractedData3.put("airport", airportName);
+    extractedData3.put("city", cityName);
+    extractedData3.put("internationalNum", "KE231");
+    extractedData3.put("internationalTime", "2140");
+    randomDataArray.put(extractedData3);
+
+    return randomDataArray;
+  }
+
+
+  public String compareCityCode(String cityCode) {
+    switch(cityCode) {
+      case "ICN":
+        return "인천";
+      case "CDG":
+        return "파리/샤를드골";
+      case "LHR":
+        return "런던/히드로";
+      case "JFK":
+        return "뉴욕/존 F. 케네디";
+      case "HND":
+        return "도쿄/하네다";
+      case "LAX":
+        return "로스앤젤레스";
+      case "DXB":
+        return "두바이";
+      case "HKG":
+        return "홍콩";
+      case "SIN":
+        return "싱가포르";
+      case "SYD":
+        return "시드니";
+      case "BKK":
+        return "방콕";
+      case "AMS":
+        return "암스테르담";
+      case "FRA":
+        return "프랑크푸르트";
+      case "MAD":
+        return "마드리드";
+      case "FCO":
+        return "로마";
+      case "GRU":
+        return "상파울루";
+      case "JNB":
+        return "요하네스버그";
+      case "PEK":
+        return "베이징";
+      case "SVO":
+        return "모스크바/셰레메티예보";
+      case "ORD":
+        return "시카고/오헤어";
+      case "YVR":
+        return "밴쿠버";
+      case "MEX":
+        return "멕시코시티";
+      case "CPT":
+        return "케이프타운";
+      case "MEL":
+        return "멜버른";
+      default:
+        return "알 수 없는 도시 코드";
+    }
+  }
+
 }
