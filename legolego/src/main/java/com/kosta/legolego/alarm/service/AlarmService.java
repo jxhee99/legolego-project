@@ -28,6 +28,10 @@ public class AlarmService {
     @Value("${admin.id}")
     private Long adminNum;
 
+    @Value("${jwt.secret_key}")
+    private String secretKey;
+
+
     // user용 알림
     public void sendAlarmToUser(Long userNum, String message) {
         sendAlarm(userNum, "USER", message);
@@ -51,8 +55,9 @@ public class AlarmService {
 
         alarmRepository.save(alarm);
 
+        String payload = String.format("{\"message\": \"%s\"}", message); // 메시지를 JSON 형식으로 변환
         // websocket 메시지 전송
-        messagingTemplate.convertAndSend("/topic/alarm/" + id, message);
+        messagingTemplate.convertAndSend("/topic/alarm/" + id,  payload);
         log.info("Message sent to /topic/alarm/" + id + ": " + message);
     }
 
@@ -89,16 +94,11 @@ public class AlarmService {
             String message = savedDiyList.getPartner().getCompanyName() + "에서 제안 요청을 보냈습니다.";
             log.info("partner 정보 : {}", message);
 
-            Alarm alarm = new Alarm();
-            alarm.setMemberId(userNum);
-            alarm.setRole("USER");
-            alarm.setMessage(message);
-            alarm.setDate(new Timestamp(System.currentTimeMillis()));
+//            Long partnerNum = savedDiyList.getPartner().getPartnerNum();
+//            sendAlarmToPartner(partnerNum, message);
+            sendAlarmToUser(userNum, message);
+//            sendAlarmToAdmin(message);
 
-            alarmRepository.save(alarm);
-            log.info("Alarm saved: {}", alarm);
-            messagingTemplate.convertAndSend("/topic/alarm/" + userNum, message);
-            log.info("Websocket message sent to /topic/alarm/{}", userNum);
         } catch (Exception e) {
             log.error("Error in sendAlarmList: ", e);
         }
