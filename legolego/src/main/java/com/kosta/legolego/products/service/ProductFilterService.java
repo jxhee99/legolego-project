@@ -2,6 +2,7 @@ package com.kosta.legolego.products.service;
 
 import com.kosta.legolego.orders.repository.OrderRepository;
 import com.kosta.legolego.products.dto.ProductDto;
+import com.kosta.legolego.products.dto.ProductOrderCountDto;
 import com.kosta.legolego.products.entity.Product;
 import com.kosta.legolego.products.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,40 +23,42 @@ public class ProductFilterService {
     @Autowired
     OrderRepository orderRepository;
 
-    // 모집 임박 상품 조회
-    public List<ProductDto> getRecruitmentCloseProduct() {
+    // 모집 임박 상품 조회 (주석 풀기!!!!!!!!!!!)
+//    public List<ProductOrderCountDto> getRecruitmentCloseProduct() {
+//
+//        LocalDateTime currentTimestamp = LocalDateTime.now();
+//
+//        // 공통 필터링 : 여행 출발 날짜 지나지 않은 상품들
+//        List<Product> products = productRepository.findBeforeBoardingDateAndRecruitmentConfirmedFalse(currentTimestamp);
+//        List<Product> filteredProducts = products.stream().filter(product -> {long paymentCount = orderRepository.countByProductAndPaymentStatus(product, true);
+//            double recruitmentRate = (double) product.getNecessaryPeople() * 0.8;
+//            int roundedNum = (int) Math.round(recruitmentRate);
+//            log.info("모집 임박 인원 : {}",roundedNum);
+//            return paymentCount >= roundedNum;
+//        }).collect(Collectors.toList());
+//
+//        return filteredProducts.stream()
+//                .map(product -> new ProductOrderCountDto(ProductDto.fromEntity(product),
+//                        orderRepository.countByProductAndPaymentStatus(product,true)))
+//                .collect(Collectors.toList());
+//    }
 
-        LocalDateTime currentTimestamp = LocalDateTime.now();
 
-        // 공통 필터링 : 여행 출발 날짜 지나지 않은 상품들
-        List<Product> products = productRepository.findBeforeBoardingDate(currentTimestamp);
-        List<Product> filteredProducts = products.stream().filter(product -> {long paymentCount = orderRepository.countByProductAndPaymentStatus(product, true);
-            double recruitmentRate = (double) product.getNecessaryPeople() * 0.8;
-            int roundedNum = (int) Math.round(recruitmentRate);
-            log.info("모집 임박 인원 : {}",roundedNum);
-            return paymentCount >= roundedNum;
-        }).collect(Collectors.toList());
-
-        return filteredProducts.stream()
-                .map(ProductDto::fromEntity)
-                .collect(Collectors.toList());
-    }
-
-
-    // 마감 임박 상품 조회
-    public List<ProductDto> getSortByDeadlineDescProduct() {
-
-        LocalDateTime currentTimestamp = LocalDateTime.now();
-
-        // 공통 필터링 : 여행 출발 날짜 지나지 않은 상품들
-        List<Product> products = productRepository.findBeforeBoardingDate(currentTimestamp);
-        products = productRepository.findRecruitmentDeadlineAsc().stream()
-                    .filter(products::contains).collect(Collectors.toList());
-
-        return products.stream()
-                .map(ProductDto::fromEntity)
-                .collect(Collectors.toList());
-    }
+    // 마감 임박 상품 조회 (주석 풀기!!!!!!!!!!!)
+//    public List<ProductOrderCountDto> getSortByDeadlineDescProduct() {
+//
+//        LocalDateTime currentTimestamp = LocalDateTime.now();
+//
+//        // 공통 필터링 : 여행 출발 날짜 지나지 않은 상품들
+//        List<Product> products = productRepository.findBeforeBoardingDate(currentTimestamp);
+//        products = productRepository.findRecruitmentDeadlineAsc().stream()
+//                    .filter(products::contains).collect(Collectors.toList());
+//
+//        return products.stream()
+//                .map(product -> new ProductOrderCountDto(ProductDto.fromEntity(product),
+//                        orderRepository.countByProductAndPaymentStatus(product,true)))
+//                .collect(Collectors.toList());
+//    }
 
     // 모집 확정 상품 조회
     public List<ProductDto> getRecruitmentConfirmProduct() {
@@ -87,19 +89,20 @@ public class ProductFilterService {
                 .collect(Collectors.toList());
     }
 
-    // 주문 내역 많은 상품들(인기순)
-    public List<ProductDto> getSortByPopularProduct() {
-        LocalDateTime currentTimestamp = LocalDateTime.now();
-
-        // 공통 필터링 : 여행 출발 날짜 지나지 않은 상품들
-        List<Product> products = productRepository.findBeforeBoardingDate(currentTimestamp);
-        products = productRepository.findPopularProducts(currentTimestamp).stream()
-                .filter(products::contains).collect(Collectors.toList());
-
-        return products.stream()
-                .map(ProductDto::fromEntity)
-                .collect(Collectors.toList());
-    }
+    // 주문 내역 많은 상품들(인기순) (주석 풀기!!!!!!!!!!!)
+//    public List<ProductOrderCountDto> getSortByPopularProduct() {
+//        LocalDateTime currentTimestamp = LocalDateTime.now();
+//
+//        // 공통 필터링 : 여행 출발 날짜 지나지 않은 상품들
+//        List<Product> products = productRepository.findBeforeBoardingDate(currentTimestamp);
+//        products = productRepository.findPopularProducts(currentTimestamp).stream()
+//                .filter(products::contains).collect(Collectors.toList());
+//
+//        return products.stream()
+//                .map(product -> new ProductOrderCountDto(ProductDto.fromEntity(product),
+//                        orderRepository.countByProductAndPaymentStatus(product,true)))
+//                .collect(Collectors.toList());
+//    }
 
     // 가격 높은 상품 순서
     public List<ProductDto> getSortByPriceDescProduct() {
