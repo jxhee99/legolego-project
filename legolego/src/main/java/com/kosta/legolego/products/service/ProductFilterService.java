@@ -30,12 +30,14 @@ public class ProductFilterService {
 
         // 공통 필터링 : 여행 출발 날짜 지나지 않은 상품들
         List<Product> products = productRepository.findBeforeBoardingDate(currentTimestamp);
-        products.stream().filter(product -> {long paymentCount = orderRepository.countByProductAndPaymentStatus(product, true);
+        List<Product> filteredProducts = products.stream().filter(product -> {long paymentCount = orderRepository.countByProductAndPaymentStatus(product, true);
             double recruitmentRate = (double) product.getNecessaryPeople() * 0.8;
-            return paymentCount >= recruitmentRate && recruitmentRate < 1;
+            int roundedNum = (int) Math.round(recruitmentRate);
+            log.info("모집 임박 인원 : {}",roundedNum);
+            return paymentCount >= roundedNum;
         }).collect(Collectors.toList());
 
-        return products.stream()
+        return filteredProducts.stream()
                 .map(ProductDto::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -91,6 +93,7 @@ public class ProductFilterService {
 
         // 공통 필터링 : 여행 출발 날짜 지나지 않은 상품들
         List<Product> products = productRepository.findBeforeBoardingDate(currentTimestamp);
+        //
         products = productRepository.findPopularProducts().stream()
                 .filter(products::contains).collect(Collectors.toList());
 
