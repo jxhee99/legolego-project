@@ -147,6 +147,9 @@ public class PostService {
                             post.getUser() != null ? post.getUser().getUserNum() : null,
                             post.getPartner() != null ? post.getPartner().getPartnerNum() : null,
                             post.getAdmin() != null ? post.getAdmin().getAdminNum() : null,
+                            post.getUser() != null ? post.getUser().getUserNickname() : null,
+                            post.getPartner() != null ? post.getPartner().getCompanyName() : null,
+                            post.getAdmin() != null ? post.getAdmin().getAdminName() : null,
                             post.getRegDate(), post.getModDate(), post.getPostCategory(),
                             post.getViewCount(), post.getComments().size());
     }

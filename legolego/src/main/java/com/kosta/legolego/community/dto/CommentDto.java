@@ -19,6 +19,9 @@ public class CommentDto {
     private Long userNum;
     private Long partnerNum;
     private Long adminNum;
+    private String userNickname;
+    private String companyName;
+    private String adminName;
     private String content;
     private LocalDate regDate;
     private LocalDate modDate;
