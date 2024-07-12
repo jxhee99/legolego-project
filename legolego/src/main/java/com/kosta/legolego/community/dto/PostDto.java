@@ -20,6 +20,9 @@ public class PostDto {
     private Long userNum;
     private Long partnerNum;
     private Long adminNum;
+    private String userNickname;
+    private String companyName;
+    private String adminName;
     private LocalDate regDate;
     private LocalDate modDate;
     private PostCategory category;

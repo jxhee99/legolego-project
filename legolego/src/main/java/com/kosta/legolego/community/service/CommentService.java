@@ -102,6 +102,9 @@ public class CommentService {
                                 comment.getUser() != null ? comment.getUser().getUserNum() : null,
                                 comment.getPartner() != null ? comment.getPartner().getPartnerNum() : null,
                                 comment.getAdmin() != null ? comment.getAdmin().getAdminNum() : null,
+                                comment.getUser() != null ? comment.getUser().getUserNickname() : null,
+                                comment.getPartner() != null ? comment.getPartner().getCompanyName() : null,
+                                comment.getAdmin() != null ? comment.getAdmin().getAdminName() : null,
                                 content, comment.getRegDate(), comment.getModDate(),
                                 comment.getParentComment() != null ? comment.getParentComment().getCommentNum() : null,
                                 deleted, replies);
@@ -147,6 +150,9 @@ public class CommentService {
                 comment.getUser() != null ? comment.getUser().getUserNum() : null,
                 comment.getPartner() != null ? comment.getPartner().getPartnerNum() : null,
                 comment.getAdmin() != null ? comment.getAdmin().getAdminNum() : null,
+                comment.getUser() != null ? comment.getUser().getUserNickname() : null,
+                comment.getPartner() != null ? comment.getPartner().getCompanyName() : null,
+                comment.getAdmin() != null ? comment.getAdmin().getAdminName() : null,
                 comment.getContent(), comment.getRegDate(), comment.getModDate(),
                 comment.getParentComment() != null ? comment.getParentComment().getCommentNum() : null,
                 comment.isDeleted(), null);
