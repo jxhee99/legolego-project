@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
+
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     // 내가 쓴 글 목록 조회
@@ -40,4 +41,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     // 카테고리 내에서 키워드 검색
     @Query("SELECT p FROM Post p WHERE p.postCategory = :category AND (p.title LIKE %:keyword% OR p.content LIKE %:keyword%)")
     List<Post> findByPostCategoryAndKeyword(@Param("category") PostCategory category, @Param("keyword") String keyword);
+
+    //등록 시간 없어서 최신순, 오래된 순 PostNum기준으로 반환
+    List<Post> findAllByOrderByPostNumDesc();
+
+    List<Post> findAllByOrderByPostNumAsc();
 }
