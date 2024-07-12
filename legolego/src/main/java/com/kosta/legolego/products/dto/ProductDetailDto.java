@@ -66,6 +66,9 @@ public class ProductDetailDto {
     @JsonProperty("orderCount")
     private int orderCount; // 추가
 
+    @JsonProperty("reviewAble")
+    private boolean reviewAble;
+
 
 
     // 파라미터가 많아 가독성이 떨어짐 -> builder() 사용하여 가독성 높임
@@ -88,6 +91,7 @@ public class ProductDetailDto {
                 .route(info.getDiyRouteDTO())
                 .detailCourse(info.getDiyDetailCourseDTOList())
                 .orderCount(orderCount)
+                .reviewAble(product.getReviewAble())
                 .build();
     }
 }

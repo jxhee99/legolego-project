@@ -67,6 +67,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
    // 인기순 필터링(모집 확정 제외)
    @Query("select p from Product p " +
            "where p.recruitmentConfirmed = false " +
+           "and p.recruitmentDeadline < :currentTimestamp " +
            "order by (select count(o) from Order o where o.product = p and o.paymentStatus = true) desc ")
    List<Product> findPopularProducts();
 
