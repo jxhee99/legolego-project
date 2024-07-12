@@ -42,6 +42,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "where p.diyList.diyPackage.airline.boardingDate > :currentTimestamp")
    List<Product> findBeforeBoardingDate(@Param("currentTimestamp") LocalDateTime currentTimestamp);
 
+   // 모집 임박 상품 필터링
+   @Query("select p from Product p " +
+           "where p.diyList.diyPackage.airline.boardingDate > :currentTimestamp " +
+           "and p.recruitmentConfirmed = false")
+   List<Product> findBeforeBoardingDateAndRecruitmentConfirmedFalse(@Param("currentTimestamp") LocalDateTime currentTimestamp);
+   
    // 모집 확정된 상품 필터링
    @Query("select p from Product p where p.recruitmentConfirmed = true")
    List<Product> findRecruitmentConfirmed();
