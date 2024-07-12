@@ -88,13 +88,12 @@ public class ProductFilterService {
     }
 
     // 주문 내역 많은 상품들(인기순)
-    public List<ProductDto> getSortByPoplarProduct() {
+    public List<ProductDto> getSortByPopularProduct() {
         LocalDateTime currentTimestamp = LocalDateTime.now();
 
         // 공통 필터링 : 여행 출발 날짜 지나지 않은 상품들
         List<Product> products = productRepository.findBeforeBoardingDate(currentTimestamp);
-        //
-        products = productRepository.findPopularProducts().stream()
+        products = productRepository.findPopularProducts(currentTimestamp).stream()
                 .filter(products::contains).collect(Collectors.toList());
 
         return products.stream()

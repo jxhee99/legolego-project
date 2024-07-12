@@ -48,9 +48,9 @@ public class ProductFilterController {
     }
 
     // 주문 내역 많은 상품들(인기순)
-    @GetMapping("/sortByPoplar")
-    public ResponseEntity<List<ProductDto>> getSortByPoplarProduct() {
-        List<ProductDto> products = productFilterService.getSortByPoplarProduct();
+    @GetMapping("/sortByPopular")
+    public ResponseEntity<List<ProductDto>> getSortByPopularProduct() {
+        List<ProductDto> products = productFilterService.getSortByPopularProduct();
         return ResponseEntity.status(HttpStatus.OK).body(products);
     }
 
