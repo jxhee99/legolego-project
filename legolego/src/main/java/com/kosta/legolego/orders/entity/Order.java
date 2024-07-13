@@ -15,12 +15,12 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
-@Entity
 @Table(name = "orders")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Entity
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -11,12 +11,13 @@ import lombok.Setter;
 import java.sql.Timestamp;
 import java.util.Date;
 
-@Entity
+
 @Table(name = "review")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Entity
 public class Review {
     @Id
     @Column(name = "review_num")

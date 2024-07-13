@@ -13,12 +13,13 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 
-@Entity
+
 @Table(name = "diy_list")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Entity
 public class DiyList {
 
     @Id
