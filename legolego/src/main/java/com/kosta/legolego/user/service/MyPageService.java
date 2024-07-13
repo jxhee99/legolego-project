@@ -1,8 +1,10 @@
 package com.kosta.legolego.user.service;
 
 import com.kosta.legolego.diypackage.entity.DiyLikeEntity;
+import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
 import com.kosta.legolego.diypackage.repository.DiyLikeRepository;
+import com.kosta.legolego.diypackage.repository.DiyListRepository;
 import com.kosta.legolego.user.dto.MyPageDto;
 import com.kosta.legolego.user.dto.MyProfileDto;
 import com.kosta.legolego.user.dto.UpdatePasswordDto;
@@ -33,6 +35,8 @@ public class MyPageService {
     @Autowired
     private DiyLikeRepository diyLikeRepository;
     @Autowired
+    private DiyListRepository diyListRepository;
+    @Autowired
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -41,24 +45,23 @@ public class MyPageService {
     public List<MyPageDto> getPackagesByUserNum(Long userNum) {
         List<DiyPackage> diyPackages = myPageRepository.findByUserUserNum(userNum);
         return diyPackages.stream()
-                        .map(MyPageDto::new)
-                        .collect(Collectors.toList());
+                .map(diyPackage -> {
+                    DiyList diyList = diyListRepository.findByDiyPackage(diyPackage).stream().findFirst().orElse(null);
+                    return new MyPageDto(diyPackage, diyList);
+                })
+                .collect(Collectors.toList());
     }
 
     // 응원하기 버튼 누른 게시물 리스트 조회
     public List<MyPageDto> getLikedPackagesByUserNum(Long userNum) {
         List<DiyLikeEntity> likes = diyLikeRepository.findByUserNum(userNum);
         return likes.stream()
-                    .map(like -> new MyPageDto(like.getDiy()))
-                    .collect(Collectors.toList());
+                .map(like -> {
+                    DiyList diyList = diyListRepository.findByDiyPackage(like.getDiy()).stream().findFirst().orElse(null);
+                    return new MyPageDto(like.getDiy(), diyList);
+                })
+                .collect(Collectors.toList());
     }
-
-    // 내가 쓴 글 목록 중 응원하기 조건 충족한 리스트만 조회
-//    public List<MyPageDto> getUserLikedPackages(Long userNum, Integer packageLikedNum) {
-//        log.info("Fetching liked packages for userNum: {} with packageLikedNum >= {}", userNum, packageLikedNum);
-//        List<DiyList> diyLists = myPageRepository.findByDiyPackageUserUserNumAndDiyPackagePackageLikedNumGreaterThanEqual(userNum, packageLikedNum);
-//        return diyLists.stream().map(MyPageDto::new).collect(Collectors.toList());
-//    }
 
     // 프로필 조회
     public MyProfileDto getProfile(Long userNum) {

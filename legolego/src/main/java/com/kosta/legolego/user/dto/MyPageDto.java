@@ -1,6 +1,7 @@
 package com.kosta.legolego.user.dto;
 
 import com.kosta.legolego.diypackage.entity.AirlineEntity;
+import com.kosta.legolego.diypackage.entity.DiyList;
 import com.kosta.legolego.diypackage.entity.DiyPackage;
 import com.kosta.legolego.diypackage.entity.RouteEntity;
 import com.kosta.legolego.user.entity.User;
@@ -25,9 +26,10 @@ public class MyPageDto {
     private User user;
     private AirlineEntity airline;
     private RouteEntity route;
+    private Boolean isSelected;
+    private Boolean isRegistered;
 
-
-    public MyPageDto(DiyPackage diyPackage) {
+    public MyPageDto(DiyPackage diyPackage, DiyList diyList) {
         this.packageNum = diyPackage.getPackageNum();
         this.packageName = diyPackage.getPackageName();
         this.profileImg = diyPackage.getProfileImg();
@@ -39,6 +41,11 @@ public class MyPageDto {
         this.user = diyPackage.getUser();
         this.airline = diyPackage.getAirline();
         this.route = diyPackage.getRoute();
+
+        if (diyList != null) {
+            this.isSelected = diyList.getIsSelected();
+            this.isRegistered = diyList.getIsRegistered();
+        }
     }
 
 }
