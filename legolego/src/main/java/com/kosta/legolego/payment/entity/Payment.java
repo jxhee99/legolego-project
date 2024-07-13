@@ -8,12 +8,12 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
 
-@Entity
 @Table(name = "payment")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 public class Payment {
 
     @Id

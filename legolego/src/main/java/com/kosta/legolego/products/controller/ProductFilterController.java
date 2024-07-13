@@ -21,18 +21,18 @@ public class ProductFilterController {
     ProductFilterService productFilterService;
 
     // 모집 임박 상품 조회 (주석 풀기!!!!!!!!!!!)
-//    @GetMapping("/recruitmentClose")
-//    public ResponseEntity<List<ProductOrderCountDto>> getRecruitmentCloseProduct() {
-//        List<ProductOrderCountDto> products = productFilterService.getRecruitmentCloseProduct();
-//        return ResponseEntity.status(HttpStatus.OK).body(products);
-//    }
+    @GetMapping("/recruitmentClose")
+    public ResponseEntity<List<ProductOrderCountDto>> getRecruitmentCloseProduct() {
+        List<ProductOrderCountDto> products = productFilterService.getRecruitmentCloseProduct();
+        return ResponseEntity.status(HttpStatus.OK).body(products);
+    }
 
     // 마감 임박 상품 조회 (주석 풀기!!!!!!!!!!!)
-//    @GetMapping("/sortByDeadlineDesc")
-//    public ResponseEntity<List<ProductOrderCountDto>> getSortByDeadlineDescProduct() {
-//        List<ProductOrderCountDto> products = productFilterService.getSortByDeadlineDescProduct();
-//        return ResponseEntity.status(HttpStatus.OK).body(products);
-//    }
+    @GetMapping("/sortByDeadlineDesc")
+    public ResponseEntity<List<ProductOrderCountDto>> getSortByDeadlineDescProduct() {
+        List<ProductOrderCountDto> products = productFilterService.getSortByDeadlineDescProduct();
+        return ResponseEntity.status(HttpStatus.OK).body(products);
+    }
 
     // 모집 확정 상품 조회
     @GetMapping("/recruitmentConfirmed")
@@ -49,11 +49,11 @@ public class ProductFilterController {
     }
 
     // 주문 내역 많은 상품들(인기순) (주석 풀기!!!!!!!!!!!)
-//    @GetMapping("/sortByPopular")
-//    public ResponseEntity<List<ProductOrderCountDto>> getSortByPopularProduct() {
-//        List<ProductOrderCountDto> products = productFilterService.getSortByPopularProduct();
-//        return ResponseEntity.status(HttpStatus.OK).body(products);
-//    }
+    @GetMapping("/sortByPopular")
+    public ResponseEntity<List<ProductOrderCountDto>> getSortByPopularProduct() {
+        List<ProductOrderCountDto> products = productFilterService.getSortByPopularProduct();
+        return ResponseEntity.status(HttpStatus.OK).body(products);
+    }
 
     // 가격 높은 상품 순서
     @GetMapping("/sortByPriceDesc")

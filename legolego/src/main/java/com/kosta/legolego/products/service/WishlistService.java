@@ -9,6 +9,7 @@ import com.kosta.legolego.user.entity.User;
 import com.kosta.legolego.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.module.ResolutionException;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class WishlistService {
     UserRepository userRepository;
 
     // 상품 찜 하기
+    @Transactional
     public void addToWishlist(Long userNum, Long productNum){
         // 1. 사용자와 상품을 엔티티로 조회
         User user = userRepository.findById(userNum)
@@ -83,6 +85,7 @@ public class WishlistService {
     }
 
     //  찜 목록에서 상품 제거
+    @Transactional
     public void  removeFromWishlist(Long userNum, Long productNum){
         Wishlist wishlist = wishlistRepository.findByUser_userNumAndProduct_productNum(userNum, productNum)
                 .orElseThrow(() -> new ResolutionException("찜 목록에서 상품을 찾을 수 없습니다."));
