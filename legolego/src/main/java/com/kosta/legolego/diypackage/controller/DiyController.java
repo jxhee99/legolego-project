@@ -117,6 +117,7 @@ public class DiyController {
   @PutMapping("/user/packages/{package_num}")
   public ResponseEntity<?> updateDiy(@PathVariable("package_num") Long package_num,@AuthenticationPrincipal CustomUserDetails userDetails ,@RequestBody RequestDTO requestDTO) {
     try{
+
       if (userDetails == null || !userDetails.getRole().equals("ROLE_USER")) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
       }
@@ -124,12 +125,11 @@ public class DiyController {
       //요청된 package_num에 해당하는 DIY 패키지의 작성자 확인
       Long packageOwner = diyService.getPackageOwner(package_num);
 
-      //가수요 만족되면 수정 못 함
-      int likeNum = diyService.getLikeNum(package_num);
-      if(likeNum >=2){
+      //수정 가능한 지 판단
+      boolean isEditPossible = diyService.isEditDeletePossible(package_num);
+      if(!isEditPossible){
         return ResponseEntity.badRequest().body("응원 달성 패키지는 수정할 수 없습니다.");
       }
-
       //작성자와 인증된 사용자 ID 비교
       if (!userNum.equals(packageOwner)) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 작성자가 아닌 경우 403 Forbidden 반환
@@ -167,9 +167,9 @@ public class DiyController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 작성자가 아닌 경우 403 Forbidden 반환
       }
 
-      //가수요 만족되면 삭제 못 함
-      int likeNum = diyService.getLikeNum(package_num);
-      if(likeNum >=2){
+      //삭제 가능한지 판단
+      boolean isDeletePossibe = diyService.isEditDeletePossible(package_num);
+      if(!isDeletePossibe){
         return ResponseEntity.badRequest().body("응원 달성 패키지는 삭제할 수 없습니다.");
       }
 

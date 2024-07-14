@@ -22,4 +22,6 @@ public class ResponseDTO {
   private boolean isLiked;
   @JsonProperty("isWriter")
   private boolean isWriter;
+  @JsonProperty("isEditDeletePossible")
+  private boolean isEditDeletePossible;
 }
