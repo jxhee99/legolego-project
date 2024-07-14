@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Transactional
 @Slf4j
@@ -36,18 +38,22 @@ public class DiyFilterService {
   DiyListRepository diyListRepository;
 
 
-
-  public List<OverLikedList> getFilteredOverLikedPackages(){
+  public List<OverLikedList> getFilteredOverLikedPackages() {
     List<OverLikedList> packages = overLikedListRepository.findAllByOrderByDiyPackageDesc();
-    return packages;
+    // 출발일이 지난 것은 제외
+    LocalDateTime now = LocalDateTime.now();
+    return packages.stream()
+            .filter(pkg -> pkg.getDiyPackage().getAirline().getBoardingDate().isAfter(now))
+            .collect(Collectors.toList());
   }
 
-  public List<DiyPackage> getPopular(){
+  public List<DiyPackage> getPopular() {
     List<DiyPackage> packages = diyRepository.findAllByPackageDraftFalseOrderByPackageLikedNumDescPackageNumDesc();
     return packages;
   }
+
   // 목적지 검색
-  public List<DiyPackage> getDestination(String destination){
+  public List<DiyPackage> getDestination(String destination) {
     //해당 목적지의 AirlineEntity를 가져옴
     List<AirlineEntity> airlineEntities = airlineRepository.findByDestinationContainingOrderByAirlineNumDesc(destination);
     // DiyPackage 리스트를 저장할 리스트
@@ -63,8 +69,9 @@ public class DiyFilterService {
 
     return diyPackages;
   }
+
   // 월별 검색
-  public List<DiyPackage> getMonth(int month){
+  public List<DiyPackage> getMonth(int month) {
     //시작일이 해당 월인 airlineEntity를 가져옴
     List<AirlineEntity> airlineEntities = airlineRepository.findByMonth(month);
 
@@ -72,7 +79,7 @@ public class DiyFilterService {
     List<DiyPackage> diyPackages = new ArrayList<>();
 
     // 각 airlinEntity에 대해 diyPackage를 가져와서 반환할 리스트에 추가
-    for(AirlineEntity airline : airlineEntities){
+    for (AirlineEntity airline : airlineEntities) {
       DiyPackage diyPackage = diyRepository.findByAirlineAndPackageDraftFalse(airline);
 
       if (diyPackage != null) {
@@ -81,8 +88,9 @@ public class DiyFilterService {
     }
     return diyPackages;
   }
+
   //통합 검색
-  public List<DiyPackage> getDestinationAndMonth(String destination, int month){
+  public List<DiyPackage> getDestinationAndMonth(String destination, int month) {
     List<AirlineEntity> airlineEntities = airlineRepository.findByDestinationAndMonth(destination, month);
     List<DiyPackage> diyPackages = new ArrayList<>();
 
@@ -97,14 +105,36 @@ public class DiyFilterService {
   }
 
   // 상품 추천
-  public ProductDto recommendProducts(String destination){
+  public ProductDto recommendProducts(String destination, Long packageNum) {
+
+    Optional<DiyPackage> optionalDiyPackage = diyRepository.findById(packageNum);
+    if (!optionalDiyPackage.isPresent()) {
+      log.error("패키지를 찾을 수 없습니다.");
+      throw new IllegalArgumentException("패키지를 찾을 수 없습니다.");
+    }
+
+    //해당 diy가 상품으로 등록되었으면 그것을 반환
+    List<DiyList> diyLists = diyListRepository.findByDiyPackage(optionalDiyPackage.get());
+    if (!diyLists.isEmpty()) {
+      List<DiyList> registeredDiyLists = diyLists.stream()
+              .filter(DiyList::getIsRegistered)
+              .collect(Collectors.toList());
+
+      if (!registeredDiyLists.isEmpty()) {
+        Product product = productSearchRepository.findByDiyList(registeredDiyLists.get(0));
+        ProductDto productDto = ProductDto.fromEntity(product);
+        return productDto;
+      }
+    }
+
     LocalDateTime now = LocalDateTime.now();
     List<Product> products = productSearchRepository.findBYDestinationProducts(destination, now);
     if (products.isEmpty()) {
       log.error("추천 상품이 없습니다.");
       throw new IllegalArgumentException("추천 상품이 없습니다.");
     }
-    // 랜덤으로 한 개 반환
+
+    // DiyList가 비어있거나 등록된 DiyList가 없을 경우 랜덤으로 반환
     Random random = new Random();
     ProductDto productDto = ProductDto.fromEntity(products.get(random.nextInt(products.size())));
     log.debug("랜덤으로 한 개 반환: {}", productDto);
@@ -113,7 +143,7 @@ public class DiyFilterService {
 
   //여행 출발일 지났는데 상품 되지 않은 diy를 overliked, diyList에서 삭제
   @Scheduled(cron = "0 33 * * * *") //매 시간 30분에
-  public void deleteOverLiked(){
+  public void deleteOverLiked() {
     LocalDateTime now = LocalDateTime.now();
 
     // 1. diyListPackage를 순회하여, is_registered가 false인 패키지를 찾는다.

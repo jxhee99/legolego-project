@@ -11,10 +11,12 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -40,6 +42,8 @@ public class DiyService {
   private ImageService imageService;
   @Autowired
   private ImageRepository imageRepository;
+  @Autowired
+  private DiyListRepository diyListRepository;
 
   //diy 생성
   public Long saveDraft(RequestDTO requestDTO) {
@@ -205,6 +209,9 @@ public class DiyService {
     // 작성자인지 검사
     boolean isWriter = (currentUserNum != null) && (diyPackage.getUser().getUserNum() ==currentUserNum);
 
+    //수정 삭제 가능한지 검사
+    boolean isEditDeletePossible = isEditDeletePossible(packageNum);
+
 
     //엔티티를 dto로 변환
     DiyAirlineDTO diyAirlineDTO = DiyAirlineDTO.toAirlineDTO(diyPackage.getAirline());
@@ -233,6 +240,7 @@ public class DiyService {
             .regDate(diyPackage.getRegDate())
             .isLiked(isLiked)
             .isWriter(isWriter)
+            .isEditDeletePossible(isEditDeletePossible)
             .build();
   }
 //put 수정
@@ -299,12 +307,21 @@ public class DiyService {
     Long userNum = diyPackage.getUser().getUserNum();
     return userNum;
   }
-  //해당 패키지의 likeNum 반환
-  public int getLikeNum(Long packageNum){
+
+  public boolean isEditDeletePossible (Long packageNum){
     DiyPackage diyPackage = diyRepository.findById(packageNum)
             .orElseThrow(() -> new  IllegalArgumentException("패키지를 찾을 수 없습니다"));
+
     int likeNum = diyPackage.getPackageLikedNum();
-    return likeNum;
+    LocalDateTime boardingDate = diyPackage.getAirline().getBoardingDate();
+    LocalDateTime now = LocalDateTime.now();
+
+    boolean isOverLiked = likeNum>=2;
+    boolean isExpired = boardingDate.isBefore(now);
+    boolean isProduct = !diyListRepository.findByDiyPackage(diyPackage).isEmpty();
+    //응원달성이 안되거나, 여행기간이 만료되고 상품이 안된 diy는 수정 삭제 가능
+    return (isExpired && !isProduct) || !isOverLiked;
+
   }
 
   private void saveDetailCourses(List<DiyDetailCourseDTO> diyDetailCourseDTOS, RouteEntity routeEntity) {

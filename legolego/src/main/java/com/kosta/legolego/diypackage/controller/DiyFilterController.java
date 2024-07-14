@@ -89,9 +89,9 @@ public class DiyFilterController {
   }
   //추천상품
   @GetMapping("/recommend/products")
-  public ResponseEntity<?> getRecommend(@RequestParam("destination") String destination) {
+  public ResponseEntity<?> getRecommend(@RequestParam("destination") String destination, @RequestParam("package_num") Long package_num) {
     try {
-      ProductDto recommendedProduct = diyFilterService.recommendProducts(destination);
+      ProductDto recommendedProduct = diyFilterService.recommendProducts(destination, package_num);
       return ResponseEntity.ok(recommendedProduct);
     } catch (IllegalArgumentException e) {
       // 추천 상품이 없을 때 204 No Content 반환
