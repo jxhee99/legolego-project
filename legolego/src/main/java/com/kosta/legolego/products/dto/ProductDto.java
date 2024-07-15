@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @AllArgsConstructor
@@ -30,6 +31,8 @@ public class ProductDto { // 조회 시 필요한 모든 데이터
     private String userNickname; // 작성자 닉네임
     private String partnerName;
     private int necessaryPeople;
+    private LocalDateTime boardingDate; // 여행 출발일
+    private LocalDateTime comingDate; // 여행 도착일
 
     public static ProductDto fromEntity(Product product){
         return new ProductDto(
@@ -46,7 +49,9 @@ public class ProductDto { // 조회 시 필요한 모든 데이터
 //                product.getAdmin().getAdminNum(),
                 product.getDiyList().getDiyPackage().getUser().getUserNickname(), // User
                 product.getDiyList().getPartner().getCompanyName(),
-                product.getNecessaryPeople()
+                product.getNecessaryPeople(),
+                product.getDiyList().getDiyPackage().getAirline().getBoardingDate(),
+                product.getDiyList().getDiyPackage().getAirline().getComingDate()
         );
     }
 
