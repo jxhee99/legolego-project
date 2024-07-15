@@ -9,4 +9,5 @@ import java.util.List;
 public interface OverLikedListRepository extends JpaRepository<OverLikedList, Long> {
   void deleteByDiyPackage(DiyPackage diyPackage);
   List<OverLikedList> findAllByOrderByDiyPackageDesc();
+  List<OverLikedList> findAllByOrderByOverLikedListNumDesc();
 }

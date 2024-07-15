@@ -210,6 +210,12 @@ public class AirlineService {
         return "케이프타운";
       case "MEL":
         return "멜버른";
+      case "ANC":
+        return "알래스카/앵커리지";
+      case "CAI":
+        return "이집트/카이로";
+      case "ACC":
+        return "가나/아크라";
       default:
         return "알 수 없는 도시 코드";
     }

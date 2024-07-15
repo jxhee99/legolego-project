@@ -45,12 +45,13 @@ public class DiyListService {
 
     // 관리자가 모든 diylist를 볼 수 있도록 구현한 로직
     public List<DiyList> getAllDiyListsForAdmin() {
-        return diyListRepository.findAll();
+        return diyListRepository.findAllByOrderByListNumDesc();
     }
 
     // 여행사가 제안한 diylist만 보이게 구현한 로직
     public List<DiyList> getDiyListsForPartner(Long partnerNum) {
-        return diyListRepository.findAllByPartner_partnerNum(partnerNum);
+//        return diyListRepository.findAllByPartner_partnerNum(partnerNum);
+        return diyListRepository.findAllByPartner_partnerNumOrderByListNumDesc(partnerNum);
     }
 
     // 사용자가 제작한 diylist만 보이게 구현한 로직

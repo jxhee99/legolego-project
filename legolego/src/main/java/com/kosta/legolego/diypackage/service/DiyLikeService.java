@@ -50,8 +50,8 @@ public class DiyLikeService {
     diyRepository.save(diyPackage);
     diyLikeRepository.save(diyLikeEntity);
 
-    // 좋아요 수가 25에 도달했을 경우 OverLikedList에 추가,  테스트용으로 2개로 설정
-    if (diyPackage.getPackageLikedNum() == 2) {
+    // 좋아요 수가 25에 도달했을 경우 OverLikedList에 추가,  테스트용으로 1개로 설정
+    if (diyPackage.getPackageLikedNum() == 1) {
       OverLikedList overLikedList = new OverLikedList();
       overLikedList.setDiyPackage(diyPackage);
       overLikedListRepository.save(overLikedList);

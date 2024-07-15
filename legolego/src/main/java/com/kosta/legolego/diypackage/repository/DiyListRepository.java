@@ -16,9 +16,14 @@ public interface DiyListRepository extends JpaRepository<DiyList, Long> {
 
     // 관리자용 조회 : over_liked_list 에 존재하는 모든 패키지
     List<DiyList> findAll();
+    //최신순으로 반환
+    List<DiyList> findAllByOrderByListNumDesc();
 
     // 여행사용 조회 : 특정 여행사가 제안한 모든 패키지
     List<DiyList> findAllByPartner_partnerNum(Long partnerNum);
+
+    // 여행사용 조회 : 특정 여행사가 제안한 모든 패키지를 ListNum 기준으로 내림차순 정렬
+    List<DiyList> findAllByPartner_partnerNumOrderByListNumDesc(Long partnerNum);
 
     // 사용자용 조회 : 특정 사용자가 작성한 over_liked_list에 있는 모든 패키지
     List<DiyList> findAllByDiyPackage_User_userNum(Long userNum);

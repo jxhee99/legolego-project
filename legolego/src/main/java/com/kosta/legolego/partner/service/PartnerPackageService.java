@@ -62,7 +62,7 @@ public class PartnerPackageService {
     Set<DiyPackage> selectedPackages = findSelectedDiyPackages();
 
     // OverLikedList 필터링
-    List<OverLikedList> filteredOverLikedList = overLikedListRepository.findAll().stream()
+    List<OverLikedList> filteredOverLikedList = overLikedListRepository.findAllByOrderByOverLikedListNumDesc().stream()
             .filter(overLikedList -> !diyPackages.contains(overLikedList.getDiyPackage()))
             .filter(overLikedList -> !selectedPackages.contains(overLikedList.getDiyPackage()))
             .collect(Collectors.toList());
