@@ -43,7 +43,7 @@ public class DiyPackage {
   @Column(name = "package_view_num", nullable = false)
   private int packageViewNum = 0;
 
-  @Column(name = "short_description")
+  @Column(name = "short_description", length = 1000)
   private String shortDescription;
 
   // 임시 저장
