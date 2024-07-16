@@ -37,7 +37,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
    @Query("SELECT p FROM Product p WHERE p.destination = :destination AND p.productNum <> :productNum AND p.recruitmentDeadline > :now")
    List<Product> findRecommendedProducts(@Param("destination") String destination, @Param("productNum") Long productNum, @Param("now") LocalDateTime now);
 
-   // 모집 기간 지난 상품 처리 메서드
+   // 모집 기간 지나지 않은 상품 처리 메서드
    @Query("select p from Product p " +
            "where p.diyList.diyPackage.airline.boardingDate > :currentTimestamp")
    List<Product> findBeforeBoardingDate(@Param("currentTimestamp") LocalDateTime currentTimestamp);
@@ -74,7 +74,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
    @Query("select p from Product p " +
            "where p.recruitmentConfirmed = false " +
            "and p.recruitmentDeadline > :currentTimestamp " +
-           "order by (select count(o) from Order o where o.product = p and o.paymentStatus = true) desc ")
+           "and (select count(o) from Order o where o.product = p and o.paymentStatus = true) > 0 " +
+           "order by (select count(o) from Order o where o.product = p and o.paymentStatus = true) desc")
    List<Product> findPopularProducts(@Param("currentTimestamp") LocalDateTime currentTimestamp);
 
 }
