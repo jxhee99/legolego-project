@@ -11,6 +11,8 @@ import com.kosta.legolego.partner.entity.Partner;
 import com.kosta.legolego.partner.repository.PartnerRepository;
 import com.kosta.legolego.user.entity.User;
 import com.kosta.legolego.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class CommentService {
 
@@ -69,21 +72,79 @@ public class CommentService {
     }
 
     // 댓글 삭제
+    @Transactional
     public void deleteComment(Long commentNum) {
         Comment comment = commentRepository.findById(commentNum)
                 .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
 
-        if (comment.getReplies().isEmpty()) {
-            // 대댓글이 없는 경우 실제 삭제
-            commentRepository.delete(comment);
-        } else {
-            // 대댓글이 있는 경우 논리적 삭제
-            comment.setDeleted(true);
-            commentRepository.save(comment);
-        }
-
-        // 댓글 수 감소
         Post post = comment.getPost();
+        boolean isParentComment = comment.getParentComment() == null;
+
+        if (isParentComment) {
+            handleParentCommentDeletion(comment, post);
+        } else {
+            handleChildCommentDeletion(comment, post);
+        }
+    }
+
+    private void handleParentCommentDeletion(Comment comment, Post post) {
+        List<Comment> replies = comment.getReplies();
+        if (replies.isEmpty()) {
+            // 대댓글이 아예 존재하지 않는 경우
+            commentRepository.delete(comment);
+            decrementCommentCount(post); // 댓글 수 감소
+            System.out.println("부모 댓글 삭제 - 대댓글 없음, 댓글 수 감소");
+        } else if (replies.stream().allMatch(this::areAllDescendantsDeleted)) {
+            // 모든 자손이 삭제된 경우
+            replies.forEach(reply -> {
+                commentRepository.delete(reply);
+                System.out.println("부모 댓글 삭제 - 대댓글 존재, 모두 삭제됨, 댓글 수 감소");
+            });
+            commentRepository.delete(comment);
+            decrementCommentCount(post); // 댓글 수 감소
+        } else {
+            // 일부 자손이 남아있는 경우
+            comment.setDeleted(true);
+            comment.setContent("삭제된 댓글입니다.");
+            commentRepository.save(comment);
+            decrementCommentCount(post); // 댓글 수 감소
+            System.out.println("부모 댓글 삭제 - 대댓글 존재, 일부 남아있음, 댓글 수 감소");
+        }
+    }
+
+    private void handleChildCommentDeletion(Comment comment, Post post) {
+        Comment parentComment = comment.getParentComment();
+        comment.setDeleted(true);
+        comment.setContent("삭제된 댓글입니다.");
+        commentRepository.save(comment);
+        decrementCommentCount(post); // 댓글 수 감소
+        System.out.println("대댓글 삭제 - 댓글 수 감소");
+
+        // 부모 댓글이 삭제된 댓글인 경우 추가 처리
+        if (parentComment.isDeleted() && areAllDescendantsDeleted(parentComment)) {
+            deleteAllDescendantsAndParent(parentComment, post);
+        }
+    }
+
+    private boolean areAllDescendantsDeleted(Comment comment) {
+        if (!comment.isDeleted()) {
+            return false;
+        }
+        return comment.getReplies().stream().allMatch(this::areAllDescendantsDeleted);
+    }
+
+    private void deleteAllDescendantsAndParent(Comment comment, Post post) {
+        List<Comment> replies = comment.getReplies();
+        for (Comment reply : replies) {
+            deleteAllDescendantsAndParent(reply, post);
+            System.out.println("모든 자손 삭제 중: " + reply.getCommentNum());
+        }
+        commentRepository.delete(comment);
+        System.out.println("부모 댓글 삭제 - 모든 자손 삭제 후, 댓글 수 감소");
+    }
+
+    // 댓글 수 감소 메서드
+    private void decrementCommentCount(Post post) {
         post.decrementCommentCount();
         postRepository.save(post);
     }
