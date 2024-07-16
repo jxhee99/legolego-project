@@ -151,7 +151,7 @@ public class PostService {
                             post.getPartner() != null ? post.getPartner().getCompanyName() : null,
                             post.getAdmin() != null ? post.getAdmin().getAdminName() : null,
                             post.getRegDate(), post.getModDate(), post.getPostCategory(),
-                            post.getViewCount(), post.getComments().size());
+                            post.getViewCount(), post.getCommentCount());
     }
 
     private Post convertToEntity(PostDto postDto) {
