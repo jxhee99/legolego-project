@@ -35,17 +35,17 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findAllByOrderByRegDateAsc();
 
     // 카테고리별 게시글 정렬
-    //List<Post> findByPostCategoryOrderByRegDateDesc(PostCategory category);
-    //List<Post> findByPostCategoryOrderByRegDateAsc(PostCategory category);
-    List<Post> findByPostCategoryOrderByPostNumDesc(PostCategory category);
-    List<Post> findByPostCategoryOrderByPostNumAsc(PostCategory category);
+    List<Post> findByPostCategoryOrderByRegDateDesc(PostCategory category);
+    List<Post> findByPostCategoryOrderByRegDateAsc(PostCategory category);
+//    List<Post> findByPostCategoryOrderByPostNumDesc(PostCategory category);
+//    List<Post> findByPostCategoryOrderByPostNumAsc(PostCategory category);
 
     // 카테고리 내에서 키워드 검색
     @Query("SELECT p FROM Post p WHERE p.postCategory = :category AND (p.title LIKE %:keyword% OR p.content LIKE %:keyword%)")
     List<Post> findByPostCategoryAndKeyword(@Param("category") PostCategory category, @Param("keyword") String keyword);
 
     //등록 시간 없어서 최신순, 오래된 순 PostNum기준으로 반환
-    List<Post> findAllByOrderByPostNumDesc();
+//    List<Post> findAllByOrderByPostNumDesc();
 
-    List<Post> findAllByOrderByPostNumAsc();
+//    List<Post> findAllByOrderByPostNumAsc();
 }

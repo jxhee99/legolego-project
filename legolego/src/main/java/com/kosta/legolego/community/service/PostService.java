@@ -25,13 +25,13 @@ public class PostService {
 
     // 모든 게시글 최신순 정렬
     public List<PostDto> getAllPostsByLatest() {
-        return postRepository.findAllByOrderByPostNumDesc().stream()
+        return postRepository.findAllByOrderByRegDateDesc().stream()
                 .map(this::convertToDto).collect(Collectors.toList());
     }
 
     // 모든 게시글 오래된 순으로 정렬
     public List<PostDto> getAllPostsByOldest() {
-        return postRepository.findAllByOrderByPostNumAsc().stream()
+        return postRepository.findAllByOrderByRegDateAsc().stream()
                 .map(this::convertToDto).collect(Collectors.toList());
     }
 
@@ -130,14 +130,14 @@ public class PostService {
 
     // 카테고리별 게시글 최신순 정렬 (기본)
     public List<PostDto> getPostsByCategoryLatest(PostCategory category) {
-        return postRepository.findByPostCategoryOrderByPostNumDesc(category).stream()
+        return postRepository.findByPostCategoryOrderByRegDateDesc(category).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     // 카테고리별 게시글 오래된 순으로 정렬
     public List<PostDto> getPostsByCategoryOldest(PostCategory category) {
-        return postRepository.findByPostCategoryOrderByPostNumAsc(category).stream()
+        return postRepository.findByPostCategoryOrderByRegDateAsc(category).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
