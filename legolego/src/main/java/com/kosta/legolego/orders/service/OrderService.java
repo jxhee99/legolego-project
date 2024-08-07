@@ -41,30 +41,45 @@ public class OrderService {
     @Autowired
     AlarmService alarmService;
 
+    @Autowired
+    LockService lockService;
+
+
     // 새로운 주문 정보 생성
     @Transactional
     public OrderDto createOrder(OrderDto orderDto){
         log.info("Creating order for userNum: {} and productNum: {}",
                 orderDto.getUserNum(), orderDto.getProductNum());
 
-        // 사용자 조회
-        User user = userRepository.findById(orderDto.getUserNum())
-                .orElseThrow(()->new RuntimeException("일치하는 사용자를 찾을 수 없습니다."));
-        // 상품 조회
-        Product product = productRepository.findById(orderDto.getProductNum())
-                .orElseThrow(()-> new RuntimeException("일치하는 상품을 찾을 수 없습니다."));
+        String lockKey = "lock:order:" + orderDto.getProductNum();
+        String lockValue = String.valueOf(System.currentTimeMillis());
 
-        Order order = OrderDto.toEntity(orderDto);
-        order.setUser(user);
-        order.setProduct(product);
-        order.setTotalPrice(orderDto.getTotalPrice());
-//        order.setPaymentStatus(true);
+        boolean lockGet = lockService.getLock(lockKey, lockValue, 20);
+        if(!lockGet) {
+            throw new RuntimeException("락을 획득하지 못했습니다.");
+        }
+        try {
+            // 사용자 조회
+            User user = userRepository.findById(orderDto.getUserNum())
+                    .orElseThrow(()->new RuntimeException("일치하는 사용자를 찾을 수 없습니다."));
+            // 상품 조회
+            Product product = productRepository.findById(orderDto.getProductNum())
+                    .orElseThrow(()-> new RuntimeException("일치하는 상품을 찾을 수 없습니다."));
 
-        // 주문 정보 저장
-        Order savedOrder = orderRepository.save(order);
-        log.info("Order created with orderNum: {}", savedOrder.getOrderNum());
+            Order order = OrderDto.toEntity(orderDto);
+            order.setUser(user);
+            order.setProduct(product);
+            order.setTotalPrice(orderDto.getTotalPrice());
 
-        return OrderDto.fromEntity(savedOrder); // 엔티티 -> DTO 변환
+            // 주문 정보 저장
+            Order savedOrder = orderRepository.save(order);
+            log.info("Order created with orderNum: {}", savedOrder.getOrderNum());
+
+            return OrderDto.fromEntity(savedOrder); // 엔티티 -> DTO 변환
+        } finally {
+            lockService.releaseLock(lockKey, lockValue);
+        }
+
     }
 
 
