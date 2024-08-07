@@ -79,11 +79,18 @@ dependencies {
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'io.lettuce.core:lettuce-core'
+    // 분산 락 구현 위한 추가 redis 의존성
+    implementation 'org.springframework.session:spring-session-data-redis'
+    implementation 'org.redisson:redisson-spring-boot-starter:3.16.4'
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // 웹 소켓 : 실시간 알림
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // 모니터링 위한 prometheus 클라이언트 라이브러리
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
 
 }
 

@@ -18,55 +18,55 @@ import java.util.List;
 @Builder
 public class ProductDetailDto {
 
-    @JsonProperty("productNum")
+//    @JsonProperty("productNum")
     private Long productNum;
 
-    @JsonProperty("partnerName")
+//    @JsonProperty("partnerName")
     private String partnerName; // = 여행사 회사명
 
-    @JsonProperty("productName")
+//    @JsonProperty("productName")
     private String productName; // = packageName
 
-    @JsonProperty("productImage")
+//    @JsonProperty("productImage")
     private String productImage; // = profileImg
 
-    @JsonProperty("price")
+//    @JsonProperty("price")
     private BigDecimal price;
 
-    @JsonProperty("regDate")
+//    @JsonProperty("regDate")
     private Timestamp regDate; // 등록일
 
-    @JsonProperty("recruitmentDeadline")
+//    @JsonProperty("recruitmentDeadline")
     private Timestamp recruitmentDeadline;  // 모집 마감일
 
-    @JsonProperty("necessaryPeople")
+//    @JsonProperty("necessaryPeople")
     private int necessaryPeople; // 모집 인원
 
-    @JsonProperty("recruitmentConfirmed")
+//    @JsonProperty("recruitmentConfirmed")
     private Boolean recruitmentConfirmed; // 모집 확정 여부
 
-    @JsonProperty("productViewNum")
+//    @JsonProperty("productViewNum")
     private Integer productViewNum; // 조회수
 
-    @JsonProperty("wishlistCount")
+//    @JsonProperty("wishlistCount")
     private Integer wishlistCount; // 찜 개수
 
-    @JsonProperty("userNickname")
+//    @JsonProperty("userNickname")
     private String userNickname; // 작성자 닉네임
 
-    @JsonProperty("airline")
+//    @JsonProperty("airline")
     private DiyAirlineDTO airline; // 항공 정보
 
-    @JsonProperty("route")
+//    @JsonProperty("route")
     private DiyRouteDTO route; // 여행 일정
 
-    @JsonProperty("detailCourse")
+//    @JsonProperty("detailCourse")
     private List<DiyDetailCourseDTO> detailCourse; // 상세 일정
 
-    @JsonProperty("orderCount")
+//    @JsonProperty("orderCount")
     private int orderCount; // 추가
 
-    @JsonProperty("reviewAble")
+//    @JsonProperty("reviewAble")
     private boolean reviewAble;
 
 
